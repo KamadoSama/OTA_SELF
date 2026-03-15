@@ -3,7 +3,8 @@ FROM node:22-alpine AS deps
 
 WORKDIR /app
 
-COPY package*.json ./
+COPY package.json yarn.lock* package-lock.json* pnpm-lock.yaml* ./
+ENV NODE_OPTIONS="--dns-result-order=ipv4first"
 RUN npm ci
 
 # ─── Stage 2: Builder ───────────────────────────────────────────────────────
