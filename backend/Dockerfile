@@ -7,6 +7,7 @@ COPY package*.json ./
 RUN npm ci
 
 COPY . .
+RUN npx prisma generate
 RUN npm run build && ls dist/ && test -f dist/main.js
 
 # ─── Stage 2: Production ────────────────────────────────────────────────────
