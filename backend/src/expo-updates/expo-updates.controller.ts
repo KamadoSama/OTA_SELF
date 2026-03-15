@@ -15,10 +15,11 @@ export class ExpoUpdatesController {
     @Headers('expo-runtime-version') expoRuntimeVersion: string,
     @Headers('expo-platform') expoPlatform: string,
     @Headers('expo-channel-name') expoChannelName: string,
+    @Headers('expo-project-id') expoProjectId: string,
     @Headers('expo-expected-receipt-signature') expectedSignature: string,
   ) {
     try {
-      this.logger.log(`Received update request for App runtime: ${expoRuntimeVersion}, Platform: ${expoPlatform}, Channel: ${expoChannelName || 'default'}`);
+      this.logger.log(`Received update request — projectId: ${expoProjectId}, runtime: ${expoRuntimeVersion}, platform: ${expoPlatform}, channel: ${expoChannelName || 'default'}`);
 
       if (!expoRuntimeVersion || !expoPlatform) {
         return res.status(400).json({
@@ -26,10 +27,17 @@ export class ExpoUpdatesController {
         });
       }
 
+      if (!expoProjectId) {
+        return res.status(400).json({
+          error: 'Missing required header: expo-project-id',
+        });
+      }
+
       const manifestResponse = await this.expoService.getLatestManifest(
         expoRuntimeVersion,
         expoPlatform,
-        expoChannelName || 'default'
+        expoChannelName || 'default',
+        expoProjectId,
       );
 
       if (!manifestResponse) {

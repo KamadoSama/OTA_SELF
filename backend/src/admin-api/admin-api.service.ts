@@ -71,64 +71,76 @@ export class AdminApiService {
         create: { appId: app.id, name: channelName }
       });
 
-      // Create Update transaction
-      const update = await this.prisma.update.create({
-        data: {
-          channelId: channel.id,
-          runtimeVersion: metadata.fileMetadata[Object.keys(metadata.fileMetadata)[0]].bundleUrl.includes('ios') ? '1.0.0' : '1.0.0', // simplified
-          platform: 'ios', // we will do one for each in a real implementation
-          metadata: metadata,
-        }
-      });
-
-      // Process and upload Launch Asset (the JS bundle)
-      // Expo metadata.json has fileMetadata which contains bundle and assets
+      // Expo metadata.json uses `bundle` (not `bundleUrl`) and `runtimeVersion`
+      const runtimeVersion = metadata.runtimeVersion ?? '1.0.0';
       const platforms = Object.keys(metadata.fileMetadata);
+
+      // Create one Update per platform
       for (const platform of platforms) {
         const platformData = metadata.fileMetadata[platform];
-        const bundlePath = path.join(tempDir, platformData.bundleUrl);
-        const bundleHash = path.basename(platformData.bundleUrl, '.js');
-        
-        await this.storage.uploadFile(bundlePath, platformData.bundleUrl, 'application/javascript');
+
+        // 'bundle' is the correct field name in Expo's metadata.json
+        const bundleRelPath: string | undefined = platformData.bundle;
+        if (!bundleRelPath) {
+          throw new BadRequestException(`Missing 'bundle' field in metadata.json for platform: ${platform}`);
+        }
+
+        const update = await this.prisma.update.create({
+          data: {
+            channelId: channel.id,
+            runtimeVersion,
+            platform,
+            metadata: metadata,
+          }
+        });
+
+        // Upload Launch Asset (JS bundle)
+        const bundlePath = path.join(tempDir, bundleRelPath);
+        const bundleHash = path.basename(bundleRelPath, '.js');
+
+        await this.storage.uploadFile(bundlePath, bundleRelPath, 'application/javascript');
 
         await this.prisma.asset.create({
           data: {
             updateId: update.id,
             hash: bundleHash,
-            key: platformData.bundleUrl,
+            key: bundleRelPath,
             contentType: 'application/javascript',
             fileExtension: '.js',
             isLaunchAsset: true
           }
         });
 
-        // Process other assets (images, fonts, etc)
-        for (const asset of platformData.assets) {
+        // Upload other assets (images, fonts, etc.)
+        for (const asset of (platformData.assets ?? [])) {
           const assetPath = path.join(tempDir, asset.path);
-          if (fs.existsSync(assetPath)) {
-            // Usually ext is empty and it uses the hash file directly
-            await this.storage.uploadFile(assetPath, asset.path, 'application/octet-stream');
-            
-            // Only add once across platforms if hash matches
-            const existingAsset = await this.prisma.asset.findFirst({ where: { updateId: update.id, hash: asset.hash } });
-            if (!existingAsset) {
-                await this.prisma.asset.create({
-                data: {
-                    updateId: update.id,
-                    hash: asset.ext ? `${asset.hash}.${asset.ext}` : asset.hash,
-                    key: asset.path,
-                    contentType: 'application/octet-stream', // Could lookup by ext
-                    fileExtension: asset.ext ? `.${asset.ext}` : null,
-                    isLaunchAsset: false
-                }
-                });
-            }
+          if (!fs.existsSync(assetPath)) continue;
+
+          await this.storage.uploadFile(assetPath, asset.path, 'application/octet-stream');
+
+          // Avoid duplicates across platforms by checking hash
+          const existingAsset = await this.prisma.asset.findFirst({
+            where: { updateId: update.id, hash: asset.hash }
+          });
+
+          if (!existingAsset) {
+            await this.prisma.asset.create({
+              data: {
+                updateId: update.id,
+                hash: asset.ext ? `${asset.hash}.${asset.ext}` : asset.hash,
+                key: asset.path,
+                contentType: 'application/octet-stream',
+                fileExtension: asset.ext ? `.${asset.ext}` : null,
+                isLaunchAsset: false
+              }
+            });
           }
         }
+
+        this.logger.log(`Successfully processed update ${update.id} for platform ${platform}`);
       }
 
-      this.logger.log(`Successfully processed update ${update.id}`);
-      return update.id;
+      return platforms[0];
 
     } catch (error) {
       this.logger.error('Failed to process zip', error);
