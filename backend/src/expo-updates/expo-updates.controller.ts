@@ -33,10 +33,14 @@ export class ExpoUpdatesController {
         });
       }
 
+      const resolvedChannel = (!expoChannelName || expoChannelName === 'default')
+        ? 'production'
+        : expoChannelName;
+
       const manifestResponse = await this.expoService.getLatestManifest(
         expoRuntimeVersion,
         expoPlatform,
-        expoChannelName || 'default',
+        resolvedChannel,
         expoProjectId,
       );
 
