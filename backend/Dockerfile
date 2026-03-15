@@ -1,31 +1,30 @@
-# ─── Stage 1: Builder ───────────────────────────────────────────────────────
-FROM node:22-alpine AS builder
+# Phase 1: Build
+FROM node:20-alpine AS builder
 
 WORKDIR /app
 
+# Copie des fichiers de configuration
 COPY package*.json ./
-RUN npm ci
+COPY prisma ./prisma/
 
+# Installation des dépendances
+RUN npm install
+
+# Copie du reste du code et build
 COPY . .
 RUN npx prisma generate
-RUN npm run build && ls dist/ && test -f dist/main.js
+RUN npm run build
 
-# ─── Stage 2: Production ────────────────────────────────────────────────────
-FROM node:22-alpine AS production
+# Phase 2: Runtime
+FROM node:20-alpine
 
 WORKDIR /app
 
-COPY package*.json ./
-RUN npm ci --omit=dev
-
-# Copie le code compilé, le schema Prisma et sa config
+COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/dist ./dist
+COPY --from=builder /app/package*.json ./
 COPY --from=builder /app/prisma ./prisma
-COPY --from=builder /app/prisma.config.ts ./prisma.config.ts
-
-# Génère le client Prisma en production
-RUN npx prisma generate
 
 EXPOSE 3001
 
-CMD ["node", "dist/main"]
+CMD ["npm", "run", "start:prod"]

@@ -44,7 +44,7 @@ services:
     container_name: ota_backend
     restart: always
     environment:
-      DATABASE_URL: ${DATABASE_URL}
+      DATABASE_URL: ${DATABASE_URL:-postgresql://postgres:ps027A3A2iqBWZi1YGtMv97uki@192.145.37.193:5433/ota_db?schema=public}
       MINIO_ENDPOINT: ${MINIO_ENDPOINT}
       MINIO_PORT: ${MINIO_PORT}
       MINIO_ROOT_USER: ${MINIO_ROOT_USER}
