@@ -27,11 +27,11 @@ export class ExpoUpdatesController {
         });
       }
 
-      if (!expoProjectId) {
-        return res.status(400).json({
-          error: 'Missing required header: expo-project-id',
-        });
-      }
+      // if (!expoProjectId) {
+      //   return res.status(400).json({
+      //     error: 'Missing required header: expo-project-id',
+      //   });
+      // }
 
       const resolvedChannel = (!expoChannelName || expoChannelName === 'default')
         ? 'production'
@@ -41,7 +41,7 @@ export class ExpoUpdatesController {
         expoRuntimeVersion,
         expoPlatform,
         resolvedChannel,
-        expoProjectId,
+        // expoProjectId,
       );
 
       if (!manifestResponse) {
