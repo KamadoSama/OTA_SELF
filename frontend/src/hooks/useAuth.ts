@@ -22,7 +22,9 @@ export function useLogin() {
     mutationFn: ({ email, password }: { email: string; password: string }) =>
       authService.login(email, password),
     onSuccess: () => {
+      console.log("Login success");
       queryClient.invalidateQueries({ queryKey: ["currentUser"] });
+      console.log("Login success");
       router.push("/");
       router.refresh();
     },
