@@ -11,7 +11,7 @@ export class ExpoUpdatesService {
     private storageService: StorageService
   ) {}
 
-  async getLatestManifest(runtimeVersion: string, platform: string, channelName: string, appId?: string) {
+  async getLatestManifest(runtimeVersion: string, platform: string, channelName: string, appId: string) {
     // 1. Find the specific channel and get the latest update that matches runtimeVersion & platform
     const latestUpdate = await this.prisma.update.findFirst({
       where: {
@@ -19,9 +19,9 @@ export class ExpoUpdatesService {
         platform: platform,
         channel: {
           name: channelName,
-          // app: {
-          //   name: appId, // expo-project-id maps to App.name in DB
-          // }
+          app: {
+            name: appId, // appId from URL param → App.name in DB
+          }
         }
       },
       orderBy: {
