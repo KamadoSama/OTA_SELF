@@ -18,9 +18,10 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm ci --omit=dev
 
-# Copie le code compilé et le schema Prisma
+# Copie le code compilé, le schema Prisma et sa config
 COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/prisma ./prisma
+COPY --from=builder /app/prisma.config.ts ./prisma.config.ts
 
 # Génère le client Prisma en production
 RUN npx prisma generate
