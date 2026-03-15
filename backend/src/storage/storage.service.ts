@@ -11,8 +11,8 @@ export class StorageService implements OnModuleInit {
   constructor() {
     console.log('User:', process.env.MINIO_ROOT_USER);
     this.minioClient = new Minio.Client({
-      endPoint: 'localhost',
-      port: 9000,
+      endPoint: process.env.MINIO_ENDPOINT || 'localhost',
+      port: Number(process.env.MINIO_PORT) || 9000,
       useSSL: false,
       accessKey: process.env.MINIO_ROOT_USER,
       secretKey: process.env.MINIO_ROOT_PASSWORD,
@@ -54,10 +54,10 @@ export class StorageService implements OnModuleInit {
     };
     
     await this.minioClient.fPutObject(this.bucketName, destFileName, filePath, metaData);
-    return `http://localhost:9000/${this.bucketName}/${destFileName}`;
+    return `http://${process.env.MINIO_ENDPOINT || 'localhost'}:${process.env.MINIO_PORT || 9000}/${this.bucketName}/${destFileName}`;
   }
 
   getPublicUrl(objectName: string): string {
-    return `http://localhost:9000/${this.bucketName}/${objectName}`;
+    return `http://${process.env.MINIO_ENDPOINT || 'localhost'}:${process.env.MINIO_PORT || 9000}/${this.bucketName}/${objectName}`;
   }
 }

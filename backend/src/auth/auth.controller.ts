@@ -2,7 +2,7 @@ import { Controller, Post, Get, Body, Res, Req, UnauthorizedException, Logger } 
 import type { Request, Response } from 'express';
 import { AuthService } from './auth.service';
 
-const SESSION_COOKIE = 'ota_admin_session';
+const SESSION_COOKIE = 'Q6aoDC6QOYwfc7WjrBuhE3AJBmbj5Drz08tBnLPxA7hsL2BL';
 
 @Controller('api/admin/auth')
 export class AuthController {

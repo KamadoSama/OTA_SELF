@@ -126,7 +126,7 @@ export default function LoginPage() {
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="admin@ota.local"
+
                 required
                 autoComplete="email"
                 className="w-full rounded-xl border border-slate-700/80 bg-slate-900/60 px-4 py-3 text-sm font-mono text-slate-100 placeholder:text-slate-600 outline-none transition-all duration-200 focus:border-emerald-500/60 focus:ring-2 focus:ring-emerald-500/20"
