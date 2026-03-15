@@ -1,0 +1,62 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model App {
+  id        String   @id @default(uuid())
+  name      String   @unique
+  createdAt DateTime @default(now())
+
+  channels Channel[]
+}
+
+model Channel {
+  id        String   @id @default(uuid())
+  name      String
+  appId     String
+  createdAt DateTime @default(now())
+
+  app       App      @relation(fields: [appId], references: [id], onDelete: Cascade)
+  updates   Update[]
+
+  @@unique([appId, name])
+}
+
+model Update {
+  id             String   @id @default(uuid())
+  channelId      String
+  runtimeVersion String   // e.g "exposdk:50.0.0" or "1.0.0"
+  platform       String   // "ios" | "android"
+  createdAt      DateTime @default(now())
+  metadata       Json?    // Optional extra metadata
+
+  channel        Channel  @relation(fields: [channelId], references: [id], onDelete: Cascade)
+  assets         Asset[]
+
+  @@index([channelId, runtimeVersion, platform])
+}
+
+model Asset {
+  id        String   @id @default(uuid())
+  updateId  String
+  hash      String   // SHA-256 hash or Expo asset hash
+  key       String   // MinIO object key (e.g., bundles/hash.js or assets/hash.png)
+  contentType String
+  fileExtension String?
+  
+  // Expo requires knowing if it's the main bundle or an external asset
+  isLaunchAsset Boolean @default(false)
+
+  update    Update   @relation(fields: [updateId], references: [id], onDelete: Cascade)
+}
+
+model AdminUser {
+  id           String   @id @default(uuid())
+  email        String   @unique
+  passwordHash String
+  createdAt    DateTime @default(now())
+}
