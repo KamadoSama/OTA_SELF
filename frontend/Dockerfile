@@ -26,11 +26,16 @@ WORKDIR /app
 
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
+# Force le port au niveau du processus Node.js
+ENV PORT=3002
+# Optionnel mais recommandé pour Docker : permet de lier à 0.0.0.0 au lieu de localhost
+ENV HOSTNAME="0.0.0.0"
 
 COPY --from=builder /app/public ./public
 COPY --from=builder /app/.next/standalone ./
 COPY --from=builder /app/.next/static ./.next/static
 
+# Informe que le conteneur écoute sur 3002
 EXPOSE 3002
 
 CMD ["node", "server.js"]
