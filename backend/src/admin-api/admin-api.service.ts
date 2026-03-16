@@ -3,6 +3,7 @@ import AdmZip from 'adm-zip';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as os from 'os';
+import * as crypto from 'crypto';
 import { PrismaService } from '../prisma.service';
 import { StorageService } from '../storage/storage.service';
 
@@ -14,6 +15,17 @@ export class AdminApiService {
     private prisma: PrismaService,
     private storage: StorageService
   ) {}
+
+  private calculateHash(filePath: string): string {
+    const fileBuffer = fs.readFileSync(filePath);
+    return crypto
+      .createHash('sha256')
+      .update(fileBuffer)
+      .digest('base64')
+      .replace(/\+/g, '-')
+      .replace(/\//g, '_')
+      .replace(/=+$/, '');
+  }
 
   async listUpdates() {
     return this.prisma.update.findMany({
@@ -96,7 +108,7 @@ export class AdminApiService {
 
         // Upload Launch Asset (JS bundle)
         const bundlePath = path.join(tempDir, bundleRelPath);
-        const bundleHash = path.basename(bundleRelPath, '.js');
+        const bundleHash = this.calculateHash(bundlePath);
 
         await this.storage.uploadFile(bundlePath, bundleRelPath, 'application/javascript');
 
@@ -116,18 +128,20 @@ export class AdminApiService {
           const assetPath = path.join(tempDir, asset.path);
           if (!fs.existsSync(assetPath)) continue;
 
+          const assetHash = this.calculateHash(assetPath);
+
           await this.storage.uploadFile(assetPath, asset.path, 'application/octet-stream');
 
           // Avoid duplicates across platforms by checking hash
           const existingAsset = await this.prisma.asset.findFirst({
-            where: { updateId: update.id, hash: asset.hash }
+            where: { updateId: update.id, hash: assetHash }
           });
 
           if (!existingAsset) {
             await this.prisma.asset.create({
               data: {
                 updateId: update.id,
-                hash: asset.ext ? `${asset.hash}.${asset.ext}` : asset.hash,
+                hash: assetHash,
                 key: asset.path,
                 contentType: 'application/octet-stream',
                 fileExtension: asset.ext ? `.${asset.ext}` : null,
