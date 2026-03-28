@@ -1,4 +1,16 @@
-import { Controller, Post, Get, Delete, Param, UseInterceptors, UploadedFile, Body, BadRequestException, Logger, NotFoundException } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Get,
+  Delete,
+  Param,
+  UseInterceptors,
+  UploadedFile,
+  Body,
+  BadRequestException,
+  Logger,
+  NotFoundException,
+} from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { AdminApiService } from './admin-api.service';
 
@@ -25,7 +37,9 @@ export class AdminApiController {
     }
 
     if (!file.originalname.endsWith('.zip')) {
-      throw new BadRequestException('Only .zip files (Expo exports) are allowed');
+      throw new BadRequestException(
+        'Only .zip files (Expo exports) are allowed',
+      );
     }
 
     this.logger.log(`Received upload request for ${file.originalname}`);

@@ -1,4 +1,14 @@
-import { Controller, Get, Req, Res, Param, Headers, InternalServerErrorException, Logger, NotFoundException } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Req,
+  Res,
+  Param,
+  Headers,
+  InternalServerErrorException,
+  Logger,
+  NotFoundException,
+} from '@nestjs/common';
 import type { Request, Response } from 'express';
 import { ExpoUpdatesService } from './expo-updates.service';
 
@@ -19,34 +29,50 @@ export class ExpoUpdatesController {
     @Headers('expo-project-id') expoProjectId: string,
   ) {
     try {
-      this.logger.log(`Received update request — appId: ${appId}, projectId: ${expoProjectId}, runtime: ${expoRuntimeVersion}, platform: ${expoPlatform}, channel: ${expoChannelName || 'production'}`);
+      this.logger.log(
+        `Received update request — appId: ${appId}, projectId: ${expoProjectId}, runtime: ${expoRuntimeVersion}, platform: ${expoPlatform}, channel: ${expoChannelName || 'production'}`,
+      );
 
       if (!expoRuntimeVersion || !expoPlatform) {
         return res.status(400).json({
-          error: 'Missing required headers: expo-runtime-version or expo-platform',
+          error:
+            'Missing required headers: expo-runtime-version or expo-platform',
         });
       }
 
       // If appId is generic (like "app"), try to use expo-project-id header
-      const targetAppId = (appId === 'app' && expoProjectId) ? expoProjectId : appId;
+      const targetAppId =
+        appId === 'app' && expoProjectId ? expoProjectId : appId;
 
-      const resolvedChannel = (!expoChannelName || expoChannelName === 'default')
-        ? 'production'
-        : expoChannelName;
+      const resolvedChannel =
+        !expoChannelName || expoChannelName === 'default'
+          ? 'production'
+          : expoChannelName;
+
+      const forwardedProto =
+        typeof req.headers['x-forwarded-proto'] === 'string'
+          ? req.headers['x-forwarded-proto'].split(',')[0]?.trim()
+          : undefined;
+      const protocol = forwardedProto || req.protocol;
+      const host = req.get('host');
+      const baseUrl = host ? `${protocol}://${host}` : undefined;
 
       const manifestResponse = await this.expoService.getLatestManifest(
         expoRuntimeVersion,
         expoPlatform,
         resolvedChannel,
         targetAppId,
+        baseUrl,
       );
 
       if (!manifestResponse) {
-        throw new NotFoundException('No update found for this runtime version and platform');
+        throw new NotFoundException(
+          'No update found for this runtime version and platform',
+        );
       }
 
-      const { manifest } = manifestResponse;
-      const boundary = `---${Date.now()}---`;
+      const { manifest, extensions } = manifestResponse;
+      const boundary = `ExpoManifestBoundary-${Math.random().toString(36).slice(2)}`;
 
       // Set Required Protocol Headers
       res.setHeader('expo-protocol-version', '1');
@@ -57,12 +83,19 @@ export class ExpoUpdatesController {
 
       // Construct Multipart Body
       let body = '';
-      
+
       // Part 1: Manifest
       body += `--${boundary}\r\n`;
-      body += `Content-Type: application/json\r\n`;
-      body += `Content-Disposition: inline; name="manifest"\r\n\r\n`;
+      body += `Content-Disposition: form-data; name="manifest"\r\n`;
+      body += `Content-Type: application/json\r\n\r\n`;
       body += JSON.stringify(manifest);
+      body += `\r\n`;
+
+      // Part 2: Extensions (assetRequestHeaders, etc.)
+      body += `--${boundary}\r\n`;
+      body += `Content-Disposition: form-data; name="extensions"\r\n`;
+      body += `Content-Type: application/json\r\n\r\n`;
+      body += JSON.stringify(extensions ?? {});
       body += `\r\n--${boundary}--\r\n`;
 
       return res.send(body);
@@ -71,7 +104,9 @@ export class ExpoUpdatesController {
         return res.status(404).json({ error: error.message });
       }
       this.logger.error('Error serving manifest', error);
-      throw new InternalServerErrorException('Failed to retrieve update manifest');
+      throw new InternalServerErrorException(
+        'Failed to retrieve update manifest',
+      );
     }
   }
 }

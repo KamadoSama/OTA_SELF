@@ -1,4 +1,13 @@
-import { Controller, Post, Get, Body, Res, Req, UnauthorizedException, Logger } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Get,
+  Body,
+  Res,
+  Req,
+  UnauthorizedException,
+  Logger,
+} from '@nestjs/common';
 import type { Request, Response } from 'express';
 import { AuthService } from './auth.service';
 
@@ -36,7 +45,11 @@ export class AuthController {
 
   @Get('me')
   async getMe(@Req() req: Request) {
-    const email = req.cookies?.[SESSION_COOKIE];
+    const cookies = req.cookies as Record<string, unknown> | undefined;
+    const email =
+      typeof cookies?.[SESSION_COOKIE] === 'string'
+        ? cookies[SESSION_COOKIE]
+        : undefined;
     if (!email) {
       throw new UnauthorizedException('Not authenticated');
     }
