@@ -8,11 +8,13 @@ datasource db {
 }
 
 model App {
-  id        String   @id @default(uuid())
-  name      String   @unique
-  createdAt DateTime @default(now())
+  id         String   @id @default(uuid())
+  name       String   @unique
+  customerId String
+  createdAt  DateTime @default(now())
 
-  channels Channel[]
+  customer   Customer  @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  channels   Channel[]
 }
 
 model Channel {
@@ -55,9 +57,29 @@ model Asset {
   update    Update   @relation(fields: [updateId], references: [id], onDelete: Cascade)
 }
 
-model AdminUser {
-  id           String   @id @default(uuid())
-  email        String   @unique
-  passwordHash String
-  createdAt    DateTime @default(now())
+enum SubscriptionTier {
+  FREE
+  PRO
+}
+
+model Customer {
+  id               String           @id @default(uuid())
+  email            String           @unique
+  passwordHash     String
+  subscriptionTier SubscriptionTier @default(FREE)
+  createdAt        DateTime         @default(now())
+
+  apps             App[]
+  apiKeys          ApiKey[]
+}
+
+model ApiKey {
+  id         String    @id @default(uuid())
+  key        String    @unique // Hashed key stored here
+  prefix     String    // First 8 chars visible to the user
+  customerId String
+  lastUsedAt DateTime?
+  createdAt  DateTime  @default(now())
+
+  customer   Customer  @relation(fields: [customerId], references: [id], onDelete: Cascade)
 }

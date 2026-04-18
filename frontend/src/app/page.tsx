@@ -1,391 +1,182 @@
 "use client";
 
-import { useState } from "react";
-import {
-  Smartphone,
-  DownloadCloud,
-  Upload,
-  Search,
-  History,
-  ChevronRight,
-  LogOut,
-  Zap,
-  Shield,
-  GitBranch,
-  HardDrive,
-  X,
-  Loader2,
-  Activity,
-  Trash2,
-  RefreshCw,
-} from "lucide-react";
-import { useUpdates, useDeleteUpdate, useUploadUpdate } from "@/hooks/useUpdates";
-import { useCurrentUser, useLogout } from "@/hooks/useAuth";
-import type { Update } from "@/services/updates.service";
+import { ChevronRight, Zap, Code, Shield, CloudLightning, ArrowRight, ExternalLink } from "lucide-react";
+import Link from "next/link";
+import { useEffect, useState } from "react";
 
-// — Skeleton components —
-function KpiSkeleton() {
-  return (
-    <div className="relative overflow-hidden rounded-2xl border border-slate-800/60 p-5 animate-pulse">
-      <div className="h-3 w-24 bg-slate-800 rounded mb-4" />
-      <div className="h-7 w-20 bg-slate-700 rounded mb-2" />
-      <div className="h-2 w-32 bg-slate-800 rounded" />
-    </div>
-  );
-}
+export default function LandingPage() {
+  const [mounted, setMounted] = useState(false);
 
-function TableRowSkeleton() {
-  return (
-    <tr className="border-b border-slate-800/40">
-      {Array.from({ length: 6 }).map((_, i) => (
-        <td key={i} className="px-6 py-4">
-          <div className="h-3 rounded bg-slate-800 animate-pulse" style={{ width: `${60 + i * 10}%` }} />
-        </td>
-      ))}
-    </tr>
-  );
-}
+  useEffect(() => {
+    setMounted(false); // Reset to ensure animation triggers if needed, but standard React life cycle is enough
+    setMounted(true);
+  }, []);
 
-const colorMap: Record<string, string> = {
-  emerald: "text-emerald-400",
-  indigo: "text-indigo-400",
-  violet: "text-violet-400",
-  sky: "text-sky-400",
-};
-
-export default function Dashboard() {
-  const [showDialog, setShowDialog] = useState(false);
-  const [search, setSearch] = useState("");
-  const [appName, setAppName] = useState("MyExpoApp");
-  const [channelName, setChannelName] = useState("production");
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [deletingId, setDeletingId] = useState<string | null>(null);
-
-  const { data: user } = useCurrentUser();
-  const { data: updates = [], isLoading, isError, refetch } = useUpdates();
-  const { mutate: deleteUpdate } = useDeleteUpdate();
-  const { mutate: uploadUpdate, isPending: isUploading } = useUploadUpdate();
-  const { mutate: logout, isPending: isLoggingOut } = useLogout();
-
-  const filtered = updates.filter(
-    (u: Update) =>
-      u.runtimeVersion.toLowerCase().includes(search.toLowerCase()) ||
-      u.channel.name.toLowerCase().includes(search.toLowerCase()) ||
-      u.platform.toLowerCase().includes(search.toLowerCase()) ||
-      u.channel.app.name.toLowerCase().includes(search.toLowerCase()),
-  );
-
-  const activeCount = updates.filter((u: Update) => {
-    // Most recent update per channel+platform is "Active"
-    const sorted = [...updates].sort(
-      (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
-    );
-    const latest = sorted.find(
-      (x) => x.channel.id === u.channel.id && x.platform === u.platform,
-    );
-    return latest?.id === u.id;
-  }).length;
-
-  const kpis = [
-    {
-      label: "Updates Déployées",
-      value: isLoading ? "—" : `${updates.length}`,
-      sub: `${activeCount} actives`,
-      icon: DownloadCloud,
-      color: "emerald",
-      glow: "rgba(16,185,129,0.15)",
-    },
-    {
-      label: "Branches",
-      value: isLoading ? "—" : `${new Set(updates.map((u: Update) => u.channel.name)).size}`,
-      sub: [...new Set(updates.map((u: Update) => u.channel.name))].join(" · ") || "—",
-      icon: GitBranch,
-      color: "indigo",
-      glow: "rgba(99,102,241,0.15)",
-    },
-    {
-      label: "Applications",
-      value: isLoading ? "—" : `${new Set(updates.map((u: Update) => u.channel.app.name)).size}`,
-      sub: [...new Set(updates.map((u: Update) => u.channel.app.name))].join(", ") || "—",
-      icon: Smartphone,
-      color: "violet",
-      glow: "rgba(139,92,246,0.15)",
-    },
-    {
-      label: "iOS vs Android",
-      value: isLoading ? "—" : `${updates.filter((u: Update) => u.platform === "ios").length}/${updates.filter((u: Update) => u.platform === "android").length}`,
-      sub: "ios / android",
-      icon: HardDrive,
-      color: "sky",
-      glow: "rgba(14,165,233,0.15)",
-    },
-  ];
-
-  const isActive = (u: Update) => {
-    const sorted = [...updates].sort(
-      (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
-    );
-    const latest = sorted.find(
-      (x) => x.channel.id === u.channel.id && x.platform === u.platform,
-    );
-    return latest?.id === u.id;
-  };
-
-  const handleUpload = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!selectedFile) return;
-    uploadUpdate(
-      { file: selectedFile, appName, channelName },
-      {
-        onSuccess: () => {
-          setShowDialog(false);
-          setSelectedFile(null);
-        },
-      },
-    );
-  };
-
-  const handleDelete = (id: string) => {
-    setDeletingId(id);
-    deleteUpdate(id, { onSettled: () => setDeletingId(null) });
-  };
+  if (!mounted) return null;
 
   return (
-    <div className="flex flex-col min-h-screen bg-slate-950 font-sans">
-      {/* Upload Dialog */}
-      {showDialog && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center p-4"
-          style={{ background: "rgba(0,0,0,0.75)", backdropFilter: "blur(8px)" }}
-        >
-          <div
-            className="relative w-full max-w-md rounded-2xl border border-slate-700/60 p-6 shadow-2xl"
-            style={{ background: "rgba(15,23,42,0.97)", boxShadow: "0 0 0 1px rgba(16,185,129,0.08), 0 32px 80px rgba(0,0,0,0.6)" }}
-          >
-            <button onClick={() => setShowDialog(false)} className="absolute right-4 top-4 text-slate-500 hover:text-slate-200 transition-colors">
-              <X className="h-5 w-5" />
-            </button>
-            <div className="mb-5">
-              <h2 className="font-mono font-bold text-lg text-emerald-400">Déployer une Mise à Jour</h2>
-              <p className="text-sm text-slate-400 mt-1 font-mono">
-                Archive <code className="bg-slate-800 px-1 rounded text-emerald-300 text-xs border border-slate-700">.zip</code> générée par <code className="bg-slate-800 px-1 rounded text-emerald-300 text-xs border border-slate-700">npx expo export</code>.
-              </p>
+    <div className="min-h-screen bg-[#000000] text-white font-sans selection:bg-white selection:text-black relative">
+      {/* Texture background: Dot Grid */}
+      <div 
+        className="absolute inset-0 z-0 opacity-[0.15]" 
+        style={{ 
+          backgroundImage: `radial-gradient(circle, #ffffff 1px, transparent 1px)`, 
+          backgroundSize: '24px 24px' 
+        }} 
+      />
+      
+      {/* Header */}
+      <header className="fixed top-0 inset-x-0 z-50 h-16 border-b border-white/[0.08] backdrop-blur-md bg-black/50">
+        <div className="container mx-auto px-6 h-full flex items-center justify-between">
+          <div className="flex items-center gap-3 font-medium tracking-tight">
+            <div className="w-7 h-7 rounded bg-white flex items-center justify-center">
+               <CloudLightning className="h-4 w-4 text-black fill-black" />
             </div>
-            <form onSubmit={handleUpload} className="space-y-4">
-              {[
-                { id: "appName", label: "Projet", value: appName, setter: setAppName },
-                { id: "channelName", label: "Channel", value: channelName, setter: setChannelName },
-              ].map((f) => (
-                <div key={f.id} className="space-y-1.5">
-                  <label htmlFor={f.id} className="text-xs font-mono font-medium uppercase tracking-widest text-slate-400">{f.label}</label>
-                  <input id={f.id} value={f.value} onChange={(e) => f.setter(e.target.value)}
-                    className="w-full rounded-xl border border-slate-700/80 bg-slate-900/60 px-4 py-2.5 text-sm font-mono text-slate-100 outline-none focus:border-emerald-500/60 focus:ring-2 focus:ring-emerald-500/20 transition-all" />
-                </div>
-              ))}
-              <div className="space-y-1.5">
-                <label htmlFor="file" className="text-xs font-mono font-medium uppercase tracking-widest text-slate-400">Archive (.zip)</label>
-                <input id="file" type="file" accept=".zip" required onChange={(e) => setSelectedFile(e.target.files?.[0] ?? null)}
-                  className="w-full rounded-xl border border-slate-700/80 bg-slate-900/60 px-3 py-2 text-sm font-mono text-slate-300 cursor-pointer outline-none file:bg-slate-800 file:border-0 file:text-xs file:font-mono file:text-emerald-300 file:px-3 file:py-1 file:rounded-lg file:mr-3 hover:file:bg-slate-700 transition-all" />
-              </div>
-              <button type="submit" disabled={isUploading || !selectedFile}
-                className="w-full mt-2 flex items-center justify-center gap-2 rounded-xl py-3 text-sm font-mono font-semibold text-white transition-all disabled:opacity-60"
-                style={{ background: "linear-gradient(135deg, #059669, #10b981)", boxShadow: "0 0 20px rgba(16,185,129,0.25)" }}>
-                {isUploading ? <><Loader2 className="h-4 w-4 animate-spin" />Uploading...</> : <><Upload className="h-4 w-4" />Déployer</>}
-              </button>
-            </form>
+            <span className="text-lg">ZenOTA</span>
           </div>
-        </div>
-      )}
-
-      {/* Navbar */}
-      <header className="sticky top-0 z-40 flex h-[60px] items-center gap-4 border-b border-slate-800/60 px-6"
-        style={{ background: "rgba(2,8,23,0.85)", backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)" }}>
-        <div className="flex items-center gap-2.5 font-mono text-lg font-bold tracking-tight">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg"
-            style={{ background: "linear-gradient(135deg, rgba(16,185,129,0.2), rgba(99,102,241,0.2))", border: "1px solid rgba(16,185,129,0.2)" }}>
-            <DownloadCloud className="h-4 w-4 text-emerald-400" />
+          
+          <nav className="hidden md:flex items-center gap-10 text-[13px] font-medium text-white/50">
+            <a href="#features" className="hover:text-white transition-colors tracking-wide">Features</a>
+            <a href="#pricing" className="hover:text-white transition-colors tracking-wide">Pricing</a>
+            <Link href="/docs" className="hover:text-white transition-colors tracking-wide flex items-center gap-1.5 text-white">Documentation <ExternalLink className="h-3 w-3" /></Link>
+          </nav>
+          
+          <div className="flex items-center gap-6">
+            <Link href="/login" className="text-[13px] font-medium text-white/50 hover:text-white transition-colors">Log in</Link>
+            <Link href="/register" className="text-[13px] font-bold bg-white text-black px-4 py-1.5 rounded hover:bg-white/90 transition-all">Sign Up</Link>
           </div>
-          <span className="text-slate-100">OTA<span className="text-emerald-400">_CTRL</span></span>
-        </div>
-
-        <div className="ml-6 hidden md:flex relative max-w-xs w-full">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-500" />
-          <input type="search" placeholder="Rechercher..." value={search} onChange={(e) => setSearch(e.target.value)}
-            className="w-full rounded-xl border border-slate-800 bg-slate-900/60 pl-9 pr-4 py-2 text-xs font-mono text-slate-300 placeholder:text-slate-600 outline-none focus:border-slate-700 transition-all" />
-        </div>
-
-        <div className="ml-auto flex items-center gap-3">
-          {user && <span className="hidden sm:block text-xs font-mono text-slate-500">{user.email}</span>}
-          <div className="h-5 w-px bg-slate-800" />
-          <div className="flex items-center gap-2">
-            <span className="flex h-2 w-2 rounded-full animate-pulse" style={{ background: "#10b981" }} />
-            <span className="text-xs font-mono text-slate-400 hidden sm:block">Opérationnel</span>
-          </div>
-          <div className="h-5 w-px bg-slate-800" />
-          <button onClick={() => refetch()} className="flex items-center gap-1.5 rounded-lg border border-slate-700/60 bg-slate-900/60 px-2.5 py-1.5 text-xs font-mono text-slate-400 hover:text-slate-200 hover:border-slate-600 transition-all" title="Actualiser">
-            <RefreshCw className={`h-3 w-3 ${isLoading ? "animate-spin" : ""}`} />
-          </button>
-          <button onClick={() => logout()} disabled={isLoggingOut}
-            className="flex items-center gap-1.5 rounded-lg border border-slate-700/60 bg-slate-900/60 px-3 py-1.5 text-xs font-mono text-slate-400 hover:text-slate-200 hover:border-slate-600 transition-all">
-            {isLoggingOut ? <Loader2 className="h-3 w-3 animate-spin" /> : <LogOut className="h-3 w-3" />}
-            <span className="hidden sm:block">Déconnexion</span>
-          </button>
         </div>
       </header>
 
-      {/* Main */}
-      <main className="flex-1 p-6 space-y-6">
-        {/* Header */}
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-xl font-bold font-mono text-slate-100 tracking-tight">Platform Overview</h1>
-            <p className="text-xs font-mono text-slate-500 mt-0.5">OTA_CTRL · Expo Updates Dashboard</p>
+      {/* Hero Section */}
+      <section className="relative pt-44 pb-32 px-6 z-10">
+        <div className="container mx-auto max-w-4xl text-center flex flex-col items-center">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded border border-white/10 bg-white/5 text-[11px] font-medium uppercase tracking-[0.2em] text-white/60 mb-10">
+             Available for Expo SDK 50+
           </div>
-          <button onClick={() => setShowDialog(true)}
-            className="flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-mono font-semibold text-white transition-all hover:scale-[1.02] active:scale-[0.98]"
-            style={{ background: "linear-gradient(135deg, #059669, #10b981)", boxShadow: "0 0 20px rgba(16,185,129,0.25), 0 4px 12px rgba(0,0,0,0.3)" }}>
-            <Upload className="h-4 w-4" />
-            <span className="hidden sm:block">Nouvelle Release</span>
-          </button>
-        </div>
-
-        {/* Error banner */}
-        {isError && (
-          <div className="flex items-center gap-3 rounded-xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm font-mono text-red-400">
-            Impossible de charger les mises à jour. Vérifiez que le backend est en ligne.
-            <button onClick={() => refetch()} className="ml-auto text-xs underline">Réessayer</button>
-          </div>
-        )}
-
-        {/* KPIs */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          {isLoading
-            ? Array.from({ length: 4 }).map((_, i) => <KpiSkeleton key={i} />)
-            : kpis.map((kpi) => {
-                const Icon = kpi.icon;
-                return (
-                  <div key={kpi.label}
-                    className="relative overflow-hidden rounded-2xl border border-slate-800/60 p-5 transition-all duration-300 hover:border-slate-700 hover:scale-[1.02] cursor-default"
-                    style={{ background: "rgba(15,23,42,0.9)", boxShadow: `0 0 40px ${kpi.glow}, 0 1px 0 rgba(255,255,255,0.04) inset` }}>
-                    <div className="absolute -top-4 -right-4 h-20 w-20 rounded-full opacity-40" style={{ background: `radial-gradient(circle, ${kpi.glow}, transparent)`, filter: "blur(16px)" }} />
-                    <div className="relative">
-                      <div className="flex items-center justify-between mb-3">
-                        <span className="text-xs font-mono font-medium text-slate-500 uppercase tracking-wider">{kpi.label}</span>
-                        <Icon className={`h-4 w-4 ${colorMap[kpi.color]}`} />
-                      </div>
-                      <div className={`text-2xl font-bold font-mono tracking-tight ${colorMap[kpi.color]}`}>{kpi.value}</div>
-                      <p className="mt-1 text-xs font-mono text-slate-600 truncate">{kpi.sub}</p>
-                    </div>
-                  </div>
-                );
-              })}
-        </div>
-
-        {/* Status row */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {[
-            { icon: Zap, label: "API Backend", value: "En ligne · :3001", color: "emerald" },
-            { icon: Shield, label: "MinIO Storage", value: "Opérationnel · us-east-1", color: "sky" },
-            { icon: Activity, label: "Uptime", value: "99.98% · 30 derniers jours", color: "violet" },
-          ].map((item) => {
-            const Icon = item.icon;
-            return (
-              <div key={item.label} className="flex items-center gap-3 rounded-xl border border-slate-800/60 bg-slate-900/40 px-4 py-3 hover:border-slate-700/60 transition-colors">
-                <div className="flex h-8 w-8 items-center justify-center rounded-lg"
-                  style={{ background: item.color === "emerald" ? "rgba(16,185,129,0.1)" : item.color === "sky" ? "rgba(14,165,233,0.1)" : "rgba(139,92,246,0.1)" }}>
-                  <Icon className={`h-4 w-4 ${item.color === "emerald" ? "text-emerald-400" : item.color === "sky" ? "text-sky-400" : "text-violet-400"}`} />
-                </div>
-                <div>
-                  <p className="text-xs font-mono text-slate-500 uppercase tracking-wider">{item.label}</p>
-                  <p className="text-xs font-mono font-medium text-slate-300">{item.value}</p>
-                </div>
-                <div className="ml-auto h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
-              </div>
-            );
-          })}
-        </div>
-
-        {/* Table */}
-        <div className="rounded-2xl border border-slate-800/60 overflow-hidden" style={{ background: "rgba(15,23,42,0.6)" }}>
-          <div className="flex items-center justify-between border-b border-slate-800/60 px-6 py-4">
-            <div className="flex items-center gap-3">
-              <History className="h-4 w-4 text-slate-500" />
-              <div>
-                <h2 className="text-sm font-semibold font-mono text-slate-100">Historique des Mises à Jour</h2>
-                <p className="text-xs text-slate-500 font-mono mt-0.5">Flux en direct · toutes branches et versions</p>
-              </div>
+          
+          <h1 className="text-6xl md:text-8xl font-bold tracking-[-0.04em] text-white mb-8 animate-in fade-in slide-in-from-bottom-10 duration-1000 leading-[0.9]">
+            The standard for <br/>Expo updates.
+          </h1>
+          
+          <p className="text-lg md:text-xl text-white/40 max-w-xl mb-12 animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-200 font-medium">
+            Push instant over-the-air updates to iOS and Android. <br/>Predictable pricing. Zero infra management.
+          </p>
+          
+          <div className="flex flex-col sm:flex-row items-center gap-4 animate-in fade-in slide-in-from-bottom-10 duration-1000 delay-300">
+            <Link href="/register" className="h-12 px-8 rounded bg-white text-black font-bold text-sm flex items-center justify-center gap-2 hover:bg-white/90 transition-all shadow-[0_0_20px_rgba(255,255,255,0.15)]">
+              Get Started for Free
+            </Link>
+            <div className="h-12 px-6 rounded border border-white/10 bg-white/5 backdrop-blur-xl flex items-center gap-3 text-white/60 font-mono text-[13px] hover:border-white/20 transition-colors group cursor-text">
+              <span className="text-white/30">$</span> npm i -g zenota-cli
+              <ArrowRight className="h-3.5 w-3.5 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all" />
             </div>
-            <span className="rounded-full bg-slate-800 px-2.5 py-0.5 text-xs font-mono text-slate-400">
-              {isLoading ? "..." : `${filtered.length} entrées`}
-            </span>
-          </div>
-
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b border-slate-800/60 bg-slate-950/50">
-                  {["ID", "App · Channel", "Runtime Version", "Platform", "Date", "Statut", ""].map((h, i) => (
-                    <th key={i} className={`px-6 py-3 text-left text-xs font-mono font-medium uppercase tracking-widest text-slate-500 ${i === 5 ? "text-right" : ""}`}>{h}</th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-800/40">
-                {isLoading
-                  ? Array.from({ length: 4 }).map((_, i) => <TableRowSkeleton key={i} />)
-                  : filtered.map((update: Update) => (
-                    <tr key={update.id} className="group transition-colors hover:bg-slate-800/30 cursor-pointer">
-                      <td className="px-6 py-4 font-mono text-xs text-slate-500">#{update.id.slice(0, 8)}</td>
-                      <td className="px-6 py-4">
-                        <div className="flex flex-col gap-1">
-                          <span className="font-mono text-xs text-slate-300">{update.channel.app.name}</span>
-                          <span className={`inline-flex w-fit items-center rounded-lg px-2 py-0.5 text-xs font-mono font-medium border ${
-                            update.channel.name === "production"
-                              ? "border-emerald-500/20 bg-emerald-500/10 text-emerald-300"
-                              : "border-slate-700 bg-slate-800/60 text-slate-400"
-                          }`}>{update.channel.name}</span>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 font-mono text-sm text-slate-200">{update.runtimeVersion}</td>
-                      <td className="px-6 py-4 font-mono text-xs text-slate-400">{update.platform === "ios" ? "🍎 iOS" : "🤖 Android"}</td>
-                      <td className="px-6 py-4 font-mono text-xs text-slate-500">{new Date(update.createdAt).toLocaleString("fr-FR", { dateStyle: "short", timeStyle: "short" })}</td>
-                      <td className="px-6 py-4 text-right">
-                        <div className="inline-flex items-center gap-1.5">
-                          {isActive(update) ? (
-                            <span className="flex items-center gap-1.5 rounded-lg border border-emerald-500/20 bg-emerald-500/10 px-2.5 py-1 text-xs font-mono text-emerald-400">
-                              <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />Actif
-                            </span>
-                          ) : (
-                            <span className="flex items-center gap-1.5 rounded-lg border border-slate-700/60 bg-slate-800/40 px-2.5 py-1 text-xs font-mono text-slate-500">Archivé</span>
-                          )}
-                          <ChevronRight className="h-4 w-4 text-slate-700 group-hover:text-slate-400 transition-colors" />
-                        </div>
-                      </td>
-                      <td className="px-3 py-4">
-                        <button
-                          onClick={(e) => { e.stopPropagation(); handleDelete(update.id); }}
-                          disabled={deletingId === update.id}
-                          className="opacity-0 group-hover:opacity-100 flex items-center justify-center h-7 w-7 rounded-lg border border-red-500/20 bg-red-500/10 text-red-400 hover:bg-red-500/20 transition-all disabled:opacity-40"
-                          title="Supprimer"
-                        >
-                          {deletingId === update.id ? <Loader2 className="h-3 w-3 animate-spin" /> : <Trash2 className="h-3 w-3" />}
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-              </tbody>
-            </table>
-
-            {!isLoading && filtered.length === 0 && (
-              <div className="py-16 text-center">
-                <Search className="mx-auto h-8 w-8 text-slate-700 mb-3" />
-                <p className="text-sm font-mono text-slate-600">
-                  {updates.length === 0 ? "Aucune mise à jour déployée pour l'instant." : `Aucun résultat pour "${search}"`}
-                </p>
-              </div>
-            )}
           </div>
         </div>
-      </main>
+      </section>
+
+      {/* Feature Bento Grid */}
+      <section id="features" className="py-24 px-6 relative z-10 border-t border-white/[0.05]">
+        <div className="container mx-auto max-w-5xl">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-1">
+             {/* Feature 1 */}
+            <div className="md:col-span-2 rounded border border-white/[0.08] bg-white/[0.02] p-10 hover:bg-white/[0.04] transition-all group overflow-hidden relative">
+               <Zap className="h-6 w-6 text-white mb-6" />
+               <h3 className="text-2xl font-bold mb-4 tracking-tight">Instant Deployment</h3>
+               <p className="text-white/40 leading-relaxed font-medium">Your component changes and JS bundles are delivered immediately to your users. Skip the App Store review cycles and ship features or hotfixes in seconds.</p>
+               <div className="absolute -bottom-10 -right-10 w-40 h-40 bg-white/[0.03] rounded-full blur-3xl group-hover:bg-white/[0.05] transition-colors" />
+            </div>
+            
+            {/* Feature 2 */}
+             <div className="rounded border border-white/[0.08] bg-white/[0.02] p-10 hover:bg-white/[0.04] transition-all">
+               <Code className="h-6 w-6 text-white mb-6" />
+               <h3 className="text-xl font-bold mb-4 tracking-tight">Pro CLI</h3>
+               <p className="text-white/40 text-[15px] font-medium">Simple as <code className="text-white">zenota publish</code>. We handle the export, compression, and global distribution for you.</p>
+            </div>
+            
+            {/* Feature 3 */}
+             <div className="rounded border border-white/[0.08] bg-white/[0.02] p-10 hover:bg-white/[0.04] transition-all">
+               <Shield className="h-6 w-6 text-white mb-6" />
+               <h3 className="text-xl font-bold mb-4 tracking-tight">Secure & Signed</h3>
+               <p className="text-white/40 text-[15px] font-medium">Every asset and bundle is cryptographically signed. Updates are only applied if they pass integrity checks.</p>
+            </div>
+            
+            {/* Feature 4 */}
+            <div className="md:col-span-2 rounded border border-white/[0.08] bg-white/[0.02] p-10 hover:bg-white/[0.04] transition-all flex flex-col justify-center">
+               <h3 className="text-2xl font-bold mb-4 tracking-tight">Native-First Performance</h3>
+               <p className="text-white/40 font-medium">Built-in support for Expo SDK. ZenOTA reuses your existing native builds without increasing your app size with heavy dependencies.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Pricing */}
+      <section id="pricing" className="py-32 px-6 border-t border-white/[0.05] relative bg-black">
+        <div className="container mx-auto max-w-4xl text-center">
+          <h2 className="text-4xl font-bold mb-6 tracking-tight">Fair Pricing</h2>
+          <p className="text-white/40 mb-20 max-w-xl mx-auto font-medium">Stop paying for unpredictable bandwidth. One flat rate for everything you need.</p>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-px bg-white/[0.08] border border-white/[0.08] rounded-lg overflow-hidden max-w-3xl mx-auto text-left">
+            {/* Free */}
+            <div className="bg-black p-12 flex flex-col">
+               <div className="mb-10">
+                 <h3 className="text-lg font-bold text-white/50 mb-2 uppercase tracking-widest text-xs">Hobby</h3>
+                 <div className="flex items-baseline gap-1">
+                   <span className="text-5xl font-bold tracking-tighter">$0</span>
+                   <span className="text-white/30 text-sm">/month</span>
+                 </div>
+               </div>
+               <ul className="space-y-5 mb-12 flex-1">
+                 <li className="flex gap-3 text-sm font-medium text-white/60"><ChevronRight className="h-4 w-4 text-white shrink-0" />1 Active Expo App</li>
+                 <li className="flex gap-3 text-sm font-medium text-white/60"><ChevronRight className="h-4 w-4 text-white shrink-0" />10 Deployments / day</li>
+                 <li className="flex gap-3 text-sm font-medium text-white/60"><ChevronRight className="h-4 w-4 text-white shrink-0" />Standard Support</li>
+               </ul>
+               <Link href="/register" className="w-full h-11 flex items-center justify-center rounded border border-white/10 font-bold text-[13px] hover:bg-white/5 transition-colors">Start Free</Link>
+            </div>
+            
+            {/* Pro */}
+             <div className="bg-[#080808] p-12 flex flex-col relative group">
+               {/* Subtle border effect on hover */}
+               <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/40 to-transparent" />
+               <div className="mb-10">
+                 <div className="flex justify-between items-start mb-2">
+                   <h3 className="text-lg font-bold text-white mb-2 uppercase tracking-widest text-xs">Professional</h3>
+                 </div>
+                 <div className="flex items-baseline gap-1">
+                   <span className="text-5xl font-bold tracking-tighter">$19</span>
+                   <span className="text-white/30 text-sm">/month</span>
+                 </div>
+               </div>
+               <ul className="space-y-5 mb-12 flex-1">
+                 <li className="flex gap-3 text-sm font-medium text-white"><ChevronRight className="h-4 w-4 text-white shrink-0" />Unlimited Apps</li>
+                 <li className="flex gap-3 text-sm font-medium text-white"><ChevronRight className="h-4 w-4 text-white shrink-0" />Unlimited Deployments</li>
+                 <li className="flex gap-3 text-sm font-medium text-white"><ChevronRight className="h-4 w-4 text-white shrink-0" />Priority CDN Delivery</li>
+                 <li className="flex gap-3 text-sm font-medium text-white"><ChevronRight className="h-4 w-4 text-white shrink-0" />Advanced CLI Analytics</li>
+               </ul>
+               <Link href="/register" className="w-full h-11 flex items-center justify-center rounded bg-white text-black font-bold text-[13px] hover:bg-white/90 transition-colors">Go Professional</Link>
+            </div>
+          </div>
+        </div>
+      </section>
+      
+      {/* Footer */}
+      <footer className="border-t border-white/[0.05] py-20 px-6 bg-black relative z-10">
+         <div className="container mx-auto flex flex-col md:flex-row justify-between items-center gap-8">
+            <div className="flex items-center gap-3 font-medium text-white/40">
+               <div className="w-6 h-6 rounded bg-white/10 flex items-center justify-center">
+                  <CloudLightning className="h-3 w-3 text-white" />
+               </div>
+               <span>ZenOTA © 2024</span>
+            </div>
+            <div className="flex gap-10 text-[13px] font-medium text-white/30">
+               <a href="#" className="hover:text-white transition-colors">GitHub</a>
+               <a href="#" className="hover:text-white transition-colors">Twitter</a>
+               <a href="#" className="hover:text-white transition-colors">Status</a>
+               <a href="#" className="hover:text-white transition-colors">Privacy</a>
+            </div>
+         </div>
+      </footer>
+
     </div>
   );
 }

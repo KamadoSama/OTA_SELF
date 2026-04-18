@@ -3,60 +3,50 @@ import {
   Post,
   Get,
   Body,
-  Res,
-  Req,
   UnauthorizedException,
   Logger,
+  UseGuards,
+  Req,
 } from '@nestjs/common';
-import type { Request, Response } from 'express';
 import { AuthService } from './auth.service';
+import { AuthGuard, AuthenticatedRequest } from './auth.guard';
 
-const SESSION_COOKIE = 'Q6aoDC6QOYwfc7WjrBuhE3AJBmbj5Drz08tBnLPxA7hsL2BL';
-
-@Controller('api/admin/auth')
+@Controller('api/auth')
 export class AuthController {
   private logger = new Logger(AuthController.name);
 
   constructor(private readonly authService: AuthService) {}
 
+  @Post('register')
+  async register(
+    @Body() body: { email: string; password: string },
+  ) {
+    const result = await this.authService.register(body.email, body.password);
+    return { success: true, ...result };
+  }
+
   @Post('login')
   async login(
     @Body() body: { email: string; password: string },
-    @Res({ passthrough: true }) res: Response,
   ) {
-    const admin = await this.authService.login(body.email, body.password);
-
-    res.cookie(SESSION_COOKIE, admin.email, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      maxAge: 1000 * 60 * 60 * 24 * 7, // 7 days
-      sameSite: 'lax',
-      path: '/',
-    });
-
-    return { success: true, email: admin.email };
+    const result = await this.authService.login(body.email, body.password);
+    return { success: true, ...result };
   }
 
   @Post('logout')
-  logout(@Res({ passthrough: true }) res: Response) {
-    res.clearCookie(SESSION_COOKIE, { path: '/' });
+  logout() {
+    // With JWT, logout is handled client-side by deleting the token
     return { success: true };
   }
 
   @Get('me')
-  async getMe(@Req() req: Request) {
-    const cookies = req.cookies as Record<string, unknown> | undefined;
-    const email =
-      typeof cookies?.[SESSION_COOKIE] === 'string'
-        ? cookies[SESSION_COOKIE]
-        : undefined;
-    if (!email) {
-      throw new UnauthorizedException('Not authenticated');
+  @UseGuards(AuthGuard)
+  async getMe(@Req() req: AuthenticatedRequest) {
+    const email = req.user.email;
+    const customer = await this.authService.getMe(email);
+    if (!customer) {
+      throw new UnauthorizedException('Customer not found');
     }
-    const admin = await this.authService.getMe(email);
-    if (!admin) {
-      throw new UnauthorizedException('Admin not found');
-    }
-    return admin;
+    return customer;
   }
 }

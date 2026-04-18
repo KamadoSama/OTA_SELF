@@ -151,6 +151,7 @@ export class AdminApiService {
     zipBuffer: Buffer,
     appName: string,
     channelName: string,
+    customerId?: string,
   ): Promise<string> {
     const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'expo-update-'));
 
@@ -178,13 +179,19 @@ export class AdminApiService {
         );
       }
 
-      // Upsert App and Channel
-      // Note: in a real app, projectId might come from a header or JWT
-      const app = await this.prisma.app.upsert({
-        where: { name: appName },
-        update: {},
-        create: { name: appName },
-      });
+      let app = await this.prisma.app.findUnique({ where: { name: appName } });
+      if (app) {
+        if (customerId && app.customerId !== customerId) {
+          throw new BadRequestException(`App name '${appName}' is already taken by another account.`);
+        }
+      } else {
+        if (!customerId) {
+          throw new BadRequestException('customerId is required for new apps.');
+        }
+        app = await this.prisma.app.create({
+          data: { name: appName, customerId: customerId },
+        });
+      }
 
       const channel = await this.prisma.channel.upsert({
         where: { appId_name: { appId: app.id, name: channelName } },
