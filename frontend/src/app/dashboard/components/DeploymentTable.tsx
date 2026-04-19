@@ -78,7 +78,7 @@ export function DeploymentTable({
                 <td className="px-6 py-5 text-center">
                   <div className="inline-flex flex-col items-center gap-1">
                     <DownloadCloud className="h-3.5 w-3.5 text-white/20" />
-                    <span className="font-mono text-[11px] font-bold">{Math.floor(Math.random() * 1000)}</span>
+                    <span className="font-mono text-[11px] font-bold">{update.downloadCount || 0}</span>
                   </div>
                 </td>
                 <td className="hidden md:table-cell px-6 py-5 text-white/30">{new Date(update.createdAt).toLocaleDateString()}</td>

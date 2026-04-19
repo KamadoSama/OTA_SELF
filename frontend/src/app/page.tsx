@@ -64,7 +64,7 @@ export default function LandingPage() {
           </p>
           
           <div className="flex flex-col sm:flex-row items-center gap-4 animate-in fade-in slide-in-from-bottom-10 duration-1000 delay-300">
-            <Link href="/register" className="h-12 px-8 rounded bg-white text-black font-bold text-sm flex items-center justify-center gap-2 hover:bg-white/90 transition-all shadow-[0_0_20px_rgba(255,255,255,0.15)]">
+            <Link href="/docs" className="h-12 px-8 rounded bg-white text-black font-bold text-sm flex items-center justify-center gap-2 hover:bg-white/90 transition-all shadow-[0_0_20px_rgba(255,255,255,0.15)]">
               Get Started for Free
             </Link>
             <div className="h-12 px-6 rounded border border-white/10 bg-white/5 backdrop-blur-xl flex items-center gap-3 text-white/60 font-mono text-[13px] hover:border-white/20 transition-colors group cursor-text">

@@ -52,7 +52,7 @@ const program = new commander_1.Command();
 program.name('zenota').description('ZenOTA CLI for Expo updates').version('1.0.0');
 const CONFIG_PATH = path.join(os.homedir(), '.zenota-config.json');
 // By default localhost for local dev, but should be customizable
-const API_URL = process.env.ZENOTA_API_URL;
+const API_URL = process.env.ZENOTA_API_URL || "http://localhost:3001/api";
 program
     .command('login')
     .description('Login to ZenOTA using your API Key')
