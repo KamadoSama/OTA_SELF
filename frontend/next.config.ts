@@ -5,7 +5,7 @@ const nextConfig: NextConfig = {
   output: "standalone",
   async rewrites() {
     const backendUrl =
-      process.env.INTERNAL_API_URL || process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
+      process.env.INTERNAL_API_URL || process.env.NEXT_PUBLIC_API_URL ;
     return [
       {
         // Backend registration (not a NextAuth route)
