@@ -21,7 +21,29 @@ export const metadata: Metadata = {
   icons: {
     icon: '/favicon.svg',
     shortcut: '/favicon.svg',
-    apple: '/favicon.svg',
+    apple: '/apple-touch-icon.png',
+  },
+  openGraph: {
+    title: 'ZenOTA | Premium Expo Updates',
+    description: 'Pro-grade OTA update management for React Native Expo apps.',
+    url: 'https://zenota.diesestudio.com',
+    siteName: 'ZenOTA',
+    images: [
+      {
+        url: '/og-image.png',
+        width: 1200,
+        height: 630,
+        alt: 'ZenOTA - Premium Expo Updates',
+      },
+    ],
+    locale: 'en_US',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'ZenOTA | Premium Expo Updates',
+    description: 'Pro-grade OTA update management for React Native Expo apps.',
+    images: ['/og-image.png'],
   },
 };
 

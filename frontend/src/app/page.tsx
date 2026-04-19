@@ -167,6 +167,15 @@ export default function LandingPage() {
                   <CloudLightning className="h-3 w-3 text-white" />
                </div>
                <span>ZenOTA © 2024</span>
+               <span className="text-white/20">|</span>
+               <a 
+                 href="https://github.com/KamadoSama" 
+                 target="_blank" 
+                 rel="noopener noreferrer"
+                 className="hover:text-white transition-colors flex items-center gap-1.5"
+               >
+                 Developed by <span className="text-white">KamadoSama</span>
+               </a>
             </div>
             <div className="flex gap-10 text-[13px] font-medium text-white/30">
                <a href="#" className="hover:text-white transition-colors">GitHub</a>
