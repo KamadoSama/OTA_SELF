@@ -1,9 +1,6 @@
 import axios from 'axios';
 
-const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
-
 export const authClient = axios.create({
-  baseURL: BACKEND_URL,
   headers: { 'Content-Type': 'application/json' },
 });
 
