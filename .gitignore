@@ -1,3 +1,4 @@
 .env
 .agents
 docs
+node_modules
