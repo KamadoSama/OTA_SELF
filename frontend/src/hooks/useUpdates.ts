@@ -56,3 +56,17 @@ export function useUploadUpdate() {
     },
   });
 }
+
+export function useBilling() {
+  return useQuery({
+    queryKey: ["billing"],
+    queryFn: () => updatesService.fetchInvoices(),
+  });
+}
+
+export function useSubscription() {
+  return useQuery({
+    queryKey: ["subscription"],
+    queryFn: () => updatesService.fetchSubscriptionStats(),
+  });
+}
