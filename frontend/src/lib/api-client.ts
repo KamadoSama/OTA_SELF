@@ -10,13 +10,13 @@ const apiClient = axios.create({
 apiClient.interceptors.request.use(async (config) => {
   if (typeof window !== 'undefined') {
     const session = await getSession();
-    console.log('session', session);
+    // console.log('session', session);
     if (session && (session as any).user.accessToken) {
-      console.log('access token', (session as any).user.accessToken);
+      // console.log('access token', (session as any).user.accessToken);
       config.headers.Authorization = `Bearer ${(session as any).user.accessToken}`;
     }
 
-    console.log('config', config);
+    // console.log('config', config);
   }
   return config;
 });
