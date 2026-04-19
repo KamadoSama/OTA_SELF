@@ -312,20 +312,26 @@ export default function DocsPage() {
               ZenOTA generates <strong className="text-white">Expo-compatible manifests</strong>. Your app's native build must have a matching <code className="text-white font-mono bg-white/5 px-1.5 py-0.5 rounded">runtimeVersion</code> configured in <code className="text-white font-mono bg-white/5 px-1.5 py-0.5 rounded">app.json</code> for an update to be applied.
             </p>
 
-            <CodeBlock
-              id="manifest-config"
-              label="app.json"
-              code={`{
+            <div className="space-y-4">
+              <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-white/30">
+                <div className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                Recommended Configuration
+              </div>
+              <CodeBlock
+                id="manifest-config"
+                label="app.json"
+                code={`{
   "expo": {
     "runtimeVersion": {
       "policy": "sdkVersion"
     },
     "updates": {
-      "url": "https://your-zenota-server.com/api/update/manifest"
+      "url": "https://api-zenota.diesestudio.com/api/update/manifest/{appSlug}"
     }
   }
 }`}
-            />
+              />
+            </div>
 
             <div
               className="rounded-lg px-4 py-4 border text-sm"
