@@ -17,6 +17,10 @@ COPY . .
 
 ENV NEXT_TELEMETRY_DISABLED=1
 
+# Backend URL for Next.js rewrites (evaluated at build time)
+ARG INTERNAL_API_URL=http://ota_backend:3001
+ENV INTERNAL_API_URL=${INTERNAL_API_URL}
+
 RUN npm run build
 
 # ─── Stage 3: Production ────────────────────────────────────────────────────
