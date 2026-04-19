@@ -24,9 +24,30 @@ export interface Update {
   id: string;
   runtimeVersion: string;
   platform: string;
+  downloadCount: number;
   createdAt: string;
   channel: Channel;
   assets: UpdateAsset[];
+}
+
+export interface Invoice {
+  id: string;
+  amount: number;
+  status: string;
+  date: string;
+  pdfUrl?: string;
+}
+
+export interface SubscriptionStats {
+  tier: string;
+  monthlyDownloads: number;
+  downloadLimit: number;
+  activeApps: number;
+  appsLimit: number;
+  storageUsed: string;
+  storageLimit: string;
+  nextBillingDate: string;
+  paymentMethod: string;
 }
 
 export const updatesService = {
@@ -49,6 +70,16 @@ export const updatesService = {
     const { data } = await apiClient.post('/api/admin/updates/upload', formData, {
       headers: { 'Content-Type': 'multipart/form-data' },
     });
+    return data;
+  },
+
+  async fetchInvoices(): Promise<Invoice[]> {
+    const { data } = await apiClient.get<Invoice[]>('/api/admin/updates/billing');
+    return data;
+  },
+
+  async fetchSubscriptionStats(): Promise<SubscriptionStats> {
+    const { data } = await apiClient.get<SubscriptionStats>('/api/admin/updates/subscription');
     return data;
   },
 };

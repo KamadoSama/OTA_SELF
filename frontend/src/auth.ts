@@ -1,10 +1,15 @@
 import NextAuth from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
+import GoogleProvider from "next-auth/providers/google";
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   providers: [
+    GoogleProvider({
+      clientId: process.env.GOOGLE_CLIENT_ID,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+    }),
     CredentialsProvider({
       name: "Credentials",
       credentials: {
@@ -13,7 +18,6 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       },
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) return null;
-
         try {
           const res = await fetch(`${BACKEND_URL}/api/auth/login`, {
             method: "POST",
@@ -27,7 +31,6 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           const data = await res.json();
 
           if (res.ok && data.access_token) {
-            // Mapping the backend response to the user object
             return {
               id: data.id,
               email: data.email,
@@ -44,9 +47,38 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     }),
   ],
   callbacks: {
-    async jwt({ token, user }) {
+    async signIn({ user, account, profile }) {
+      if (account?.provider === "google") {
+        try {
+          // Sync Google user with backend
+          const res = await fetch(`${BACKEND_URL}/api/auth/google`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              email: user.email,
+              name: user.name,
+              googleId: user.id,
+            }),
+          });
+          
+          if (!res.ok) return false;
+          
+          const data = await res.json();
+          // Store backend data in the user object for the JWT callback
+          (user as any).id = data.id;
+          (user as any).tier = data.tier;
+          (user as any).accessToken = data.access_token;
+          return true;
+        } catch (error) {
+          console.error("Google sync error:", error);
+          return false;
+        }
+      }
+      return true;
+    },
+    async jwt({ token, user, account }) {
       if (user) {
-        token.id = user.id;
+        token.id = (user as any).id || user.id;
         token.tier = (user as any).tier;
         token.accessToken = (user as any).accessToken;
       }

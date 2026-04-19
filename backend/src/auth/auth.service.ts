@@ -65,4 +65,33 @@ export class AuthService {
     });
     return customer;
   }
+
+  async googleAuth(email: string, name: string) {
+    let customer = await this.prisma.customer.findUnique({ where: { email } });
+
+    if (!customer) {
+      // Create a new customer with a random password if it doesn't exist
+      const randomPassword = require('crypto').randomBytes(16).toString('hex');
+      const passwordHash = await bcrypt.hash(randomPassword, 10);
+      
+      customer = await this.prisma.customer.create({
+        data: {
+          email,
+          passwordHash,
+          subscriptionTier: 'FREE', // Default tier
+        },
+      });
+      this.logger.log(`New Google customer created: ${email}`);
+    }
+
+    const payload = { sub: customer.id, email: customer.email };
+    const token = this.jwtService.sign(payload);
+
+    return {
+      id: customer.id,
+      email: customer.email,
+      tier: customer.subscriptionTier,
+      access_token: token,
+    };
+  }
 }

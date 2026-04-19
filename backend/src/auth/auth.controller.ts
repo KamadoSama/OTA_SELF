@@ -33,6 +33,14 @@ export class AuthController {
     return { success: true, ...result };
   }
 
+  @Post('google')
+  async googleAuth(
+    @Body() body: { email: string; name: string; googleId: string },
+  ) {
+    const result = await this.authService.googleAuth(body.email, body.name);
+    return { success: true, ...result };
+  }
+
   @Post('logout')
   logout() {
     // With JWT, logout is handled client-side by deleting the token

@@ -34,6 +34,7 @@ model Update {
   channelId      String
   runtimeVersion String   // e.g "exposdk:50.0.0" or "1.0.0"
   platform       String   // "ios" | "android"
+  downloadCount  Int      @default(0)
   createdAt      DateTime @default(now())
   metadata       Json?    // Optional extra metadata
 
@@ -71,6 +72,18 @@ model Customer {
 
   apps             App[]
   apiKeys          ApiKey[]
+  invoices         Invoice[]
+}
+
+model Invoice {
+  id         String   @id @default(uuid())
+  customerId String
+  amount     Float
+  status     String   // "PAID", "PENDING", "FAILED"
+  date       DateTime @default(now())
+  pdfUrl     String?
+
+  customer   Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
 }
 
 model ApiKey {

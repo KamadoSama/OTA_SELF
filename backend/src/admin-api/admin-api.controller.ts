@@ -63,4 +63,22 @@ export class AdminApiController {
     }
     return { success: true, deletedId: id };
   }
+
+  @Get('billing')
+  async getBilling() {
+    // In a real app, you would get this from the authenticated request
+    // For demo, we use a fixed customer ID or create one if needed
+    const customers = await (this.adminService as any).prisma.customer.findMany({ take: 1 });
+    const customerId = customers[0]?.id;
+    if (!customerId) return [];
+    return this.adminService.getInvoices(customerId);
+  }
+
+  @Get('subscription')
+  async getSubscription() {
+    const customers = await (this.adminService as any).prisma.customer.findMany({ take: 1 });
+    const customerId = customers[0]?.id;
+    if (!customerId) return null;
+    return this.adminService.getSubscriptionStats(customerId);
+  }
 }

@@ -1,30 +1,55 @@
-import { PrismaClient } from '@prisma/client';
-import { PrismaPg } from '@prisma/adapter-pg';
-import { Pool } from 'pg';
+import { PrismaClient, SubscriptionTier } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
-import 'dotenv/config';
+
+const prisma = new PrismaClient();
 
 async function main() {
-  const pool = new Pool({ connectionString: process.env.DATABASE_URL });
-  const adapter = new PrismaPg(pool as never);
-  const prisma = new PrismaClient({ adapter } as never);
+  const email = 'tahoarthur@gmail.com';
+  const password = '12345678';
 
-  const email = process.env.ADMIN_EMAIL ?? 'admin@ota.local';
-  const password = process.env.ADMIN_PASSWORD ?? 'admin123';
+  console.log('🌱 Seeding database...');
 
-  try {
-    const existing = await prisma.adminUser.findUnique({ where: { email } });
-    if (existing) {
-      console.log(`✅ Admin already exists: ${email}`);
-      return;
-    }
-    const passwordHash = await bcrypt.hash(password, 12);
-    const admin = await prisma.adminUser.create({ data: { email, passwordHash } });
-    console.log(`🌱 Admin created: ${admin.email}`);
-  } finally {
-    await prisma.$disconnect();
-    await pool.end();
+  const existing = await prisma.customer.findUnique({ where: { email } });
+  if (existing) {
+    console.log(`✅ Customer already exists: ${email}`);
+  } else {
+    const passwordHash = await bcrypt.hash(password, 10);
+    const customer = await prisma.customer.create({
+      data: {
+        email,
+        passwordHash,
+        subscriptionTier: SubscriptionTier.PRO,
+      },
+    });
+    console.log(`👤 Customer created: ${customer.email}`);
+
+    // Create a default app for the customer
+    const app = await prisma.app.create({
+      data: {
+        name: 'my-mobile-app',
+        customerId: customer.id,
+      },
+    });
+    console.log(`📱 App created: ${app.name}`);
+
+    // Create initial invoices
+    await prisma.invoice.createMany({
+      data: [
+        { customerId: customer.id, amount: 49.0, status: 'PAID', date: new Date('2026-04-18') },
+        { customerId: customer.id, amount: 49.0, status: 'PAID', date: new Date('2026-03-18') },
+      ]
+    });
+    console.log(`🧾 Initial invoices created`);
   }
+
+  console.log('🏁 Seed finished.');
 }
 
-main().catch((e) => { console.error(e); process.exit(1); });
+main()
+  .catch((e) => {
+    console.error(e);
+    process.exit(1);
+  })
+  .finally(async () => {
+    await prisma.$disconnect();
+  });
