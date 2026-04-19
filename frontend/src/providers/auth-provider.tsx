@@ -1,0 +1,113 @@
+'use client';
+
+import React, { createContext, useContext, useEffect, useState } from 'react';
+import { useRouter, usePathname } from 'next/navigation';
+import { useSession, signIn, signOut } from 'next-auth/react';
+import { AdminUser } from '@/services/auth.service';
+
+interface AuthContextType {
+  user: AdminUser | null;
+  loading: boolean;
+  login: (email: string, pass: string) => Promise<void>;
+  register: (email: string, pass: string) => Promise<void>;
+  logout: () => Promise<void>;
+}
+
+const AuthContext = createContext<AuthContextType | undefined>(undefined);
+
+const PUBLIC_PREFIXES = ['/docs'];
+const PUBLIC_EXACT = ['/', '/login', '/register'];
+const GUEST_ONLY_ROUTES = ['/login', '/register'];
+
+export function AuthProvider({ children }: { children: React.ReactNode }) {
+  const { data: session, status } = useSession();
+  const [user, setUser] = useState<AdminUser | null>(null);
+  const router = useRouter();
+  const pathname = usePathname();
+
+  const loading = status === 'loading';
+
+  const isPublicRoute = (path: string) => {
+    return PUBLIC_EXACT.includes(path) || PUBLIC_PREFIXES.some(prefix => path.startsWith(prefix));
+  };
+
+  useEffect(() => {
+    if (session?.user) {
+      setUser({
+        id: (session.user as any).id,
+        email: session.user.email || '',
+        subscriptionTier: (session.user as any).tier || 'free',
+        createdAt: '', // Not available in session by default
+      });
+
+      if (GUEST_ONLY_ROUTES.includes(pathname)) {
+        router.push('/dashboard');
+      }
+
+    } else {
+      setUser(null);
+      if (!loading && !isPublicRoute(pathname)) {
+        router.push('/login');
+      }
+    }
+  }, [session, loading, pathname, router]);
+
+  const login = async (email: string, pass: string) => {
+    const result = await signIn('credentials', {
+      email,
+      password: pass,
+      redirect: false,
+    });
+
+    if (result?.error) {
+      throw new Error(result.error);
+    }
+
+    router.push('/');
+  };
+
+  const register = async (email: string, pass: string) => {
+    // Note: NextAuth doesn't have a built-in register. 
+    // Usually you'd call your API then sign in.
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/register`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password: pass }),
+    });
+
+    if (!res.ok) {
+      const error = await res.json();
+      throw new Error(error.message || 'Registration failed');
+    }
+
+    await login(email, pass);
+  };
+
+  const logout = async () => {
+    await signOut({ redirect: false });
+    setUser(null);
+    router.push('/login');
+  };
+
+  if (loading && !isPublicRoute(pathname)) {
+    return (
+      <div className="min-h-screen bg-black flex items-center justify-center">
+        <div className="w-8 h-8 border-t-2 border-blue-500 border-solid rounded-full animate-spin"></div>
+      </div>
+    );
+  }
+
+  return (
+    <AuthContext.Provider value={{ user, loading, login, register, logout }}>
+      {children}
+    </AuthContext.Provider>
+  );
+}
+
+export function useAuth() {
+  const context = useContext(AuthContext);
+  if (context === undefined) {
+    throw new Error('useAuth must be used within an AuthProvider');
+  }
+  return context;
+}

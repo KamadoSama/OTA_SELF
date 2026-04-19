@@ -1,14 +1,28 @@
 import type { Metadata } from 'next';
-import { Fira_Code, Fira_Sans } from 'next/font/google';
+import { Geist, Geist_Mono } from 'next/font/google';
 import './globals.css';
 import { QueryProvider } from '@/providers/query-provider';
+import { AuthProvider } from '@/providers/auth-provider';
+import { AuthSessionProvider } from '@/providers/session-provider';
 
-const firaCode = Fira_Code({ subsets: ['latin'], variable: '--font-fira-code' });
-const firaSans = Fira_Sans({ subsets: ['latin'], weight: ['300', '400', '500', '600', '700'], variable: '--font-fira-sans' });
+const geistSans = Geist({
+  variable: '--font-geist-sans',
+  subsets: ['latin'],
+});
+
+const geistMono = Geist_Mono({
+  variable: '--font-geist-mono',
+  subsets: ['latin'],
+});
 
 export const metadata: Metadata = {
-  title: 'OTA Dashboard | Expo Updates',
-  description: 'Self-hosted OTA update management for React Native Expo apps.',
+  title: 'ZenOTA | Premium Expo Updates',
+  description: 'Pro-grade OTA update management for React Native Expo apps.',
+  icons: {
+    icon: '/favicon.svg',
+    shortcut: '/favicon.svg',
+    apple: '/favicon.svg',
+  },
 };
 
 export default function RootLayout({
@@ -18,9 +32,13 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="dark">
-      <body className={`${firaCode.variable} ${firaSans.variable} font-sans bg-slate-950 text-slate-50 antialiased min-h-screen`}>
+      <body className={`${geistSans.variable} ${geistMono.variable} font-sans bg-[#000000] text-slate-50 antialiased min-h-screen`}>
         <QueryProvider>
-          {children}
+          <AuthSessionProvider>
+            <AuthProvider>
+              {children}
+            </AuthProvider>
+          </AuthSessionProvider>
         </QueryProvider>
       </body>
     </html>

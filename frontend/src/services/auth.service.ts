@@ -1,34 +1,31 @@
 import axios from 'axios';
 
-// Auth routes use Next.js API routes (relative URLs) so cookies are set on the same domain
-const authClient = axios.create({
-  withCredentials: true,
+const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+
+export const authClient = axios.create({
+  baseURL: BACKEND_URL,
   headers: { 'Content-Type': 'application/json' },
 });
+
+// Note: Authorization header should be set dynamically in components 
+// using the token from NextAuth session.
 
 export interface AdminUser {
   id: string;
   email: string;
+  subscriptionTier: string;
   createdAt: string;
 }
 
+export interface AuthResponse {
+  success: boolean;
+  email: string;
+  id: string;
+  access_token: string;
+}
+
 export const authService = {
-  async login(email: string, password: string) {
-    const { data } = await authClient.post<{ success: boolean; email: string }>(
-      '/api/admin/auth/login',
-      { email, password },
-    );
-    return data;
-  },
-
-  async logout() {
-    const { data } = await authClient.post('/api/admin/auth/logout');
-    return data;
-  },
-
-  async getMe(): Promise<AdminUser> {
-    const { data } = await authClient.get<AdminUser>('/api/admin/auth/me');
-    return data;
-  },
+  // Methods here can be added if needed for specific backend calls
+  // but login/logout/me are now handled by NextAuth
 };
 

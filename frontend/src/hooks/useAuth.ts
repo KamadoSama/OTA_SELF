@@ -1,50 +1,58 @@
 "use client";
 
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
-import { authService } from "@/services/auth.service";
-import axios from "axios";
+import { useAuth } from "@/providers/auth-provider";
+import { useSession } from "next-auth/react";
 
 export function useCurrentUser() {
-  return useQuery({
-    queryKey: ["currentUser"],
-    queryFn: () => authService.getMe(),
-    retry: false,
-    staleTime: 5 * 60 * 1000, // 5 minutes
-  });
+  const { data: session, status } = useSession();
+  
+  return {
+    data: session?.user ? {
+      id: (session.user as any).id,
+      email: session.user.email,
+      subscriptionTier: (session.user as any).tier,
+    } : null,
+    isLoading: status === "loading",
+    status,
+  };
 }
 
 export function useLogin() {
+  const { login } = useAuth();
   const queryClient = useQueryClient();
-  const router = useRouter();
 
   return useMutation({
     mutationFn: ({ email, password }: { email: string; password: string }) =>
-      authService.login(email, password),
+      login(email, password),
     onSuccess: () => {
-      console.log("Login success");
       queryClient.invalidateQueries({ queryKey: ["currentUser"] });
-      console.log("Login success");
-      router.push("/");
-      router.refresh();
+    },
+  });
+}
+
+export function useRegister() {
+  const { register } = useAuth();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ email, password }: { email: string; password: string }) =>
+      register(email, password),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["currentUser"] });
     },
   });
 }
 
 export function useLogout() {
+  const { logout } = useAuth();
   const queryClient = useQueryClient();
-  const router = useRouter();
 
   return useMutation({
-    mutationFn: () => authService.logout(),
+    mutationFn: () => logout(),
     onSuccess: () => {
       queryClient.clear();
-      router.push("/login");
-      router.refresh();
     },
   });
-}
-
-export function isUnauthorized(error: unknown) {
-  return axios.isAxiosError(error) && error.response?.status === 401;
 }
