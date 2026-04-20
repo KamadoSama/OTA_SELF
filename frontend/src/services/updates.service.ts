@@ -47,6 +47,7 @@ export interface SubscriptionStats {
   deploymentsToday: number;
   deploymentsLimit: number | string;
   activeApiKeys: number;
+  apiKeysLimit: number | string;
   storageUsed: string;
   storageLimit: string;
   nextBillingDate: string | null;

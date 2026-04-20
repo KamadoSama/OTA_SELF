@@ -12,7 +12,12 @@ export function SubscriptionView() {
   const { mutate: downgrade, isPending: isDowngrading } = useDowngradePlan();
   const [showConfirmDowngrade, setShowConfirmDowngrade] = useState(false);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
-  const [cardInfo, setCardInfo] = useState({ last4: "4242", brand: "Visa", expMonth: 12, expYear: 2026 });
+  const [formData, setFormData] = useState({
+    cardNumber: "",
+    expiry: "",
+    cvc: "",
+  });
+  const [formError, setFormError] = useState<string | null>(null);
 
   const isPro = stats?.tier === 'PRO';
   const isExpired = stats?.trialEndsAt && new Date(stats.trialEndsAt) < new Date() && !stats.cardLast4;
@@ -59,9 +64,32 @@ export function SubscriptionView() {
       percent: isPro ? 0 : (stats.activeApiKeys / 1) * 100 
     }
   ];
-
+  
+  const validateForm = () => {
+    if (formData.cardNumber.replace(/\s/g, '').length < 12) return "Please enter a valid card number.";
+    if (!formData.expiry.includes('/')) return "Please enter a valid expiry date (MM/YY).";
+    if (formData.cvc.length < 3) return "Please enter a valid CVC.";
+    return null;
+  };
+  
   const handleUpgrade = () => {
-    upgrade(cardInfo, {
+    const error = validateForm();
+    if (error) {
+      setFormError(error);
+      return;
+    }
+    
+    setFormError(null);
+    // Extract info from formData
+    const last4 = formData.cardNumber.replace(/\s/g, '').slice(-4);
+    const [month, year] = formData.expiry.split('/').map(s => parseInt(s.trim()));
+    
+    upgrade({ 
+      last4, 
+      brand: "Visa", // Simplified for now
+      expMonth: month || 12, 
+      expYear: year ? (year < 100 ? 2000 + year : year) : 2026 
+    }, {
       onSuccess: () => setShowPaymentModal(false)
     });
   };
@@ -256,6 +284,12 @@ export function SubscriptionView() {
               <p className="text-sm text-white/40">Enter your card details to start your 30-day free trial.</p>
             </div>
 
+            {formError && (
+              <div className="p-3 rounded bg-red-500/10 border border-red-500/20 text-red-500 text-xs font-bold animate-in shake duration-300">
+                {formError}
+              </div>
+            )}
+
             <div className="space-y-4">
               <div className="space-y-2">
                 <label className="text-[10px] font-bold uppercase tracking-widest text-white/30">Card Information</label>
@@ -264,7 +298,11 @@ export function SubscriptionView() {
                   <input 
                     type="text" 
                     placeholder="4242 4242 4242 4242"
-                    defaultValue="4242 4242 4242 4242"
+                    value={formData.cardNumber}
+                    onChange={(e) => {
+                      setFormData({ ...formData, cardNumber: e.target.value });
+                      if (formError) setFormError(null);
+                    }}
                     className="w-full bg-white/[0.03] border border-white/10 rounded-lg pl-10 pr-4 py-3 text-sm font-medium outline-none focus:border-white/30 transition-all"
                   />
                 </div>
@@ -275,7 +313,11 @@ export function SubscriptionView() {
                   <input 
                     type="text" 
                     placeholder="12 / 26"
-                    defaultValue="12 / 26"
+                    value={formData.expiry}
+                    onChange={(e) => {
+                      setFormData({ ...formData, expiry: e.target.value });
+                      if (formError) setFormError(null);
+                    }}
                     className="w-full bg-white/[0.03] border border-white/10 rounded-lg px-4 py-3 text-sm font-medium outline-none focus:border-white/30 transition-all"
                   />
                 </div>
@@ -284,7 +326,11 @@ export function SubscriptionView() {
                   <input 
                     type="text" 
                     placeholder="•••"
-                    defaultValue="123"
+                    value={formData.cvc}
+                    onChange={(e) => {
+                      setFormData({ ...formData, cvc: e.target.value });
+                      if (formError) setFormError(null);
+                    }}
                     className="w-full bg-white/[0.03] border border-white/10 rounded-lg px-4 py-3 text-sm font-medium outline-none focus:border-white/30 transition-all"
                   />
                 </div>
@@ -315,7 +361,10 @@ export function SubscriptionView() {
                 {isUpgrading ? <Loader2 className="h-4 w-4 animate-spin mx-auto" /> : "Confirm & Start Trial"}
               </button>
               <button 
-                onClick={() => setShowPaymentModal(false)}
+                onClick={() => {
+                  setShowPaymentModal(false);
+                  setFormError(null);
+                }}
                 className="w-full py-3 text-xs font-bold text-white/30 hover:text-white transition-colors"
               >
                 Cancel

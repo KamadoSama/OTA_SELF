@@ -52,6 +52,7 @@ export default function Dashboard() {
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [newRawKey, setNewRawKey] = useState<string | null>(null);
   const [showKeyDialog, setShowKeyDialog] = useState(false);
+  const [keyError, setKeyError] = useState<string | null>(null);
   const [itemToDelete, setItemToDelete] = useState<{ id: string; type: 'key' | 'update' } | null>(null);
 
   const { data: user } = useCurrentUser();
@@ -101,10 +102,16 @@ export default function Dashboard() {
   };
 
   const handleGenerateKey = () => {
+    setKeyError(null);
     generateKey(undefined, {
       onSuccess: (res) => {
         setNewRawKey(res.rawKey);
         setShowKeyDialog(true);
+      },
+      onError: (err: any) => {
+        const message = err.response?.data?.message || "Failed to generate API key";
+        setKeyError(message);
+        setTimeout(() => setKeyError(null), 5000);
       }
     });
   };
@@ -301,6 +308,9 @@ export default function Dashboard() {
             onGenerateKey={handleGenerateKey}
             onDeleteItem={(id) => setItemToDelete({ id, type: 'key' })}
             isGeneratingKey={isGeneratingKey}
+            error={keyError}
+            activeKeysCount={stats?.activeApiKeys || 0}
+            keysLimit={stats?.apiKeysLimit || 0}
           />
         </div>
       </main>

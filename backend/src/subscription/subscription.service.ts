@@ -133,6 +133,7 @@ export class SubscriptionService {
       deploymentsToday,
       deploymentsLimit: limits.maxDeploymentsPerDay === -1 ? 'Unlimited' : limits.maxDeploymentsPerDay,
       activeApiKeys: customer._count.apiKeys,
+      apiKeysLimit: limits.maxApiKeys === -1 ? 'Unlimited' : limits.maxApiKeys,
       storageUsed: "0.5 GB",
       storageLimit: tier === 'PRO' ? "10 GB" : "1 GB",
       nextBillingDate: customer.trialEndsAt || (customer.subscriptionStartDate ? new Date(customer.subscriptionStartDate.getTime() + 30 * 24 * 60 * 60 * 1000) : null),
