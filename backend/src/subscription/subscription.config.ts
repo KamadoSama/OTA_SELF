@@ -1,7 +1,7 @@
 export const PLAN_LIMITS = {
   FREE: {
     maxApps: 1,
-    maxDeploymentsPerDay: 3,
+    maxDeploymentsPerDay: 2,
     maxApiKeys: 1,
     maxDownloadsPerMonth: 1000,
   },

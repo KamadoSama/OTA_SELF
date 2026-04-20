@@ -54,7 +54,7 @@ export function SubscriptionView() {
     { 
       label: "Deployments Today", 
       used: stats.deploymentsToday, 
-      total: isPro ? "Unlimited" : "3", 
+      total: isPro ? "Unlimited" : "1", 
       percent: isPro ? 0 : (stats.deploymentsToday / 3) * 100 
     },
     { 

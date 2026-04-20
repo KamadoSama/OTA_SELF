@@ -128,7 +128,7 @@ export default function LandingPage() {
                </div>
                <ul className="space-y-5 mb-12 flex-1">
                  <li className="flex gap-3 text-sm font-medium text-white/60"><ChevronRight className="h-4 w-4 text-white shrink-0" />1 Active Expo App</li>
-                 <li className="flex gap-3 text-sm font-medium text-white/60"><ChevronRight className="h-4 w-4 text-white shrink-0" />10 Deployments / day</li>
+                 <li className="flex gap-3 text-sm font-medium text-white/60"><ChevronRight className="h-4 w-4 text-white shrink-0" />2 Deployment / day</li>
                  <li className="flex gap-3 text-sm font-medium text-white/60"><ChevronRight className="h-4 w-4 text-white shrink-0" />Standard Support</li>
                </ul>
                <Link href="/register?plan=free" className="w-full h-11 flex items-center justify-center rounded border border-white/10 font-bold text-[13px] hover:bg-white/5 transition-colors">Start Free</Link>
