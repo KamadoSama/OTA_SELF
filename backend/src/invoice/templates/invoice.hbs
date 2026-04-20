@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <style>
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            color: #000;
+            line-height: 1.5;
+            margin: 0;
+            padding: 40px;
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 60px;
+        }
+        .logo-section {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .logo {
+            width: 32px;
+            height: 32px;
+            background: #000;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-weight: bold;
+        }
+        .brand-name {
+            font-size: 24px;
+            font-weight: 800;
+            letter-spacing: -0.04em;
+        }
+        .invoice-title {
+            font-size: 32px;
+            font-weight: 800;
+            letter-spacing: -0.04em;
+            margin: 0;
+        }
+        .info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            margin-bottom: 60px;
+        }
+        .info-block h3 {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: #666;
+            margin-bottom: 8px;
+        }
+        .info-block p {
+            font-size: 14px;
+            font-weight: 500;
+            margin: 0;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 40px;
+        }
+        th {
+            text-align: left;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: #666;
+            padding: 12px 0;
+            border-bottom: 1px solid #eee;
+        }
+        td {
+            padding: 20px 0;
+            border-bottom: 1px solid #eee;
+            font-size: 14px;
+        }
+        .price {
+            text-align: right;
+            font-weight: 600;
+        }
+        .total-section {
+            margin-left: auto;
+            width: 250px;
+        }
+        .total-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+        }
+        .total-row.grand-total {
+            border-top: 2px solid #000;
+            margin-top: 12px;
+            font-weight: 800;
+            font-size: 18px;
+        }
+        .footer {
+            margin-top: 100px;
+            padding-top: 40px;
+            border-top: 1px solid #eee;
+            text-align: center;
+            font-size: 12px;
+            color: #999;
+        }
+        .badge {
+            display: inline-block;
+            padding: 4px 8px;
+            background: #f0f0f0;
+            border-radius: 4px;
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            margin-left: 8px;
+        }
+        .badge.paid {
+            background: #ecfdf5;
+            color: #059669;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="logo-section">
+            <div class="logo">⚡</div>
+            <span class="brand-name">ZenOTA</span>
+        </div>
+        <div>
+            <h1 class="invoice-title">Invoice</h1>
+            <p style="text-align: right; margin: 4px 0; font-size: 14px; color: #666;">{{invoiceId}}</p>
+        </div>
+    </div>
+
+    <div class="info-grid">
+        <div class="info-block">
+            <h3>Billed To</h3>
+            <p>{{customerEmail}}</p>
+        </div>
+        <div class="info-block" style="text-align: right;">
+            <h3>Date Issued</h3>
+            <p>{{date}}</p>
+            <div class="badge paid" style="margin-top: 8px;">Paid</div>
+        </div>
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Description</th>
+                <th style="text-align: right;">Amount</th>
+            </tr>
+        </thead>
+        <tbody>
+            {{#each items}}
+            <tr>
+                <td>{{description}}</td>
+                <td class="price">${{price}}</td>
+            </tr>
+            {{/each}}
+        </tbody>
+    </table>
+
+    <div class="total-section">
+        <div class="total-row">
+            <span style="color: #666;">Subtotal</span>
+            <span>${{amount}}</span>
+        </div>
+        <div class="total-row">
+            <span style="color: #666;">Tax (0%)</span>
+            <span>$0.00</span>
+        </div>
+        <div class="total-row grand-total">
+            <span>Total</span>
+            <span>${{amount}}</span>
+        </div>
+    </div>
+
+    {{#if isTrial}}
+    <p style="margin-top: 40px; font-size: 13px; color: #666; font-style: italic;">
+        * This invoice is for your 30-day free trial period. No charges have been applied to your account.
+    </p>
+    {{/if}}
+
+    <div class="footer">
+        <p>ZenOTA — Pro-grade Expo Updates</p>
+        <p>zenota.diesestudio.com</p>
+    </div>
+</body>
+</html>

@@ -1,12 +1,18 @@
 import { Injectable, BadRequestException, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma.service';
 import { randomBytes, createHash } from 'crypto';
+import { SubscriptionService } from '../subscription/subscription.service';
 
 @Injectable()
 export class ApiKeysService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private subscriptionService: SubscriptionService,
+  ) {}
 
   async generateApiKey(customerId: string) {
+    await this.subscriptionService.checkCanCreateApiKey(customerId);
+
     const rawKey = `zo_${randomBytes(24).toString('hex')}`; // zenota api key
     const prefix = rawKey.slice(0, 11); // "zo_..." (3 chars + 8 chars)
     

@@ -1,14 +1,14 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, Suspense } from "react";
 import { CloudLightning, Eye, EyeOff, Loader2, ArrowRight } from "lucide-react";
 import { useRegister } from "@/hooks/useAuth";
 import axios from "axios";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { signIn } from "next-auth/react";
 
-export default function RegisterPage() {
+function RegisterForm() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -17,6 +17,8 @@ export default function RegisterPage() {
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
   const emailRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const plan = searchParams.get("plan");
 
   const { mutate: register, isPending } = useRegister();
 
@@ -29,7 +31,7 @@ export default function RegisterPage() {
     e.preventDefault();
     setError("");
     register(
-      { email, password },
+      { email, password, plan: plan || 'FREE' },
       {
         onSuccess: () => {
           router.push("/dashboard");
@@ -48,7 +50,8 @@ export default function RegisterPage() {
 
   const handleGoogleSignUp = () => {
     setIsGoogleLoading(true);
-    signIn("google", { callbackUrl: "/dashboard" });
+    const callbackUrl = plan === "pro" ? "/dashboard/subscription?setup=pro" : "/dashboard";
+    signIn("google", { callbackUrl });
   };
 
   return (
@@ -191,5 +194,17 @@ export default function RegisterPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function RegisterPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-black flex items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-white/20" />
+      </div>
+    }>
+      <RegisterForm />
+    </Suspense>
   );
 }

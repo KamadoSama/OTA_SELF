@@ -43,11 +43,18 @@ export interface SubscriptionStats {
   monthlyDownloads: number;
   downloadLimit: number;
   activeApps: number;
-  appsLimit: number;
+  appsLimit: number | string;
+  deploymentsToday: number;
+  deploymentsLimit: number | string;
+  activeApiKeys: number;
   storageUsed: string;
   storageLimit: string;
-  nextBillingDate: string;
-  paymentMethod: string;
+  nextBillingDate: string | null;
+  trialEndsAt: string | null;
+  cardLast4?: string;
+  cardBrand?: string;
+  cardExpMonth?: number;
+  cardExpYear?: number;
 }
 
 export const updatesService = {
@@ -74,12 +81,43 @@ export const updatesService = {
   },
 
   async fetchInvoices(): Promise<Invoice[]> {
-    const { data } = await apiClient.get<Invoice[]>('/api/admin/updates/billing');
+    const { data } = await apiClient.get<Invoice[]>('/api/subscription/invoices');
     return data;
   },
 
   async fetchSubscriptionStats(): Promise<SubscriptionStats> {
-    const { data } = await apiClient.get<SubscriptionStats>('/api/admin/updates/subscription');
+    const { data } = await apiClient.get<SubscriptionStats>('/api/subscription');
     return data;
+  },
+
+  async upgradeToPro(paymentInfo: any) {
+    const { data } = await apiClient.post('/api/subscription/upgrade', paymentInfo);
+    return data;
+  },
+
+  async downgradeToFree() {
+    const { data } = await apiClient.post('/api/subscription/downgrade');
+    return data;
+  },
+
+  async deleteAccount() {
+    const { data } = await apiClient.delete('/api/subscription/account');
+    return data;
+  },
+
+  async downloadInvoicePdf(id: string) {
+    const response = await apiClient.get(`/api/subscription/invoices/${id}/pdf`, {
+      responseType: 'blob',
+    });
+    
+    const blob = new Blob([response.data], { type: 'application/pdf' });
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', `invoice-${id}.pdf`);
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    window.URL.revokeObjectURL(url);
   },
 };

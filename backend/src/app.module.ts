@@ -9,12 +9,16 @@ import { AuthModule } from './auth/auth.module';
 import { ApiKeysModule } from './api-keys/api-keys.module';
 import { OtaPublishModule } from './ota-publish/ota-publish.module';
 import { PrismaModule } from './prisma.module';
+import { SubscriptionModule } from './subscription/subscription.module';
+import { InvoiceModule } from './invoice/invoice.module';
+import { ScheduleModule } from '@nestjs/schedule';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
     }),
+    ScheduleModule.forRoot(),
     PrismaModule,
     ExpoUpdatesModule,
     AdminApiModule,
@@ -22,6 +26,8 @@ import { PrismaModule } from './prisma.module';
     AuthModule,
     ApiKeysModule,
     OtaPublishModule,
+    SubscriptionModule,
+    InvoiceModule,
   ],
   controllers: [AppController],
   providers: [AppService],

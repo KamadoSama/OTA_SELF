@@ -9,7 +9,7 @@ interface AuthContextType {
   user: AdminUser | null;
   loading: boolean;
   login: (email: string, pass: string) => Promise<void>;
-  register: (email: string, pass: string) => Promise<void>;
+  register: (email: string, pass: string, plan?: string) => Promise<void>;
   logout: () => Promise<void>;
 }
 
@@ -66,13 +66,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     router.push('/');
   };
 
-  const register = async (email: string, pass: string) => {
+  const register = async (email: string, pass: string, plan?: string) => {
     // Note: NextAuth doesn't have a built-in register. 
     // Usually you'd call your API then sign in.
     const res = await fetch(`/api/auth/register`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password: pass }),
+      body: JSON.stringify({ email, password: pass, plan }),
     });
 
     if (!res.ok) {

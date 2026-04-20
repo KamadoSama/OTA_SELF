@@ -68,7 +68,16 @@ model Customer {
   email            String           @unique
   passwordHash     String
   subscriptionTier SubscriptionTier @default(FREE)
-  createdAt        DateTime         @default(now())
+  subscriptionStartDate DateTime?    // When the PRO subscription started
+  trialEndsAt           DateTime?    // When the free month ends
+  
+  // Payment info
+  cardLast4             String?
+  cardBrand             String?
+  cardExpMonth          Int?
+  cardExpYear           Int?
+
+  createdAt             DateTime         @default(now())
 
   apps             App[]
   apiKeys          ApiKey[]
