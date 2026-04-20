@@ -9,6 +9,7 @@ import {
   Trash2,
   Key,
 } from "lucide-react";
+import Link from "next/link";
 
 // Components
 import { Navbar } from "./components/Navbar";
@@ -17,10 +18,11 @@ import { DeploymentTable } from "./components/DeploymentTable";
 import { ApiKeyTable } from "./components/ApiKeyTable";
 
 // Hooks & Services
-import { useUpdates, useDeleteUpdate, useUploadUpdate } from "@/hooks/useUpdates";
+import { useUpdates, useDeleteUpdate, useUploadUpdate, useSubscription } from "@/hooks/useUpdates";
 import { useCurrentUser, useLogout } from "@/hooks/useAuth";
 import { useApiKeys, useGenerateApiKey, useDeleteApiKey } from "@/hooks/useApiKeys";
 import type { Update } from "@/services/updates.service";
+import { ShieldCheck } from "lucide-react";
 
 function AppleLogo({ className }: { className?: string }) {
   return (
@@ -39,6 +41,9 @@ function AndroidLogo({ className }: { className?: string }) {
 }
 
 export default function Dashboard() {
+  const { data: stats } = useSubscription();
+  const isExpired = stats?.trialEndsAt && new Date(stats.trialEndsAt) < new Date() && !stats.cardLast4;
+
   const [showDialog, setShowDialog] = useState(false);
   const [search, setSearch] = useState("");
   const [appName, setAppName] = useState("my-app");
@@ -233,6 +238,22 @@ export default function Dashboard() {
       />
 
       <main className="flex-1 container mx-auto px-4 sm:px-6 py-8 sm:py-12 relative z-10 space-y-10 max-w-7xl">
+        {isExpired && (
+          <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-4 flex items-center justify-between gap-4 animate-in slide-in-from-top-2 duration-300">
+            <div className="flex items-center gap-3">
+              <ShieldCheck className="h-5 w-5 text-red-500" />
+              <p className="text-sm font-medium text-white/80">
+                Your Professional trial has expired. <span className="hidden sm:inline text-white/40">Please update your payment method to continue using Pro features.</span>
+              </p>
+            </div>
+            <Link 
+              href="/dashboard/subscription"
+              className="px-4 py-1.5 bg-red-500 text-white rounded text-xs font-bold hover:bg-red-600 transition-colors shrink-0"
+            >
+              Fix Now
+            </Link>
+          </div>
+        )}
         <div className="space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-500">
           <div className="flex flex-col sm:flex-row sm:items-end justify-between border-b border-white/[0.06] pb-10 gap-6">
             <div className="space-y-2">

@@ -7,7 +7,7 @@ import { useSession } from "next-auth/react";
 
 export function useCurrentUser() {
   const { data: session, status } = useSession();
-  
+
   return {
     data: session?.user ? {
       id: (session.user as any).id,
@@ -37,8 +37,8 @@ export function useRegister() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ email, password }: { email: string; password: string }) =>
-      register(email, password),
+    mutationFn: ({ email, password, plan }: { email: string; password: string; plan?: string }) =>
+      register(email, password, plan),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["currentUser"] });
     },

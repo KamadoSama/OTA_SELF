@@ -14,20 +14,25 @@ import {
 import { FileInterceptor } from '@nestjs/platform-express';
 import { AdminApiService } from './admin-api.service';
 
+import { AuthGuard, AuthenticatedRequest } from '../auth/auth.guard';
+import { Req, UseGuards } from '@nestjs/common';
+
 @Controller('api/admin/updates')
+@UseGuards(AuthGuard)
 export class AdminApiController {
   private logger = new Logger(AdminApiController.name);
 
   constructor(private readonly adminService: AdminApiService) {}
 
   @Get()
-  async listUpdates() {
-    return this.adminService.listUpdates();
+  async listUpdates(@Req() req: AuthenticatedRequest) {
+    return this.adminService.listUpdates(req.user.id);
   }
 
   @Post('upload')
   @UseInterceptors(FileInterceptor('file'))
   async uploadUpdate(
+    @Req() req: AuthenticatedRequest,
     @UploadedFile() file: Express.Multer.File,
     @Body('app') appName: string,
     @Body('channel') channelName: string,
@@ -42,11 +47,12 @@ export class AdminApiController {
       );
     }
 
-    this.logger.log(`Received upload request for ${file.originalname}`);
+    this.logger.log(`Dashboard upload by ${req.user.email} for ${file.originalname}`);
     const updateId = await this.adminService.processUpdateZip(
       file.buffer,
       appName || 'MyExpoApp',
       channelName || 'production',
+      req.user.id,
     );
 
     return {
@@ -56,29 +62,11 @@ export class AdminApiController {
   }
 
   @Delete(':id')
-  async deleteUpdate(@Param('id') id: string) {
-    const deleted = await this.adminService.deleteUpdate(id);
+  async deleteUpdate(@Req() req: AuthenticatedRequest, @Param('id') id: string) {
+    const deleted = await this.adminService.deleteUpdate(id, req.user.id);
     if (!deleted) {
-      throw new NotFoundException(`Update ${id} not found`);
+      throw new NotFoundException(`Update ${id} not found or access denied`);
     }
     return { success: true, deletedId: id };
-  }
-
-  @Get('billing')
-  async getBilling() {
-    // In a real app, you would get this from the authenticated request
-    // For demo, we use a fixed customer ID or create one if needed
-    const customers = await (this.adminService as any).prisma.customer.findMany({ take: 1 });
-    const customerId = customers[0]?.id;
-    if (!customerId) return [];
-    return this.adminService.getInvoices(customerId);
-  }
-
-  @Get('subscription')
-  async getSubscription() {
-    const customers = await (this.adminService as any).prisma.customer.findMany({ take: 1 });
-    const customerId = customers[0]?.id;
-    if (!customerId) return null;
-    return this.adminService.getSubscriptionStats(customerId);
   }
 }

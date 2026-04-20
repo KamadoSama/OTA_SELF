@@ -70,3 +70,36 @@ export function useSubscription() {
     queryFn: () => updatesService.fetchSubscriptionStats(),
   });
 }
+
+export function useUpgradePlan() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (paymentInfo: any) => updatesService.upgradeToPro(paymentInfo),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["subscription"] });
+      queryClient.invalidateQueries({ queryKey: ["billing"] });
+    },
+  });
+}
+
+export function useDowngradePlan() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: () => updatesService.downgradeToFree(),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["subscription"] });
+    },
+  });
+}
+
+export function useDeleteAccount() {
+  return useMutation({
+    mutationFn: () => updatesService.deleteAccount(),
+  });
+}
+
+export function useDownloadInvoice() {
+  return useMutation({
+    mutationFn: (id: string) => updatesService.downloadInvoicePdf(id),
+  });
+}

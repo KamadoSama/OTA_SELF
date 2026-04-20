@@ -19,9 +19,9 @@ export class AuthController {
 
   @Post('register')
   async register(
-    @Body() body: { email: string; password: string },
+    @Body() body: { email: string; password: string; plan?: 'FREE' | 'PRO' },
   ) {
-    const result = await this.authService.register(body.email, body.password);
+    const result = await this.authService.register(body.email, body.password, body.plan || 'FREE');
     return { success: true, ...result };
   }
 
@@ -35,9 +35,9 @@ export class AuthController {
 
   @Post('google')
   async googleAuth(
-    @Body() body: { email: string; name: string; googleId: string },
+    @Body() body: { email: string; name: string; googleId: string; plan?: 'FREE' | 'PRO' },
   ) {
-    const result = await this.authService.googleAuth(body.email, body.name);
+    const result = await this.authService.googleAuth(body.email, body.name, body.plan || 'FREE');
     return { success: true, ...result };
   }
 

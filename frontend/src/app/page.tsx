@@ -131,7 +131,7 @@ export default function LandingPage() {
                  <li className="flex gap-3 text-sm font-medium text-white/60"><ChevronRight className="h-4 w-4 text-white shrink-0" />10 Deployments / day</li>
                  <li className="flex gap-3 text-sm font-medium text-white/60"><ChevronRight className="h-4 w-4 text-white shrink-0" />Standard Support</li>
                </ul>
-               <Link href="/register" className="w-full h-11 flex items-center justify-center rounded border border-white/10 font-bold text-[13px] hover:bg-white/5 transition-colors">Start Free</Link>
+               <Link href="/register?plan=free" className="w-full h-11 flex items-center justify-center rounded border border-white/10 font-bold text-[13px] hover:bg-white/5 transition-colors">Start Free</Link>
             </div>
             
             {/* Pro */}
@@ -141,6 +141,7 @@ export default function LandingPage() {
                <div className="mb-10">
                  <div className="flex justify-between items-start mb-2">
                    <h3 className="text-lg font-bold text-white mb-2 uppercase tracking-widest text-xs">Professional</h3>
+                   <div className="bg-white/10 px-2 py-0.5 rounded text-[9px] font-bold text-white uppercase tracking-wider">1 Month Free</div>
                  </div>
                  <div className="flex items-baseline gap-1">
                    <span className="text-5xl font-bold tracking-tighter">$19</span>
@@ -153,7 +154,7 @@ export default function LandingPage() {
                  <li className="flex gap-3 text-sm font-medium text-white"><ChevronRight className="h-4 w-4 text-white shrink-0" />Priority CDN Delivery</li>
                  <li className="flex gap-3 text-sm font-medium text-white"><ChevronRight className="h-4 w-4 text-white shrink-0" />Advanced CLI Analytics</li>
                </ul>
-               <Link href="/register" className="w-full h-11 flex items-center justify-center rounded bg-white text-black font-bold text-[13px] hover:bg-white/90 transition-colors">Go Professional</Link>
+               <Link href="/register?plan=pro" className="w-full h-11 flex items-center justify-center rounded bg-white text-black font-bold text-[13px] hover:bg-white/90 transition-colors">Go Professional</Link>
             </div>
           </div>
         </div>

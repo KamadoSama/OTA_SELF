@@ -1,16 +1,32 @@
 "use client";
 
-import { User, Shield, Bell, Terminal, Server, Save, Loader2, Mail, Lock } from "lucide-react";
+import { User, Shield, Bell, Terminal, Server, Save, Loader2, Mail, Lock, Trash2, AlertTriangle } from "lucide-react";
 import { useState } from "react";
-import { useCurrentUser } from "@/hooks/useAuth";
+import { useCurrentUser, useLogout } from "@/hooks/useAuth";
+import { useDeleteAccount } from "@/hooks/useUpdates";
+import { useRouter } from "next/navigation";
 
 export function SettingsView() {
   const [isSaving, setIsSaving] = useState(false);
   const { data: user, isLoading } = useCurrentUser();
+  const { mutate: logout } = useLogout();
+  const { mutate: deleteAccount, isPending: isDeleting } = useDeleteAccount();
+  const router = useRouter();
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   const handleSave = () => {
     setIsSaving(true);
     setTimeout(() => setIsSaving(false), 1500);
+  };
+
+  const handleDeleteAccount = () => {
+    deleteAccount(undefined, {
+      onSuccess: () => {
+        logout(undefined, {
+          onSuccess: () => router.push("/")
+        });
+      }
+    });
   };
 
   if (isLoading) {
@@ -151,6 +167,57 @@ export function SettingsView() {
                   </div>
                 </div>
               ))}
+            </div>
+          </section>
+
+          <hr className="border-white/[0.06]" />
+
+          {/* Danger Zone */}
+          <section className="space-y-6 pb-20">
+            <div className="space-y-1">
+              <h3 className="text-lg font-bold tracking-tight text-red-500">Danger Zone</h3>
+              <p className="text-sm text-white/40">Permanently remove your account and all data.</p>
+            </div>
+
+            <div className="rounded border border-red-500/10 bg-red-500/[0.02] p-6 space-y-6">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div className="space-y-1">
+                  <h4 className="text-sm font-bold text-white">Delete Account</h4>
+                  <p className="text-xs text-white/40 leading-relaxed max-w-md">
+                    This will permanently delete your apps, deployments, and billing history. This action cannot be undone.
+                  </p>
+                </div>
+                <button 
+                  onClick={() => setShowDeleteConfirm(true)}
+                  className="px-4 py-2 rounded bg-red-500/10 text-red-500 text-xs font-bold border border-red-500/20 hover:bg-red-500 hover:text-white transition-all whitespace-nowrap"
+                >
+                  Delete Account
+                </button>
+              </div>
+
+              {showDeleteConfirm && (
+                <div className="p-4 rounded bg-red-500/10 border border-red-500/20 flex flex-col sm:flex-row items-center gap-4 animate-in fade-in slide-in-from-top-2">
+                  <AlertTriangle className="h-5 w-5 text-red-500 shrink-0" />
+                  <p className="text-[11px] font-bold text-red-500 flex-1 text-center sm:text-left uppercase tracking-wider">
+                    Are you absolutely sure? Everything will be deleted.
+                  </p>
+                  <div className="flex gap-2 shrink-0">
+                    <button 
+                      onClick={handleDeleteAccount}
+                      disabled={isDeleting}
+                      className="px-3 py-1.5 rounded bg-red-500 text-white text-[10px] font-bold hover:bg-red-600 transition-all flex items-center gap-2"
+                    >
+                      {isDeleting ? <Loader2 className="h-3 w-3 animate-spin" /> : "Delete Everything"}
+                    </button>
+                    <button 
+                      onClick={() => setShowDeleteConfirm(false)}
+                      className="px-3 py-1.5 rounded bg-white/5 text-white/60 text-[10px] font-bold hover:bg-white/10 transition-all"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
           </section>
         </div>

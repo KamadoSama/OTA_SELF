@@ -35,16 +35,22 @@ export class AuthService {
     };
   }
 
-  async register(email: string, password: string) {
+  async register(email: string, password: string, tier: 'FREE' | 'PRO' = 'FREE') {
     const existing = await this.prisma.customer.findUnique({ where: { email } });
     if (existing) {
       throw new UnauthorizedException('Email already in use');
     }
     const passwordHash = await bcrypt.hash(password, 10);
+    
+    const trialEndsAt = tier === 'PRO' ? new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) : null;
+
     const customer = await this.prisma.customer.create({
       data: {
         email,
         passwordHash,
+        subscriptionTier: tier,
+        trialEndsAt,
+        subscriptionStartDate: tier === 'PRO' ? new Date() : null,
       },
     });
 
@@ -54,6 +60,7 @@ export class AuthService {
     return {
       id: customer.id,
       email: customer.email,
+      tier: customer.subscriptionTier,
       access_token: token,
     };
   }
@@ -66,22 +73,26 @@ export class AuthService {
     return customer;
   }
 
-  async googleAuth(email: string, name: string) {
+  async googleAuth(email: string, name: string, tier: 'FREE' | 'PRO' = 'FREE') {
     let customer = await this.prisma.customer.findUnique({ where: { email } });
 
     if (!customer) {
-      // Create a new customer with a random password if it doesn't exist
-      const randomPassword = require('crypto').randomBytes(16).toString('hex');
+      const crypto = require('crypto');
+      const randomPassword = crypto.randomBytes(16).toString('hex');
       const passwordHash = await bcrypt.hash(randomPassword, 10);
       
+      const trialEndsAt = tier === 'PRO' ? new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) : null;
+
       customer = await this.prisma.customer.create({
         data: {
           email,
           passwordHash,
-          subscriptionTier: 'FREE', // Default tier
+          subscriptionTier: tier,
+          trialEndsAt,
+          subscriptionStartDate: tier === 'PRO' ? new Date() : null,
         },
       });
-      this.logger.log(`New Google customer created: ${email}`);
+      this.logger.log(`New Google customer created: ${email} with tier ${tier}`);
     }
 
     const payload = { sub: customer.id, email: customer.email };
