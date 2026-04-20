@@ -16,6 +16,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL('https://zenota.diesestudio.com'),
   title: 'ZenOTA | Premium Expo Updates',
   description: 'Pro-grade OTA update management for React Native Expo apps.',
   icons: {
@@ -31,8 +32,8 @@ export const metadata: Metadata = {
     images: [
       {
         url: '/og-image.png',
-        width: 1200,
-        height: 630,
+        width: 1024,
+        height: 1024,
         alt: 'ZenOTA - Premium Expo Updates',
       },
     ],
