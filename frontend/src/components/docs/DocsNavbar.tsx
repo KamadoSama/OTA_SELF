@@ -1,6 +1,7 @@
 "use client";
 
 import { ArrowLeft, CloudLightning, Menu, X } from "lucide-react";
+import { Logo } from "../ui/Logo";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
@@ -104,7 +105,7 @@ export function DocsNavbar({
         <div className="flex items-center gap-3">
           {/* Hamburger — visible uniquement sur mobile */}
           <button
-            onClick={() => setIsOpen(true)}
+            onClick={() => {console.log("is open") ; setIsOpen(true)}}
             aria-label="Ouvrir le menu de navigation"
             className="md:hidden flex items-center justify-center w-9 h-9 rounded-md border border-white/10 text-white hover:bg-white/10 transition-colors"
           >
@@ -113,9 +114,7 @@ export function DocsNavbar({
 
           {/* Logo */}
           <div className="flex items-center gap-2">
-            <div className="w-6 h-6 rounded bg-white flex items-center justify-center shrink-0">
-              <CloudLightning className="h-4 w-4 text-black fill-black" />
-            </div>
+            <Logo size={24} className="rounded-md" />
             <span className="text-sm font-bold tracking-tight text-white">ZenOTA</span>
             <span className="hidden sm:inline text-sm font-medium" style={{ color: "rgba(255,255,255,0.3)" }}>
               / Docs
@@ -146,20 +145,17 @@ export function DocsNavbar({
         </div>
       </header>
 
-      {/* ── Mobile Drawer ── */}
-      {/* Overlay (arrière-plan sombre) */}
+
       <div
         onClick={() => setIsOpen(false)}
-        className={`fixed inset-0 z-50 bg-black/70 backdrop-blur-sm transition-opacity duration-300 md:hidden ${
-          isOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
-        }`}
+        className={`fixed inset-0 z-50 bg-black/70 backdrop-blur-sm transition-opacity duration-300  md:hidden ${ isOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"}`}
         aria-hidden="true"
       />
 
       {/* Panneau coulissant */}
       <aside
         className={`fixed top-0 left-0 z-50 h-full w-72 bg-[#0a0a0a] border-r flex flex-col transition-transform duration-300 ease-in-out md:hidden ${
-          isOpen ? "translate-x-0" : "-translate-x-full"
+          isOpen ? "translate-x-0 " : "hidden"
         }`}
         style={{ borderColor: "rgba(255,255,255,0.08)" }}
       >
@@ -169,18 +165,19 @@ export function DocsNavbar({
           style={{ borderColor: "rgba(255,255,255,0.08)" }}
         >
           <div className="flex items-center gap-2">
-            <div className="w-5 h-5 rounded bg-white flex items-center justify-center shrink-0">
-              <CloudLightning className="h-3.5 w-3.5 text-black fill-black" />
-            </div>
+            <Logo size={20} className="rounded-md" />
             <span className="text-sm font-bold text-white">ZenOTA Docs</span>
           </div>
+
+
           <button
-            onClick={() => setIsOpen(false)}
+            onClick={() => { setIsOpen(false)}}
             aria-label="Fermer le menu"
             className="flex items-center justify-center w-8 h-8 rounded-md text-white/40 hover:text-white hover:bg-white/10 transition-colors"
           >
             <X className="h-4 w-4" />
           </button>
+
         </div>
 
         {/* Navigation dans le drawer */}
