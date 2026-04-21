@@ -148,8 +148,7 @@ export default function DocsPage() {
               {[
                 { icon: Zap, title: "Instant Delivery", desc: "Edge CDN ensures updates reach users in milliseconds worldwide." },
                 { icon: Globe, title: "Flat Pricing", desc: "No bandwidth billing. One subscription for all your apps." },
-                { icon: Terminal, title: "Powerful CLI", desc: "One command to export, compress, and deploy your bundle." },
-                { icon: Download, title: "Self-hosted", desc: "Full control over your data with MinIO S3-compatible storage." },
+                { icon: Terminal, title: "Powerful CLI", desc: "One command to export, compress, and deploy your bundle." }
               ].map((card) => {
                 const Icon = card.icon;
                 return (
