@@ -12,13 +12,16 @@ import FormData from 'form-data';
 import ora from 'ora';
 import * as os from 'os';
 
+const packageJson = JSON.parse(fs.readFileSync(path.join(__dirname, '../package.json'), 'utf-8'));
+
 const program = new Command();
-program.name('zenota').description('ZenOTA CLI for Expo updates').version('1.0.0');
+program.name('zenota').description('ZenOTA CLI for Expo updates').version(packageJson.version);
 
 const CONFIG_PATH = path.join(os.homedir(), '.zenota-config.json');
 
 // By default localhost for local dev, but should be customizable
-const API_URL = process.env.ZENOTA_API_URL ; 
+// Production API URL by default
+const API_URL = process.env.ZENOTA_API_URL || 'https://api-zenota.diesestudio.com/api'; 
 
 program
   .command('login')

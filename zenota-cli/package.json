@@ -1,9 +1,9 @@
 {
   "name": "zenota-cli",
-  "version": "1.0.2",
+  "version": "1.0.6",
   "description": "ZenOTA Command Line Interface for React Native Expo",
   "bin": {
-    "zenota": "./bin/zenota.js"
+    "zenota": "bin/zenota.js"
   },
   "scripts": {
     "build": "tsc"
