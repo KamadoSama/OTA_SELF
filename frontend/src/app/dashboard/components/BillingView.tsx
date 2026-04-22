@@ -1,6 +1,7 @@
 import { FileText, BarChart3, ArrowUpRight, Loader2, Download } from "lucide-react";
 import { useBilling, useDownloadInvoice } from "@/hooks/useUpdates";
 import { useState } from "react";
+import posthog from "posthog-js";
 
 export function BillingView() {
   const { data: invoices, isLoading } = useBilling();
@@ -10,7 +11,10 @@ export function BillingView() {
   const handleDownload = (id: string) => {
     setDownloadingId(id);
     downloadPdf(id, {
-      onSettled: () => setDownloadingId(null)
+      onSuccess: () => {
+        posthog.capture("invoice_downloaded", { invoice_id: id });
+      },
+      onSettled: () => setDownloadingId(null),
     });
   };
 

@@ -5,6 +5,7 @@ import { useSubscription, useUpgradePlan, useDowngradePlan } from "@/hooks/useUp
 import { useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
+import posthog from "posthog-js";
 
 export function SubscriptionView() {
   const { data: stats, isLoading } = useSubscription();
@@ -84,13 +85,19 @@ export function SubscriptionView() {
     const last4 = formData.cardNumber.replace(/\s/g, '').slice(-4);
     const [month, year] = formData.expiry.split('/').map(s => parseInt(s.trim()));
     
-    upgrade({ 
-      last4, 
+    upgrade({
+      last4,
       brand: "Visa", // Simplified for now
-      expMonth: month || 12, 
-      expYear: year ? (year < 100 ? 2000 + year : year) : 2026 
+      expMonth: month || 12,
+      expYear: year ? (year < 100 ? 2000 + year : year) : 2026
     }, {
-      onSuccess: () => setShowPaymentModal(false)
+      onSuccess: () => {
+        posthog.capture("plan_upgraded", { plan: "PRO", amount: 19 });
+        setShowPaymentModal(false);
+      },
+      onError: (err) => {
+        posthog.captureException(err, { extra: { context: "upgrade_plan" } });
+      },
     });
   };
 
@@ -258,8 +265,16 @@ export function SubscriptionView() {
               </p>
             </div>
             <div className="flex flex-col gap-3">
-              <button 
-                onClick={() => downgrade(undefined, { onSuccess: () => setShowConfirmDowngrade(false) })}
+              <button
+                onClick={() => downgrade(undefined, {
+                  onSuccess: () => {
+                    posthog.capture("plan_downgraded", { from_plan: "PRO", to_plan: "FREE" });
+                    setShowConfirmDowngrade(false);
+                  },
+                  onError: (err) => {
+                    posthog.captureException(err, { extra: { context: "downgrade_plan" } });
+                  },
+                })}
                 className="w-full py-2.5 bg-white text-black font-bold text-sm rounded-lg hover:bg-white/90 transition-all"
               >
                 Confirm Downgrade

@@ -5,6 +5,7 @@ import { useState } from "react";
 import { useCurrentUser, useLogout } from "@/hooks/useAuth";
 import { useDeleteAccount } from "@/hooks/useUpdates";
 import { useRouter } from "next/navigation";
+import posthog from "posthog-js";
 
 export function SettingsView() {
   const [isSaving, setIsSaving] = useState(false);
@@ -22,10 +23,15 @@ export function SettingsView() {
   const handleDeleteAccount = () => {
     deleteAccount(undefined, {
       onSuccess: () => {
+        posthog.capture("account_deleted");
+        posthog.reset();
         logout(undefined, {
           onSuccess: () => router.push("/")
         });
-      }
+      },
+      onError: (err) => {
+        posthog.captureException(err, { extra: { context: "delete_account" } });
+      },
     });
   };
 

@@ -7,6 +7,7 @@ import axios from "axios";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { signIn } from "next-auth/react";
+import posthog from "posthog-js";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -31,6 +32,10 @@ export default function LoginPage() {
     login(
       { email, password },
       {
+        onSuccess: () => {
+          posthog.identify(email, { email });
+          posthog.capture("user_logged_in", { method: "email" });
+        },
         onError: (err) => {
           const msg =
             axios.isAxiosError(err) && err.response?.status === 401
@@ -38,6 +43,7 @@ export default function LoginPage() {
               : "Connection error. Please try again.";
           setError(msg);
           setPassword("");
+          posthog.captureException(err, { extra: { context: "login" } });
         },
       },
     );
@@ -45,6 +51,7 @@ export default function LoginPage() {
 
   const handleGoogleSignIn = () => {
     setIsGoogleLoading(true);
+    posthog.capture("user_logged_in_with_google", { method: "google" });
     signIn("google", { callbackUrl: "/dashboard" });
   };
 

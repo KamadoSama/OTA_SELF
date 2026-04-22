@@ -7,6 +7,7 @@ import axios from "axios";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { signIn } from "next-auth/react";
+import posthog from "posthog-js";
 
 function RegisterForm() {
   const [email, setEmail] = useState("");
@@ -34,6 +35,8 @@ function RegisterForm() {
       { email, password, plan: plan || 'FREE' },
       {
         onSuccess: () => {
+          posthog.identify(email, { email });
+          posthog.capture("user_signed_up", { method: "email", plan: plan || "FREE" });
           router.push("/dashboard");
         },
         onError: (err) => {
@@ -43,6 +46,7 @@ function RegisterForm() {
               : "Registration failed. Please try again.";
           setError(msg);
           setPassword("");
+          posthog.captureException(err, { extra: { context: "register" } });
         },
       },
     );
@@ -50,6 +54,7 @@ function RegisterForm() {
 
   const handleGoogleSignUp = () => {
     setIsGoogleLoading(true);
+    posthog.capture("user_signed_up_with_google", { method: "google", plan: plan || "FREE" });
     const callbackUrl = plan === "pro" ? "/dashboard/subscription?setup=pro" : "/dashboard";
     signIn("google", { callbackUrl });
   };

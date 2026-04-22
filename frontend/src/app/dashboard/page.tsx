@@ -23,6 +23,7 @@ import { useCurrentUser, useLogout } from "@/hooks/useAuth";
 import { useApiKeys, useGenerateApiKey, useDeleteApiKey } from "@/hooks/useApiKeys";
 import type { Update } from "@/services/updates.service";
 import { ShieldCheck } from "lucide-react";
+import posthog from "posthog-js";
 
 function AppleLogo({ className }: { className?: string }) {
   return (
@@ -89,8 +90,12 @@ export default function Dashboard() {
       { file: selectedFile, appName, channelName },
       {
         onSuccess: () => {
+          posthog.capture("deployment_uploaded", { app_name: appName, channel: channelName, file_name: selectedFile.name });
           setShowDialog(false);
           setSelectedFile(null);
+        },
+        onError: (err) => {
+          posthog.captureException(err, { extra: { context: "upload_deployment" } });
         },
       },
     );
@@ -98,19 +103,26 @@ export default function Dashboard() {
 
   const handleDelete = (id: string) => {
     setDeletingId(id);
-    deleteUpdate(id, { onSettled: () => setDeletingId(null) });
+    deleteUpdate(id, {
+      onSuccess: () => {
+        posthog.capture("deployment_deleted", { update_id: id });
+      },
+      onSettled: () => setDeletingId(null),
+    });
   };
 
   const handleGenerateKey = () => {
     setKeyError(null);
     generateKey(undefined, {
       onSuccess: (res) => {
+        posthog.capture("api_key_generated");
         setNewRawKey(res.rawKey);
         setShowKeyDialog(true);
       },
       onError: (err: any) => {
         const message = err.response?.data?.message || "Failed to generate API key";
         setKeyError(message);
+        posthog.captureException(err, { extra: { context: "generate_api_key" } });
         setTimeout(() => setKeyError(null), 5000);
       }
     });
@@ -219,6 +231,7 @@ export default function Dashboard() {
             <div className="flex flex-col gap-2">
               <button onClick={() => {
                 if (itemToDelete.type === 'key') {
+                  posthog.capture("api_key_deleted", { key_id: itemToDelete.id });
                   deleteKey(itemToDelete.id);
                 } else {
                   handleDelete(itemToDelete.id);

@@ -4,6 +4,7 @@ import { CloudLightning, RefreshCw, LogOut, Loader2, Menu, X } from "lucide-reac
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import posthog from "posthog-js";
 
 interface NavbarProps {
   isLoading?: boolean;
@@ -79,8 +80,12 @@ export function Navbar({
           )}
 
           {onLogout && (
-            <button 
-              onClick={onLogout} 
+            <button
+              onClick={() => {
+                posthog.capture("user_logged_out");
+                posthog.reset();
+                onLogout();
+              }}
               disabled={isLoggingOut}
               className="hidden sm:flex items-center gap-2 rounded border border-white/10 px-3 py-1.5 text-[12px] font-bold hover:bg-white/[0.05] transition-all"
             >
@@ -116,8 +121,10 @@ export function Navbar({
               </Link>
             ))}
             {onLogout && (
-              <button 
+              <button
                 onClick={() => {
+                  posthog.capture("user_logged_out");
+                  posthog.reset();
                   onLogout();
                   setIsMobileMenuOpen(false);
                 }}
