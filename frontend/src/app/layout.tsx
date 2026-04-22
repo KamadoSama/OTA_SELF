@@ -48,6 +48,8 @@ export const metadata: Metadata = {
   },
 };
 
+import { PostHogProvider } from '@/providers/posthog-provider';
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -56,13 +58,15 @@ export default function RootLayout({
   return (
     <html lang="en" className="dark">
       <body className={`${geistSans.variable} ${geistMono.variable} font-sans bg-[#000000] text-slate-50 antialiased min-h-screen`}>
-        <QueryProvider>
-          <AuthSessionProvider>
-            <AuthProvider>
-              {children}
-            </AuthProvider>
-          </AuthSessionProvider>
-        </QueryProvider>
+        <PostHogProvider>
+          <QueryProvider>
+            <AuthSessionProvider>
+              <AuthProvider>
+                {children}
+              </AuthProvider>
+            </AuthSessionProvider>
+          </QueryProvider>
+        </PostHogProvider>
       </body>
     </html>
   );
