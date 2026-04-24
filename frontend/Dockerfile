@@ -5,7 +5,7 @@ WORKDIR /app
 
 COPY package.json yarn.lock* package-lock.json* pnpm-lock.yaml* ./
 ENV NODE_OPTIONS="--dns-result-order=ipv4first"
-RUN npm ci
+RUN npm install -g npm@latest && npm ci --no-cache 
 
 # ─── Stage 2: Builder ───────────────────────────────────────────────────────
 FROM node:22-alpine AS builder
