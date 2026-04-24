@@ -7,7 +7,6 @@ RUN apk add --no-cache libc6-compat
 
 COPY package.json yarn.lock* package-lock.json* pnpm-lock.yaml* ./
 ENV NODE_OPTIONS="--dns-result-order=ipv4first"
-RUN npm install -g npm@latest
 RUN npm ci || npm install
 
 # ─── Stage 2: Builder ───────────────────────────────────────────────────────
