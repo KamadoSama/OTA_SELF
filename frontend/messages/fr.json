@@ -107,7 +107,33 @@
   },
   "Pricing": {
     "title": "Infrastructure d'Élite. <lb></lb> Prix Équitable.",
-    "subtitle": "Un tarif forfaitaire unique. Des possibilités illimitées. Faites évoluer vos applications Expo sans la taxe sur la bande passante."
+    "subtitle": "Un tarif forfaitaire unique. Des possibilités illimitées. Faites évoluer vos applications Expo sans la taxe sur la bande passante.",
+    "hobby": {
+      "name": "Hobby",
+      "price": "0 €",
+      "frequency": "/mois",
+      "features": [
+        "1 Projet Actif",
+        "2 Déploiements par jour",
+        "Support Communautaire",
+        "Livraison Standard Edge"
+      ],
+      "cta": "Commencer Gratuitement"
+    },
+    "pro": {
+      "name": "Professionnel",
+      "popular": "Le Plus Populaire",
+      "price": "19 €",
+      "frequency": "/mois",
+      "features": [
+        "Projets Illimités",
+        "Déploiements Illimités",
+        "Support CDN Prioritaire",
+        "Analyses CLI Avancées",
+        "Gestion d'Équipe"
+      ],
+      "cta": "Devenir Professionnel"
+    }
   },
   "Metrics": {
     "latency": "Latence Edge 50ms",
@@ -236,5 +262,14 @@
     "footer": {
       "lastUpdated": "Docs ZenOTA — Dernière mise à jour Avril 2024"
     }
+  },
+  "Footer": {
+    "desc": "La norme d'entreprise pour les mises à jour Expo. Conçu pour la performance, la sécurité et le plaisir des développeurs.",
+    "developedBy": "ZenOTA © 2024 • Développé par KamadoSama",
+    "product": "Produit",
+    "social": "Social",
+    "company": "Entreprise",
+    "terms": "Conditions",
+    "privacy": "Confidentialité"
   }
 }

@@ -933,14 +933,14 @@ export default function LandingPage() {
             >
               <div className="relative z-10 flex flex-col h-full">
                 <div className="mb-10">
-                  <span className="text-[10px] font-bold uppercase tracking-[0.3em] text-white/30 block mb-4">Hobby</span>
+                  <span className="text-[10px] font-bold uppercase tracking-[0.3em] text-white/30 block mb-4">{t('Pricing.hobby.name')}</span>
                   <div className="flex items-baseline gap-2">
-                    <span className="text-6xl font-bold tracking-tighter">$0</span>
-                    <span className="text-white/20 text-sm">/mo</span>
+                    <span className="text-6xl font-bold tracking-tighter">{t('Pricing.hobby.price')}</span>
+                    <span className="text-white/20 text-sm">{t('Pricing.hobby.frequency')}</span>
                   </div>
                 </div>
                 <div className="space-y-6 mb-12 flex-1">
-                  {['1 Active Project', '2 Deployments per day', 'Community Support', 'Standard Edge Delivery'].map(item => (
+                  {(t.raw('Pricing.hobby.features') as string[]).map(item => (
                     <div key={item} className="flex items-center gap-3 text-sm text-white/50 group-hover:text-white/80 transition-colors">
                       <ChevronRight className="h-4 w-4 text-white/20" />
                       {item}
@@ -948,7 +948,7 @@ export default function LandingPage() {
                   ))}
                 </div>
                 <Link href="/register?plan=free" className="h-14 w-full rounded-2xl border border-white/10 flex items-center justify-center font-bold text-sm hover:bg-white hover:text-black transition-all duration-500">
-                  Start Free
+                  {t('Pricing.hobby.cta')}
                 </Link>
               </div>
             </motion.div>
@@ -965,16 +965,16 @@ export default function LandingPage() {
               <div className="relative z-10 flex flex-col h-full text-black">
                 <div className="mb-10">
                   <div className="flex justify-between items-center mb-4">
-                    <span className="text-[10px] font-bold uppercase tracking-[0.3em] text-black/30">Professional</span>
-                    <span className="px-2 py-1 rounded-md bg-black text-white text-[9px] font-bold uppercase tracking-wider">Most Popular</span>
+                    <span className="text-[10px] font-bold uppercase tracking-[0.3em] text-black/30">{t('Pricing.pro.name')}</span>
+                    <span className="px-2 py-1 rounded-md bg-black text-white text-[9px] font-bold uppercase tracking-wider">{t('Pricing.pro.popular')}</span>
                   </div>
                   <div className="flex items-baseline gap-2">
-                    <span className="text-6xl font-bold tracking-tighter">$19</span>
-                    <span className="text-black/30 text-sm">/mo</span>
+                    <span className="text-6xl font-bold tracking-tighter">{t('Pricing.pro.price')}</span>
+                    <span className="text-black/30 text-sm">{t('Pricing.pro.frequency')}</span>
                   </div>
                 </div>
                 <div className="space-y-6 mb-12 flex-1">
-                  {['Unlimited Projects', 'Unlimited Deployments', 'Priority CDN Support', 'Advanced CLI Analytics', 'Team Management'].map(item => (
+                  {(t.raw('Pricing.pro.features') as string[]).map(item => (
                     <div key={item} className="flex items-center gap-3 text-sm font-bold text-black/60">
                       <ChevronRight className="h-4 w-4 text-black/20" />
                       {item}
@@ -982,7 +982,7 @@ export default function LandingPage() {
                   ))}
                 </div>
                 <Link href="/register?plan=pro" className="h-14 w-full rounded-2xl bg-black text-white flex items-center justify-center font-bold text-sm hover:bg-black/90 transition-all shadow-xl">
-                  Go Professional
+                  {t('Pricing.pro.cta')}
                 </Link>
               </div>
               {/* Dynamic light effect on the Pro card */}
@@ -1008,30 +1008,30 @@ export default function LandingPage() {
                 ZenOTA
               </div>
               <p className="text-white/20 text-sm max-w-xs font-medium">
-                The enterprise-grade standard for Expo updates. Built for performance, security, and developer joy.
+                {t('Footer.desc')}
               </p>
               <div className="text-[10px] font-bold uppercase tracking-widest text-white/10">
-                ZenOTA © 2024 • Developed by KamadoSama
+                {t('Footer.developedBy')}
               </div>
             </div>
 
             <div className="grid grid-cols-2 md:grid-cols-3 gap-16">
               <div className="flex flex-col gap-4">
-                <span className="text-[10px] font-bold uppercase tracking-widest text-white/20">Product</span>
-                <a href="#features" className="text-sm font-medium text-white/40 hover:text-white transition-colors">Features</a>
-                <a href="#pricing" className="text-sm font-medium text-white/40 hover:text-white transition-colors">Pricing</a>
-                <Link href="/docs" className="text-sm font-medium text-white/40 hover:text-white transition-colors">Documentation</Link>
+                <span className="text-[10px] font-bold uppercase tracking-widest text-white/20">{t('Footer.product')}</span>
+                <a href="#features" className="text-sm font-medium text-white/40 hover:text-white transition-colors">{t('Common.features')}</a>
+                <a href="#pricing" className="text-sm font-medium text-white/40 hover:text-white transition-colors">{t('Common.pricing')}</a>
+                <Link href="/docs" className="text-sm font-medium text-white/40 hover:text-white transition-colors">{t('Common.documentation')}</Link>
               </div>
               <div className="flex flex-col gap-4">
-                <span className="text-[10px] font-bold uppercase tracking-widest text-white/20">Social</span>
+                <span className="text-[10px] font-bold uppercase tracking-widest text-white/20">{t('Footer.social')}</span>
                 <a href="#" className="text-sm font-medium text-white/40 hover:text-white transition-colors">GitHub</a>
                 <a href="#" className="text-sm font-medium text-white/40 hover:text-white transition-colors">Twitter</a>
                 <a href="#" className="text-sm font-medium text-white/40 hover:text-white transition-colors">Discord</a>
               </div>
               <div className="flex flex-col gap-4">
-                <span className="text-[10px] font-bold uppercase tracking-widest text-white/20">Company</span>
-                <a href="#" className="text-sm font-medium text-white/40 hover:text-white transition-colors">Terms</a>
-                <a href="#" className="text-sm font-medium text-white/40 hover:text-white transition-colors">Privacy</a>
+                <span className="text-[10px] font-bold uppercase tracking-widest text-white/20">{t('Footer.company')}</span>
+                <a href="#" className="text-sm font-medium text-white/40 hover:text-white transition-colors">{t('Footer.terms')}</a>
+                <a href="#" className="text-sm font-medium text-white/40 hover:text-white transition-colors">{t('Footer.privacy')}</a>
               </div>
             </div>
           </div>

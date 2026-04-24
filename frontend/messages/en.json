@@ -107,7 +107,33 @@
   },
   "Pricing": {
     "title": "Elite Infrastructure. <lb></lb> Fair Pricing.",
-    "subtitle": "One flat rate. Unlimited possibilities. Scale your Expo apps without the bandwidth tax."
+    "subtitle": "One flat rate. Unlimited possibilities. Scale your Expo apps without the bandwidth tax.",
+    "hobby": {
+      "name": "Hobby",
+      "price": "$0",
+      "frequency": "/mo",
+      "features": [
+        "1 Active Project",
+        "2 Deployments per day",
+        "Community Support",
+        "Standard Edge Delivery"
+      ],
+      "cta": "Start Free"
+    },
+    "pro": {
+      "name": "Professional",
+      "popular": "Most Popular",
+      "price": "$19",
+      "frequency": "/mo",
+      "features": [
+        "Unlimited Projects",
+        "Unlimited Deployments",
+        "Priority CDN Support",
+        "Advanced CLI Analytics",
+        "Team Management"
+      ],
+      "cta": "Go Professional"
+    }
   },
   "Metrics": {
     "latency": "50ms Edge Latency",
@@ -236,5 +262,14 @@
     "footer": {
       "lastUpdated": "ZenOTA Docs — Last updated April 2024"
     }
+  },
+  "Footer": {
+    "desc": "The enterprise-grade standard for Expo updates. Built for performance, security, and developer joy.",
+    "developedBy": "ZenOTA © 2024 • Developed by KamadoSama",
+    "product": "Product",
+    "social": "Social",
+    "company": "Company",
+    "terms": "Terms",
+    "privacy": "Privacy"
   }
 }
