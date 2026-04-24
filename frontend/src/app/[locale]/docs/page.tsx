@@ -1,34 +1,9 @@
 "use client";
 
 import { Copy, Terminal, Download, Globe, Zap, CheckCircle2 } from "lucide-react";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { DocsNavbar, DocsSidebarDesktop } from "@/components/docs/DocsNavbar";
-
-const NAV_SECTIONS = [
-  {
-    title: "Getting Started",
-    items: [
-      { id: "introduction", label: "Introduction" },
-      { id: "prerequisites", label: "Prerequisites" },
-      { id: "quickstart", label: "Quick Start" },
-    ],
-  },
-  {
-    title: "CLI Reference",
-    items: [
-      { id: "installation", label: "Installation" },
-      { id: "authentication", label: "Authentication" },
-      { id: "publishing", label: "Publishing Updates" },
-    ],
-  },
-  {
-    title: "Platform",
-    items: [
-      { id: "api-keys", label: "API Keys" },
-      { id: "manifest", label: "Manifest & Versioning" },
-    ],
-  },
-];
+import { useTranslations } from "next-intl";
 
 function CodeBlock({ code, id, label }: { code: string; id: string; label?: string }) {
   const [copied, setCopied] = useState(false);
@@ -74,10 +49,49 @@ function CodeBlock({ code, id, label }: { code: string; id: string; label?: stri
 
 export default function DocsPage() {
   const [activeSection, setActiveSection] = useState("introduction");
+  const t = useTranslations("Docs");
+
+  const NAV_SECTIONS = useMemo(() => [
+    {
+      title: t("sections.gettingStarted.title"),
+      items: [
+        { id: "introduction", label: t("sections.gettingStarted.intro") },
+        { id: "prerequisites", label: t("sections.gettingStarted.prerequisites") },
+        { id: "quickstart", label: t("sections.gettingStarted.quickstart") },
+      ],
+    },
+    {
+      title: t("sections.cliReference.title"),
+      items: [
+        { id: "installation", label: t("sections.cliReference.installation") },
+        { id: "authentication", label: t("sections.cliReference.authentication") },
+        { id: "publishing", label: t("sections.cliReference.publishing") },
+      ],
+    },
+    {
+      title: t("sections.platform.title"),
+      items: [
+        { id: "api-keys", label: t("sections.platform.apiKeys") },
+        { id: "manifest", label: t("sections.platform.manifest") },
+      ],
+    },
+  ], [t]);
 
   const handleNavClick = (id: string) => {
     setActiveSection(id);
   };
+
+  const codeTag = (chunks: React.ReactNode) => (
+    <code className="text-white font-mono bg-white/5 px-1.5 py-0.5 rounded text-sm">
+      {chunks}
+    </code>
+  );
+
+  const bold = (chunks: React.ReactNode) => (
+    <strong className="text-white font-semibold">
+      {chunks}
+    </strong>
+  );
 
   return (
     <div
@@ -110,7 +124,7 @@ export default function DocsPage() {
       />
 
       {/* Page Body: Sidebar + Content */}
-      <div className="relative z-10 flex flex-row max-w-[1200px] mx-auto px-4 md:px-6">
+      <div className="relative z-10 flex flex-row max-w-[1200px] mx-auto px-4 md:px-4">
 
         {/* Desktop Sidebar */}
         <DocsSidebarDesktop
@@ -134,21 +148,21 @@ export default function DocsPage() {
                 style={{ borderColor: "rgba(255,255,255,0.1)", backgroundColor: "rgba(255,255,255,0.04)" }}
               >
                 <span className="text-[10px] font-bold uppercase tracking-widest" style={{ color: "rgba(255,255,255,0.4)" }}>
-                  Introduction
+                  {t('introduction.badge')}
                 </span>
               </div>
-              <h1 className="text-3xl md:text-4xl font-bold tracking-tight leading-tight">What is ZenOTA?</h1>
+              <h1 className="text-3xl md:text-4xl font-bold tracking-tight leading-tight">{t('introduction.title')}</h1>
             </div>
 
             <p className="text-base md:text-lg leading-relaxed" style={{ color: "rgba(255,255,255,0.55)" }}>
-              ZenOTA is an enterprise-grade <strong className="text-white font-semibold">Over-The-Air (OTA)</strong> update platform for React Native Expo apps. Ship JavaScript bundles and assets directly to user devices without App Store delays — your own self-hosted alternative to EAS Update.
+              {t.rich('introduction.desc', { bold })}
             </p>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {[
-                { icon: Zap, title: "Instant Delivery", desc: "Edge CDN ensures updates reach users in milliseconds worldwide." },
-                { icon: Globe, title: "Flat Pricing", desc: "No bandwidth billing. One subscription for all your apps." },
-                { icon: Terminal, title: "Powerful CLI", desc: "One command to export, compress, and deploy your bundle." }
+                { icon: Zap, title: t('introduction.features.instant.title'), desc: t('introduction.features.instant.desc') },
+                { icon: Globe, title: t('introduction.features.pricing.title'), desc: t('introduction.features.pricing.desc') },
+                { icon: Terminal, title: t('introduction.features.cli.title'), desc: t('introduction.features.cli.desc') }
               ].map((card) => {
                 const Icon = card.icon;
                 return (
@@ -171,19 +185,19 @@ export default function DocsPage() {
           {/* ── Prerequisites ── */}
           <section id="prerequisites" className="flex flex-col gap-8">
             <div className="flex flex-col gap-2">
-              <h2 className="text-2xl md:text-3xl font-bold tracking-tight">Prerequisites</h2>
-              <p style={{ color: "rgba(255,255,255,0.45)" }}>Configure your Expo project for OTA updates before using ZenOTA.</p>
+              <h2 className="text-2xl md:text-3xl font-bold tracking-tight">{t('prerequisites.title')}</h2>
+              <p style={{ color: "rgba(255,255,255,0.45)" }}>{t('prerequisites.subtitle')}</p>
             </div>
 
             <div className="flex flex-col gap-6">
               <p className="text-sm leading-relaxed" style={{ color: "rgba(255,255,255,0.5)" }}>
-                ZenOTA replaces the default EAS Update endpoint with its own. For this to work, you need the <code className="text-white font-mono bg-white/5 px-1.5 py-0.5 rounded text-sm">expo-updates</code> library installed and the update configuration initialized in your project.
+                {t.rich('prerequisites.desc', { codeTag })}
               </p>
 
               <div className="flex flex-col gap-4">
                 <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-white/30">
                   <div className="h-1.5 w-1.5 rounded-full bg-white/30" />
-                  Step 1 — Install expo-updates
+                  {t('prerequisites.step1')}
                 </div>
                 <CodeBlock
                   id="install-expo-updates"
@@ -195,7 +209,7 @@ export default function DocsPage() {
               <div className="flex flex-col gap-4">
                 <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-white/30">
                   <div className="h-1.5 w-1.5 rounded-full bg-white/30" />
-                  Step 2 — Initialize EAS Update config
+                  {t('prerequisites.step2')}
                 </div>
                 <CodeBlock
                   id="eas-update-configure"
@@ -203,23 +217,23 @@ export default function DocsPage() {
                   code="npx eas update:configure"
                 />
                 <p className="text-sm leading-relaxed" style={{ color: "rgba(255,255,255,0.45)" }}>
-                  This will add a <code className="text-white font-mono bg-white/5 px-1.5 py-0.5 rounded text-sm">runtimeVersion</code> and an <code className="text-white font-mono bg-white/5 px-1.5 py-0.5 rounded text-sm">updates.url</code> field to your <code className="text-white font-mono bg-white/5 px-1.5 py-0.5 rounded text-sm">app.json</code>.
+                  {t.rich('prerequisites.step2Desc', { codeTag })}
                 </p>
               </div>
 
               <div className="flex flex-col gap-4">
                 <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-white/30">
                   <div className="h-1.5 w-1.5 rounded-full bg-white/30" />
-                  Step 3 — Configure ZenOTA Endpoint
+                  {t('prerequisites.step3')}
                 </div>
                 <p className="text-sm leading-relaxed" style={{ color: "rgba(255,255,255,0.45)" }}>
-                  Finally, you'll need to update the <code className="text-white font-mono bg-white/5 px-1.5 py-0.5 rounded text-sm">updates.url</code> in your <code className="text-white font-mono bg-white/5 px-1.5 py-0.5 rounded text-sm">app.json</code> to point to your ZenOTA manifest endpoint.
+                  {t.rich('prerequisites.step3Desc', { codeTag })}
                 </p>
                 <div
                   className="group flex items-center gap-2 self-start text-[13px] font-bold text-white/40 hover:text-white transition-colors cursor-pointer"
                   onClick={() => handleNavClick('manifest')}
                 >
-                  See how to configure app.json <CheckCircle2 className="h-3.5 w-3.5" />
+                  {t('prerequisites.seeManifest')} <CheckCircle2 className="h-3.5 w-3.5" />
                 </div>
               </div>
 
@@ -227,7 +241,7 @@ export default function DocsPage() {
                 className="rounded-xl px-5 py-5 border text-[13px] leading-relaxed"
                 style={{ borderColor: "rgba(255,255,255,0.08)", backgroundColor: "rgba(255,255,255,0.02)", color: "rgba(255,255,255,0.4)" }}
               >
-                <strong className="text-white/80">Critical:</strong> You must complete these steps <strong className="text-white/80">before</strong> installing the ZenOTA CLI. Without <code className="text-white font-mono bg-white/5 px-1.5 py-0.5 rounded text-xs">expo-updates</code>, the CLI export command will fail.
+                {t.rich('prerequisites.critical', { bold, codeTag })}
               </div>
             </div>
           </section>
@@ -235,37 +249,37 @@ export default function DocsPage() {
           {/* ── Quick Start ── */}
           <section id="quickstart" className="flex flex-col gap-8">
             <div className="flex flex-col gap-2">
-              <h2 className="text-2xl md:text-3xl font-bold tracking-tight">Quick Start</h2>
-              <p style={{ color: "rgba(255,255,255,0.45)" }}>Ship your first update in under 5 minutes.</p>
+              <h2 className="text-2xl md:text-3xl font-bold tracking-tight">{t('quickstart.title')}</h2>
+              <p style={{ color: "rgba(255,255,255,0.45)" }}>{t('quickstart.subtitle')}</p>
             </div>
 
             <ol className="flex flex-col gap-14">
               {[
                 {
                   step: 1,
-                  title: "Install the ZenOTA CLI",
-                  desc: "Install the CLI globally via npm or yarn.",
+                  title: t('quickstart.steps.1.title'),
+                  desc: t('quickstart.steps.1.desc'),
                   code: "npm install -g zenota-cli",
                   label: "Terminal",
                 },
                 {
                   step: 2,
-                  title: "Generate an API Key",
-                  desc: "Go to your Dashboard → CLI Access Tokens → Generate New Key. Copy the key immediately — it won't be shown again.",
+                  title: t('quickstart.steps.2.title'),
+                  desc: t('quickstart.steps.2.desc'),
                   code: null,
                   label: null,
                 },
                 {
                   step: 3,
-                  title: "Authenticate the CLI",
-                  desc: "Run the login command and paste your API key when prompted.",
+                  title: t('quickstart.steps.3.title'),
+                  desc: t('quickstart.steps.3.desc'),
                   code: "zenota login",
                   label: "Terminal",
                 },
                 {
                   step: 4,
-                  title: "Publish your update",
-                  desc: "Navigate to your Expo project root. Run publish and choose your target platform (Android, iOS, or both) from the interactive menu.",
+                  title: t('quickstart.steps.4.title'),
+                  desc: t('quickstart.steps.4.desc'),
                   code: "zenota publish",
                   label: "Terminal",
                 },
@@ -292,7 +306,7 @@ export default function DocsPage() {
               onClick={() => handleNavClick('publishing')}
               className="group flex items-center gap-2 self-start mt-4 text-[13px] font-bold text-white/40 hover:text-white transition-colors"
             >
-              Explore CLI Reference <CheckCircle2 className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
+              {t('quickstart.exploreCLI')} <CheckCircle2 className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
             </button>
           </section>
 
@@ -304,9 +318,9 @@ export default function DocsPage() {
             >
               <div className="flex items-center gap-3">
                 <Terminal className="h-4 w-4" style={{ color: "rgba(255,255,255,0.5)" }} />
-                <h2 className="text-2xl md:text-3xl font-bold tracking-tight">CLI Reference</h2>
+                <h2 className="text-2xl md:text-3xl font-bold tracking-tight">{t('cliReference.title')}</h2>
               </div>
-              <p style={{ color: "rgba(255,255,255,0.45)" }}>All commands and flags available in the <code className="text-white font-mono bg-white/5 px-1.5 py-0.5 rounded text-sm">zenota-cli</code>.</p>
+              <p style={{ color: "rgba(255,255,255,0.45)" }}>{t.rich('cliReference.subtitle', { codeTag })}</p>
             </div>
 
             <div className="flex flex-col gap-8">
@@ -320,16 +334,16 @@ export default function DocsPage() {
                   <table className="w-full text-sm min-w-[500px]">
                     <thead>
                       <tr style={{ borderBottom: "1px solid rgba(255,255,255,0.07)", backgroundColor: "rgba(255,255,255,0.03)" }}>
-                        <th className="text-left px-5 py-4 font-bold text-[10px] uppercase tracking-[0.2em]" style={{ color: "rgba(255,255,255,0.25)" }}>Flag</th>
-                        <th className="text-left px-5 py-4 font-bold text-[10px] uppercase tracking-[0.2em]" style={{ color: "rgba(255,255,255,0.25)" }}>Default</th>
-                        <th className="text-left px-5 py-4 font-bold text-[10px] uppercase tracking-[0.2em]" style={{ color: "rgba(255,255,255,0.25)" }}>Description</th>
+                        <th className="text-left px-5 py-4 font-bold text-[10px] uppercase tracking-[0.2em]" style={{ color: "rgba(255,255,255,0.25)" }}>{t('cliReference.table.flag')}</th>
+                        <th className="text-left px-5 py-4 font-bold text-[10px] uppercase tracking-[0.2em]" style={{ color: "rgba(255,255,255,0.25)" }}>{t('cliReference.table.default')}</th>
+                        <th className="text-left px-5 py-4 font-bold text-[10px] uppercase tracking-[0.2em]" style={{ color: "rgba(255,255,255,0.25)" }}>{t('cliReference.table.description')}</th>
                       </tr>
                     </thead>
                     <tbody>
                       {[
-                        { flag: "--channel, -c", default: "production", desc: "Target deployment channel (e.g., production, staging)." },
-                        { flag: "--platform, -p", default: "interactive", desc: "Target platform: ios, android, or all. Opens a menu if omitted." },
-                        { flag: "--version, -v", default: "—", desc: "Show the current CLI version." },
+                        { flag: "--channel, -c", default: "production", desc: t('cliReference.flags.channel') },
+                        { flag: "--platform, -p", default: "interactive", desc: t('cliReference.flags.platform') },
+                        { flag: "--version, -v", default: "—", desc: t('cliReference.flags.version') },
                       ].map((row) => (
                         <tr key={row.flag} className="hover:bg-white/[0.02] transition-colors" style={{ borderTop: "1px solid rgba(255,255,255,0.05)" }}>
                           <td className="px-5 py-5 font-mono text-[13px] font-bold" style={{ color: "rgba(255,255,255,0.8)" }}>{row.flag}</td>
@@ -347,15 +361,15 @@ export default function DocsPage() {
               onClick={() => handleNavClick('api-keys')}
               className="group flex items-center gap-2 self-start mt-4 text-[13px] font-bold text-white/40 hover:text-white transition-colors"
             >
-              Learn about API Keys <CheckCircle2 className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
+              {t('cliReference.learnAPI')} <CheckCircle2 className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
             </button>
           </section>
 
           {/* ── API Keys ── */}
           <section id="api-keys" className="flex flex-col mt-4 gap-6">
             <div className="flex flex-col gap-2">
-              <h2 className="text-2xl md:text-3xl font-bold tracking-tight">API Keys</h2>
-              <p style={{ color: "rgba(255,255,255,0.45)" }}>Secure your CLI deployments with scoped API tokens.</p>
+              <h2 className="text-2xl md:text-3xl font-bold tracking-tight">{t('apiKeys.title')}</h2>
+              <p style={{ color: "rgba(255,255,255,0.45)" }}>{t('apiKeys.subtitle')}</p>
             </div>
 
             <div
@@ -368,26 +382,21 @@ export default function DocsPage() {
                 <span className="text-lg">⚠️</span>
               </div>
               <div className="flex flex-col gap-2">
-                <p className="text-sm font-bold text-white/90">One-time display policy</p>
+                <p className="text-sm font-bold text-white/90">{t('apiKeys.warning.title')}</p>
                 <p className="text-[13px] leading-relaxed" style={{ color: "rgba(255,255,255,0.4)" }}>
-                  API keys are only shown once at creation time. Copy and store them in a secure place (e.g., a password manager or CI/CD secret store). If you lose a key, you must revoke and regenerate it.
+                  {t('apiKeys.warning.desc')}
                 </p>
               </div>
             </div>
 
             <ol className="flex flex-col gap-5 mt-2">
-              {[
-                { step: 1, text: "Go to your Dashboard → CLI Access Tokens." },
-                { step: 2, text: 'Click "Generate New Key". The raw key is shown only once.' },
-                { step: 3, text: 'Run `zenota login` in your terminal and paste the key when prompted.' },
-                { step: 4, text: "The CLI stores the key securely in ~/.zenota-config.json." },
-              ].map(({ step, text }) => (
-                <li key={step} className="flex items-center gap-4 group">
+              {(t.raw('apiKeys.steps') as string[]).map((text, index) => (
+                <li key={index} className="flex items-center gap-4 group">
                   <span
                     className="h-6 w-6 rounded-full flex items-center justify-center text-[10px] font-bold shrink-0 border border-white/10 group-hover:border-white/30 transition-colors"
                     style={{ backgroundColor: "rgba(255,255,255,0.03)", color: "rgba(255,255,255,0.4)" }}
                   >
-                    {step}
+                    {index + 1}
                   </span>
                   <span className="text-[13px] font-medium" style={{ color: "rgba(255,255,255,0.5)" }}>{text}</span>
                 </li>
@@ -398,25 +407,25 @@ export default function DocsPage() {
               onClick={() => handleNavClick('manifest')}
               className="group flex items-center gap-2 self-start mt-4 text-[13px] font-bold text-white/40 hover:text-white transition-colors"
             >
-              Understand Manifests & Versioning <CheckCircle2 className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
+              {t('apiKeys.seeVersioning')} <CheckCircle2 className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
             </button>
           </section>
 
           {/* ── Manifest & Versioning ── */}
           <section id="manifest" className="flex mt-4 flex-col gap-8">
             <div className="flex flex-col gap-2">
-              <h2 className="text-2xl md:text-3xl font-bold tracking-tight text-white/90">Manifest & Versioning</h2>
-              <p style={{ color: "rgba(255,255,255,0.45)" }}>How ZenOTA matches updates to native builds.</p>
+              <h2 className="text-2xl md:text-3xl font-bold tracking-tight text-white/90">{t('manifest.title')}</h2>
+              <p style={{ color: "rgba(255,255,255,0.45)" }}>{t('manifest.subtitle')}</p>
             </div>
 
             <p className="text-[15px] leading-relaxed" style={{ color: "rgba(255,255,255,0.45)" }}>
-              ZenOTA generates <strong className="text-white/80 font-semibold">Expo-compatible manifests</strong>. Your app's native build must have a matching <code className="text-white font-mono bg-white/5 px-1.5 py-0.5 rounded text-[13px]">runtimeVersion</code> configured in <code className="text-white font-mono bg-white/5 px-1.5 py-0.5 rounded text-[13px]">app.json</code> for an update to be applied.
+              {t.rich('manifest.desc', { bold, codeTag })}
             </p>
 
             <div className="space-y-6">
               <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.2em] text-white/20">
                 <div className="h-1.5 w-1.5 rounded-full bg-white/20" />
-                Recommended Configuration
+                {t('manifest.config')}
               </div>
               <CodeBlock
                 id="manifest-config"
@@ -438,7 +447,7 @@ export default function DocsPage() {
               className="rounded-xl px-6 py-5 border text-[13px] leading-relaxed"
               style={{ borderColor: "rgba(255,255,255,0.07)", backgroundColor: "rgba(255,255,255,0.02)", color: "rgba(255,255,255,0.4)" }}
             >
-              <strong className="text-white/80">Pro Tip:</strong> Use the <code className="text-white font-mono bg-white/5 px-1.5 py-0.5 rounded text-xs">sdkVersion</code> policy during development and switch to a <code className="text-white font-mono bg-white/5 px-1.5 py-0.5 rounded text-xs">nativeVersion</code> policy for production after your first App Store submission.
+              {t.rich('manifest.proTip', { codeTag, bold })}
             </div>
           </section>
 
@@ -448,7 +457,7 @@ export default function DocsPage() {
             style={{ borderColor: "rgba(255,255,255,0.07)" }}
           >
             <p className="text-[12px] text-center sm:text-left" style={{ color: "rgba(255,255,255,0.2)" }}>
-              ZenOTA Docs — Last updated April 2024
+              {t('footer.lastUpdated')}
             </p>
 
             <div className="flex items-center gap-6">

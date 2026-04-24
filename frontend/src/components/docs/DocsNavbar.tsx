@@ -4,6 +4,7 @@ import { ArrowLeft, CloudLightning, Menu, X } from "lucide-react";
 import { Logo } from "../ui/Logo";
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { useTranslations } from "next-intl";
 
 export interface NavSection {
   title: string;
@@ -24,6 +25,7 @@ export function DocsNavbar({
   version = "v1.0.0",
 }: DocsNavbarProps) {
   const [isOpen, setIsOpen] = useState(false);
+  const t = useTranslations("Docs.navbar");
 
   // Fermer le menu en appuyant sur Échap
   useEffect(() => {
@@ -78,11 +80,11 @@ export function DocsNavbar({
 
       <div className="flex flex-col gap-2">
         <p className="text-[10px] font-bold uppercase tracking-widest mb-1" style={{ color: "rgba(255,255,255,0.2)" }}>
-          Resources
+          {t('resources')}
         </p>
         <a href="#" className="text-sm font-medium transition-colors hover:text-white" style={{ color: "rgba(255,255,255,0.35)" }}>GitHub</a>
         <a href="#" className="text-sm font-medium transition-colors hover:text-white" style={{ color: "rgba(255,255,255,0.35)" }}>Discord</a>
-        <a href="#" className="text-sm font-medium transition-colors hover:text-white" style={{ color: "rgba(255,255,255,0.35)" }}>Changelog</a>
+        <a href="#" className="text-sm font-medium transition-colors hover:text-white" style={{ color: "rgba(255,255,255,0.35)" }}>{t('changelog')}</a>
       </div>
     </div>
   );
@@ -130,7 +132,7 @@ export function DocsNavbar({
             style={{ color: "rgba(255,255,255,0.4)" }}
           >
             <ArrowLeft className="h-3.5 w-3.5 transition-transform group-hover:-translate-x-0.5" />
-            <span className="hidden sm:inline group-hover:text-white transition-colors">Accueil</span>
+            <span className="hidden sm:inline group-hover:text-white transition-colors">{t('home')}</span>
           </Link>
           <span
             className="hidden sm:inline text-[11px] font-mono font-bold uppercase tracking-widest px-2 py-0.5 rounded border"
@@ -196,7 +198,7 @@ export function DocsNavbar({
             style={{ color: "rgba(255,255,255,0.35)" }}
           >
             <ArrowLeft className="h-4 w-4 transition-transform group-hover:-translate-x-0.5" />
-            <span className="group-hover:text-white transition-colors">Retour à l'accueil</span>
+            <span className="group-hover:text-white transition-colors">{t('backHome')}</span>
           </Link>
         </div>
       </aside>
@@ -219,6 +221,7 @@ export function DocsSidebarDesktop({
   activeSection,
   onNavClick,
 }: Pick<DocsNavbarProps, "navSections" | "activeSection" | "onNavClick">) {
+  const t = useTranslations("Docs.navbar");
   return (
     <aside
       className="hidden md:flex flex-col gap-8 sticky"
@@ -262,11 +265,11 @@ export function DocsSidebarDesktop({
 
       <div className="flex flex-col gap-2">
         <p className="text-[10px] font-bold uppercase tracking-widest mb-1" style={{ color: "rgba(255,255,255,0.2)" }}>
-          Resources
+          {t('resources')}
         </p>
         <a href="#" className="text-sm font-medium transition-colors hover:text-white" style={{ color: "rgba(255,255,255,0.35)" }}>GitHub</a>
         <a href="#" className="text-sm font-medium transition-colors hover:text-white" style={{ color: "rgba(255,255,255,0.35)" }}>Discord</a>
-        <a href="#" className="text-sm font-medium transition-colors hover:text-white" style={{ color: "rgba(255,255,255,0.35)" }}>Changelog</a>
+        <a href="#" className="text-sm font-medium transition-colors hover:text-white" style={{ color: "rgba(255,255,255,0.35)" }}>{t('changelog')}</a>
       </div>
     </aside>
   );

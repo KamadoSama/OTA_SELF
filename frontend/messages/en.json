@@ -1,0 +1,240 @@
+{
+  "Common": {
+    "login": "Log in",
+    "signup": "Sign Up",
+    "docs": "Docs",
+    "features": "Features",
+    "pricing": "Pricing",
+    "getStarted": "Get Started for Free",
+    "documentation": "Documentation"
+  },
+  "Hero": {
+    "badge": "Optimized for Expo SDK 50+",
+    "title1": "Ship updates",
+    "title2": "in a state of",
+    "title3": "Zen.",
+    "description": "The high-performance OTA infrastructure for React Native. Bypass review cycles. Deploy instantly. Scale infinitely."
+  },
+  "Loading": {
+    "initializing": "Initializing ZenOTA"
+  },
+  "Login": {
+    "title": "Log in to ZenOTA",
+    "subtitle": "Enter your details to access your dashboard.",
+    "google": "Continue with Google",
+    "or": "or",
+    "email": "Email",
+    "password": "Password",
+    "forgot": "Forgot?",
+    "submit": "Log in",
+    "noAccount": "Don't have an account?",
+    "signup": "Sign up for free",
+    "error401": "Invalid email or password.",
+    "errorGeneric": "Connection error. Please try again."
+  },
+  "Problem": {
+    "title": "The App Store waiting game is over.",
+    "subtitle": "Shipping a typo fix shouldn't take 3 days of review. Bypass the bureaucracy and deliver updates directly to your users' devices.",
+    "oldWay": "The Old Way",
+    "zenotaWay": "The ZenOTA Way",
+    "oldSteps": [
+      "Build native binaries (AAB/IPA)",
+      "Upload to App Store / Play Store",
+      "Wait for manual review (1-3 days)",
+      "Users must manually download update"
+    ],
+    "zenotaSteps": [
+      "Make code changes in JS/TS",
+      "Run `zenota publish`",
+      "Updates distributed via Global Edge CDN",
+      "Users get the update instantly on next launch"
+    ]
+  },
+  "Workflow": {
+    "pipeline": "The Pipeline",
+    "title": "Zero friction deployment.",
+    "step1": {
+      "title": "Local Changes",
+      "desc": "Add the ZenOTA URL to your app.json. It takes less than 30 seconds to set up."
+    },
+    "step2": {
+      "title": "zenota publish",
+      "desc": "Run the command. We bundle, hash, and upload your assets to our global edge network."
+    },
+    "step3": {
+      "title": "Edge Network",
+      "desc": "Users receive the update on the next launch. No App Store delays, no user action required."
+    },
+    "stepLabel": "Step",
+    "iosUsers": "iOS Users",
+    "androidUsers": "Android Users"
+  },
+  "Features": {
+    "infra": "Infrastructure",
+    "title": "Built for speed. <lb></lb> Designed for developers.",
+    "instant": {
+      "title": "Instant Edge Delivery",
+      "desc": "We ship your JS bundles across a global edge network. Your users get updates in milliseconds, not minutes."
+    },
+    "security": {
+      "title": "Military-Grade Security",
+      "desc": "End-to-end cryptographic signing ensures that only your authorized code ever runs on your users' devices."
+    },
+    "cli": {
+      "title": "Intuitive CLI",
+      "desc": "A command-line experience that feels like magic. zenota publish is all you need."
+    },
+    "runtime": {
+      "title": "Native-First Runtime",
+      "desc": "Zero overhead. ZenOTA leverages the native Expo Updates runtime you already trust, without adding bloat."
+    }
+  },
+  "FAQ": {
+    "title": "Frequently Asked Questions",
+    "subtitle": "Everything you need to know about ZenOTA.",
+    "q1": {
+      "q": "Do I need to eject my Expo app?",
+      "a": "No! ZenOTA works seamlessly with managed Expo workflows. It uses the exact same expo-updates library you already have installed. You just point the configuration to our servers in your app.json."
+    },
+    "q2": {
+      "q": "What happens if an update crashes my app?",
+      "a": "By default, the Expo Updates runtime will detect a fatal crash on startup and automatically roll back to the previously embedded bundle, ensuring your users are never stuck on a broken screen."
+    },
+    "q3": {
+      "q": "What is considered a 'Deployment'?",
+      "a": "A deployment is a single push of a new bundle (using zenota publish). If you publish an update for both iOS and Android simultaneously, it counts as one deployment. There are no limits on how many users can download your updates."
+    }
+  },
+  "Pricing": {
+    "title": "Elite Infrastructure. <lb></lb> Fair Pricing.",
+    "subtitle": "One flat rate. Unlimited possibilities. Scale your Expo apps without the bandwidth tax."
+  },
+  "Metrics": {
+    "latency": "50ms Edge Latency",
+    "signing": "End-to-End Signing",
+    "uptime": "99.99% Uptime SLA",
+    "config": "Zero Native Config"
+  },
+  "Docs": {
+    "navbar": {
+      "home": "Home",
+      "backHome": "Back to Home",
+      "version": "v1.0.0",
+      "resources": "Resources",
+      "changelog": "Changelog"
+    },
+    "sections": {
+      "gettingStarted": {
+        "title": "Getting Started",
+        "intro": "Introduction",
+        "prerequisites": "Prerequisites",
+        "quickstart": "Quick Start"
+      },
+      "cliReference": {
+        "title": "CLI Reference",
+        "installation": "Installation",
+        "authentication": "Authentication",
+        "publishing": "Publishing Updates"
+      },
+      "platform": {
+        "title": "Platform",
+        "apiKeys": "API Keys",
+        "manifest": "Manifest & Versioning"
+      }
+    },
+    "introduction": {
+      "badge": "Introduction",
+      "title": "What is ZenOTA?",
+      "desc": "ZenOTA is an enterprise-grade <bold>Over-The-Air (OTA)</bold> update platform for React Native Expo apps. Ship JavaScript bundles and assets directly to user devices without App Store delays — your own self-hosted alternative to EAS Update.",
+      "features": {
+        "instant": {
+          "title": "Instant Delivery",
+          "desc": "Edge CDN ensures updates reach users in milliseconds worldwide."
+        },
+        "pricing": {
+          "title": "Flat Pricing",
+          "desc": "No bandwidth billing. One subscription for all your apps."
+        },
+        "cli": {
+          "title": "Powerful CLI",
+          "desc": "One command to export, compress, and deploy your bundle."
+        }
+      }
+    },
+    "prerequisites": {
+      "title": "Prerequisites",
+      "subtitle": "Configure your Expo project for OTA updates before using ZenOTA.",
+      "desc": "ZenOTA replaces the default EAS Update endpoint with its own. For this to work, you need the <codeTag>expo-updates</codeTag> library installed and the update configuration initialized in your project.",
+      "step1": "Step 1 — Install expo-updates",
+      "step2": "Step 2 — Initialize EAS Update config",
+      "step2Desc": "This will add a <codeTag>runtimeVersion</codeTag> and an <codeTag>updates.url</codeTag> field to your <codeTag>app.json</codeTag>.",
+      "step3": "Step 3 — Configure ZenOTA Endpoint",
+      "step3Desc": "Finally, you'll need to update the <codeTag>updates.url</codeTag> in your <codeTag>app.json</codeTag> to point to your ZenOTA manifest endpoint.",
+      "seeManifest": "See how to configure app.json",
+      "critical": "<bold>Critical:</bold> You must complete these steps <bold>before</bold> installing the ZenOTA CLI. Without <codeTag>expo-updates</codeTag>, the CLI export command will fail."
+    },
+    "quickstart": {
+      "title": "Quick Start",
+      "subtitle": "Ship your first update in under 5 minutes.",
+      "steps": {
+        "1": {
+          "title": "Install the ZenOTA CLI",
+          "desc": "Install the CLI globally via npm or yarn."
+        },
+        "2": {
+          "title": "Generate an API Key",
+          "desc": "Go to your Dashboard → CLI Access Tokens → Generate New Key. Copy the key immediately — it won't be shown again."
+        },
+        "3": {
+          "title": "Authenticate the CLI",
+          "desc": "Run the login command and paste your API key when prompted."
+        },
+        "4": {
+          "title": "Publish your update",
+          "desc": "Navigate to your Expo project root. Run publish and choose your target platform (Android, iOS, or both) from the interactive menu."
+        }
+      },
+      "exploreCLI": "Explore CLI Reference"
+    },
+    "cliReference": {
+      "title": "CLI Reference",
+      "subtitle": "All commands and flags available in the <codeTag>zenota-cli</codeTag>.",
+      "table": {
+        "flag": "Flag",
+        "default": "Default",
+        "description": "Description"
+      },
+      "flags": {
+        "channel": "Target deployment channel (e.g., production, staging).",
+        "platform": "Target platform: ios, android, or all. Opens a menu if omitted.",
+        "version": "Show the current CLI version."
+      },
+      "learnAPI": "Learn about API Keys"
+    },
+    "apiKeys": {
+      "title": "API Keys",
+      "subtitle": "Secure your CLI deployments with scoped API tokens.",
+      "warning": {
+        "title": "One-time display policy",
+        "desc": "API keys are only shown once at creation time. Copy and store them in a secure place (e.g., a password manager or CI/CD secret store). If you lose a key, you must revoke and regenerate it."
+      },
+      "steps": [
+        "Go to your Dashboard → CLI Access Tokens.",
+        "Click \"Generate New Key\". The raw key is shown only once.",
+        "Run `zenota login` in your terminal and paste the key when prompted.",
+        "The CLI stores the key securely in ~/.zenota-config.json."
+      ],
+      "seeVersioning": "Understand Manifests & Versioning"
+    },
+    "manifest": {
+      "title": "Manifest & Versioning",
+      "subtitle": "How ZenOTA matches updates to native builds.",
+      "desc": "ZenOTA generates <bold>Expo-compatible manifests</bold>. Your app's native build must have a matching <codeTag>runtimeVersion</codeTag> configured in <codeTag>app.json</codeTag> for an update to be applied.",
+      "config": "Recommended Configuration",
+      "proTip": "<bold>Pro Tip:</bold> Use the <codeTag>sdkVersion</codeTag> policy during development and switch to a <codeTag>nativeVersion</codeTag> policy for production after your first App Store submission."
+    },
+    "footer": {
+      "lastUpdated": "ZenOTA Docs — Last updated April 2024"
+    }
+  }
+}

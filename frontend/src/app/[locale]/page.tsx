@@ -2,9 +2,12 @@
 
 import { ArrowRight, ChevronRight, CloudLightning, Code, ExternalLink, Shield, Zap, Clock, XCircle, CheckCircle, ChevronDown, Terminal, Server, Smartphone } from 'lucide-react';
 import { Logo } from '@/components/ui/Logo';
-import Link from 'next/link';
+import { Link } from '@/i18n/routing';
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from 'framer-motion';
+import { useTranslations } from 'next-intl';
+import { LanguageSwitcher } from '@/components/ui/LanguageSwitcher';
+
 
 function FAQItem({ question, answer }: { question: string, answer: string }) {
   const [isOpen, setIsOpen] = useState(false);
@@ -95,6 +98,7 @@ function CodeDemo() {
 }
 
 function WorkflowVisual() {
+  const t = useTranslations('Workflow');
   return (
     <div className="relative w-full max-w-5xl mx-auto py-10 md:py-20 px-4">
       {/* Desktop Version */}
@@ -200,8 +204,8 @@ function WorkflowVisual() {
               <div className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center mx-auto mb-3">
                 <Terminal className="h-5 w-5 text-white/60" />
               </div>
-              <div className="text-[10px] font-bold uppercase tracking-widest text-white/40 mb-1">Step 1</div>
-              <div className="text-sm font-bold">Local Changes</div>
+              <div className="text-[10px] font-bold uppercase tracking-widest text-white/40 mb-1">{t('stepLabel')} 1</div>
+              <div className="text-sm font-bold">{t('step1.title')}</div>
             </motion.div>
           </div>
 
@@ -217,8 +221,8 @@ function WorkflowVisual() {
               <div className="w-10 h-10 rounded-full bg-white text-black flex items-center justify-center mx-auto mb-3 shadow-xl">
                 <Zap className="h-5 w-5" />
               </div>
-              <div className="text-[10px] font-bold uppercase tracking-widest text-white/40 mb-1">Step 2</div>
-              <div className="text-sm font-bold">zenota publish</div>
+              <div className="text-[10px] font-bold uppercase tracking-widest text-white/40 mb-1">{t('stepLabel')} 2</div>
+              <div className="text-sm font-bold">{t('step2.title')}</div>
             </motion.div>
           </div>
 
@@ -234,8 +238,8 @@ function WorkflowVisual() {
               <div className="w-10 h-10 rounded-full bg-blue-500/10 flex items-center justify-center mx-auto mb-3">
                 <Server className="h-5 w-5 text-blue-400" />
               </div>
-              <div className="text-[10px] font-bold uppercase tracking-widest text-white/40 mb-1">Step 3</div>
-              <div className="text-sm font-bold">Edge Network</div>
+              <div className="text-[10px] font-bold uppercase tracking-widest text-white/40 mb-1">{t('stepLabel')} 3</div>
+              <div className="text-sm font-bold">{t('step3.title')}</div>
             </motion.div>
           </div>
 
@@ -252,7 +256,7 @@ function WorkflowVisual() {
                 <div className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center shrink-0">
                   <Smartphone className="h-4 w-4 text-white/40" />
                 </div>
-                <div className="text-[11px] font-bold">iOS Users</div>
+                <div className="text-[11px] font-bold">{t('iosUsers')}</div>
               </motion.div>
               <motion.div 
                 initial={{ opacity: 0, x: 20 }}
@@ -264,7 +268,7 @@ function WorkflowVisual() {
                 <div className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center shrink-0">
                   <Smartphone className="h-4 w-4 text-white/40" />
                 </div>
-                <div className="text-[11px] font-bold">Android Users</div>
+                <div className="text-[11px] font-bold">{t('androidUsers')}</div>
               </motion.div>
             </div>
           </div>
@@ -283,8 +287,8 @@ function WorkflowVisual() {
           <div className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center mx-auto mb-3">
             <Terminal className="h-5 w-5 text-white/60" />
           </div>
-          <div className="text-[10px] font-bold uppercase tracking-widest text-white/40 mb-1">Step 1</div>
-          <div className="text-base font-bold">Local Changes</div>
+          <div className="text-[10px] font-bold uppercase tracking-widest text-white/40 mb-1">{t('stepLabel')} 1</div>
+          <div className="text-base font-bold">{t('step1.title')}</div>
         </motion.div>
 
         {/* Line 1-2 */}
@@ -308,8 +312,8 @@ function WorkflowVisual() {
           <div className="w-10 h-10 rounded-full bg-white text-black flex items-center justify-center mx-auto mb-3 shadow-xl">
             <Zap className="h-5 w-5" />
           </div>
-          <div className="text-[10px] font-bold uppercase tracking-widest text-white/40 mb-1">Step 2</div>
-          <div className="text-base font-bold">zenota publish</div>
+          <div className="text-[10px] font-bold uppercase tracking-widest text-white/40 mb-1">{t('stepLabel')} 2</div>
+          <div className="text-base font-bold">{t('step2.title')}</div>
         </motion.div>
 
         {/* Line 2-3 */}
@@ -333,8 +337,8 @@ function WorkflowVisual() {
           <div className="w-10 h-10 rounded-full bg-blue-500/10 flex items-center justify-center mx-auto mb-3">
             <Server className="h-5 w-5 text-blue-400" />
           </div>
-          <div className="text-[10px] font-bold uppercase tracking-widest text-white/40 mb-1">Step 3</div>
-          <div className="text-base font-bold">Edge Network</div>
+          <div className="text-[10px] font-bold uppercase tracking-widest text-white/40 mb-1">{t('stepLabel')} 3</div>
+          <div className="text-base font-bold">{t('step3.title')}</div>
         </motion.div>
 
         {/* Line 3-4 (Split) */}
@@ -389,7 +393,7 @@ function WorkflowVisual() {
             <div className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center shrink-0">
               <Smartphone className="h-4 w-4 text-white/40" />
             </div>
-            <div className="text-xs font-bold">iOS Users</div>
+            <div className="text-xs font-bold">{t('iosUsers')}</div>
           </motion.div>
           <motion.div 
             initial={{ opacity: 0, x: 20 }}
@@ -401,7 +405,7 @@ function WorkflowVisual() {
             <div className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center shrink-0">
               <Smartphone className="h-4 w-4 text-white/40" />
             </div>
-            <div className="text-xs font-bold">Android Users</div>
+            <div className="text-xs font-bold">{t('androidUsers')}</div>
           </motion.div>
         </div>
       </div>
@@ -410,6 +414,7 @@ function WorkflowVisual() {
 }
 
 function LoadingScreen() {
+  const t = useTranslations();
   return (
     <motion.div 
       initial={{ opacity: 1 }}
@@ -449,7 +454,7 @@ function LoadingScreen() {
         className="mt-16 flex flex-col items-center gap-4"
       >
         <div className="text-[10px] font-bold uppercase tracking-[0.4em] text-white/30">
-          Initializing ZenOTA
+          {t('Loading.initializing')}
         </div>
         <div className="w-32 h-[1px] bg-white/10 relative overflow-hidden">
           <motion.div 
@@ -465,6 +470,7 @@ function LoadingScreen() {
 }
 
 export default function LandingPage() {
+  const t = useTranslations();
   const [mounted, setMounted] = useState(false);
   const [loading, setLoading] = useState(true);
 
@@ -513,25 +519,29 @@ export default function LandingPage() {
           </div>
 
           <nav className="hidden md:flex items-center gap-12">
-            {['Features', 'Pricing'].map((item) => (
-              <a
-                key={item}
-                href={`#${item.toLowerCase()}`}
-                className="text-sm font-medium text-white/40 hover:text-white transition-all hover:tracking-widest duration-300"
-              >
-                {item}
-              </a>
-            ))}
+            <a
+              href="#features"
+              className="text-sm font-medium text-white/40 hover:text-white transition-all hover:tracking-widest duration-300"
+            >
+              {t('Common.features')}
+            </a>
+            <a
+              href="#pricing"
+              className="text-sm font-medium text-white/40 hover:text-white transition-all hover:tracking-widest duration-300"
+            >
+              {t('Common.pricing')}
+            </a>
             <Link href="/docs" className="text-sm font-medium text-white flex items-center gap-1.5 group">
-              Docs
+              {t('Common.docs')}
               <ExternalLink className="h-3 w-3 text-white/40 group-hover:text-white group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all" />
             </Link>
           </nav>
 
           <div className="flex items-center gap-8">
-            <Link href="/login" className="text-sm font-medium text-white/40 hover:text-white transition-colors">Log in</Link>
+            <LanguageSwitcher />
+            <Link href="/login" className="text-sm font-medium text-white/40 hover:text-white transition-colors">{t('Common.login')}</Link>
             <Link href="/register" className="glass h-10 px-6 flex items-center justify-center rounded-full text-sm font-bold hover:bg-white hover:text-black transition-all duration-500 hover:scale-105 active:scale-95">
-              Sign Up
+              {t('Common.signup')}
             </Link>
           </div>
         </div>
@@ -559,7 +569,7 @@ export default function LandingPage() {
             className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full glass text-[10px] font-bold uppercase tracking-[0.3em] text-white/40 mb-12"
           >
             <Logo size={14} className="rounded-sm" />
-            Optimized for Expo SDK 50+
+            {t('Hero.badge')}
           </motion.div>
 
           <motion.h1 
@@ -568,8 +578,8 @@ export default function LandingPage() {
             transition={{ duration: 0.8, delay: 0.1, ease: "easeOut" }}
             className="text-7xl md:text-[120px] font-black tracking-[-0.06em] text-center leading-[0.85] mb-12"
           >
-            Ship updates <br />
-            <span className="text-white/20 italic font-light tracking-tight">in a state of</span> Zen.
+            {t('Hero.title1')} <br />
+            <span className="text-white/20 italic font-light tracking-tight">{t('Hero.title2')}</span> {t('Hero.title3')}
           </motion.h1>
 
           <motion.p 
@@ -578,8 +588,7 @@ export default function LandingPage() {
             transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
             className="text-xl md:text-2xl text-white/30 max-w-2xl text-center mb-16 leading-relaxed font-medium"
           >
-            The high-performance OTA infrastructure for React Native. <br className="hidden md:block" />
-            Bypass review cycles. Deploy instantly. Scale infinitely.
+            {t('Hero.description')}
           </motion.p>
 
           <motion.div 
@@ -590,12 +599,12 @@ export default function LandingPage() {
           >
             <div className="flex flex-col sm:flex-row gap-4">
               <Link href="/register" className="h-14 px-10 rounded-full bg-white text-black font-bold text-sm flex items-center justify-center gap-3 hover:scale-105 active:scale-95 transition-all shadow-[0_20px_50px_rgba(255,255,255,0.2)]">
-                Get Started for Free
+                {t('Common.getStarted')}
                 <ArrowRight className="h-4 w-4" />
               </Link>
 
               <Link href="/docs" className="h-14  px-10 rounded-full glass text-white font-bold text-sm flex items-center justify-center gap-3 hover:scale-105 active:scale-95 transition-all shadow-[0_20px_50px_rgba(255,255,255,0.2)]">
-                Documentation
+                {t('Common.documentation')}
                 <ExternalLink className="h-4 w-4" />
               </Link>
             </div>
@@ -621,19 +630,19 @@ export default function LandingPage() {
           className="container flex flex-wrap justify-center items-center gap-8 md:gap-16"
         >
           <div className="flex items-center gap-3 text-white/40 font-medium uppercase tracking-widest text-xs">
-            <CloudLightning className="h-4 w-4 text-white/20" /> 50ms Edge Latency
+            <CloudLightning className="h-4 w-4 text-white/20" /> {t('Metrics.latency')}
           </div>
           <div className="hidden md:block w-1 h-1 rounded-full bg-white/10" />
           <div className="flex items-center gap-3 text-white/40 font-medium uppercase tracking-widest text-xs">
-            <Shield className="h-4 w-4 text-white/20" /> End-to-End Signing
+            <Shield className="h-4 w-4 text-white/20" /> {t('Metrics.signing')}
           </div>
           <div className="hidden md:block w-1 h-1 rounded-full bg-white/10" />
           <div className="flex items-center gap-3 text-white/40 font-medium uppercase tracking-widest text-xs">
-            <Zap className="h-4 w-4 text-white/20" /> 99.99% Uptime SLA
+            <Zap className="h-4 w-4 text-white/20" /> {t('Metrics.uptime')}
           </div>
           <div className="hidden md:block w-1 h-1 rounded-full bg-white/10" />
           <div className="flex items-center gap-3 text-white/40 font-medium uppercase tracking-widest text-xs">
-            <Code className="h-4 w-4 text-white/20" /> Zero Native Config
+            <Code className="h-4 w-4 text-white/20" /> {t('Metrics.config')}
           </div>
         </motion.div>
       </section>
@@ -648,9 +657,9 @@ export default function LandingPage() {
             transition={{ duration: 0.8 }}
             className="text-center mb-16"
           >
-            <h2 className="text-3xl md:text-5xl font-bold tracking-tight mb-6">The App Store waiting game is <span className="text-white">over.</span></h2>
+            <h2 className="text-3xl md:text-5xl font-bold tracking-tight mb-6">{t.rich('Problem.title', { span: (chunks) => <span className="text-white">{chunks}</span> })}</h2>
             <p className="text-white/40 text-lg md:text-xl font-medium max-w-2xl mx-auto">
-              Shipping a typo fix shouldn't take 3 days of review. Bypass the bureaucracy and deliver updates directly to your users' devices.
+              {t('Problem.subtitle')}
             </p>
           </motion.div>
 
@@ -666,10 +675,10 @@ export default function LandingPage() {
               <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 blur-[50px] rounded-full pointer-events-none" />
               <h3 className="text-xl font-bold text-white/50 mb-6 flex items-center gap-3">
                 <Clock className="h-5 w-5 text-white/30" />
-                The Old Way
+                {t('Problem.oldWay')}
               </h3>
               <ul className="space-y-4">
-                {['Build native binaries (AAB/IPA)', 'Upload to App Store / Play Store', 'Wait for manual review (1-3 days)', 'Users must manually download update'].map((item, i) => (
+                {(t.raw('Problem.oldSteps') as string[]).map((item, i) => (
                   <li key={i} className="flex items-start gap-3 text-white/40">
                     <XCircle className="h-5 w-5 text-white/20 shrink-0" />
                     <span>{item}</span>
@@ -689,10 +698,10 @@ export default function LandingPage() {
               <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 blur-[50px] rounded-full pointer-events-none" />
               <h3 className="text-xl font-bold text-white mb-6 flex items-center gap-3">
                 <Zap className="h-5 w-5 text-white" />
-                The ZenOTA Way
+                {t('Problem.zenotaWay')}
               </h3>
               <ul className="space-y-4">
-                {['Make code changes in JS/TS', 'Run `zenota publish`', 'Updates distributed via Global Edge CDN', 'Users get the update instantly on next launch'].map((item, i) => (
+                {(t.raw('Problem.zenotaSteps') as string[]).map((item, i) => (
                   <li key={i} className="flex items-start gap-3 text-white/80 font-medium">
                     <CheckCircle className="h-5 w-5 text-white shrink-0" />
                     <span>{item}</span>
@@ -714,24 +723,24 @@ export default function LandingPage() {
             transition={{ duration: 0.8 }}
             className="text-center mb-16"
           >
-            <h2 className="text-sm font-bold uppercase tracking-[0.4em] text-white/20 mb-4">The Pipeline</h2>
-            <p className="text-4xl md:text-6xl font-black tracking-tight leading-tight">Zero friction deployment.</p>
+            <h2 className="text-sm font-bold uppercase tracking-[0.4em] text-white/20 mb-4">{t('Workflow.pipeline')}</h2>
+            <p className="text-4xl md:text-6xl font-black tracking-tight leading-tight">{t('Workflow.title')}</p>
           </motion.div>
           
           <WorkflowVisual />
 
           <div className="mt-20 grid grid-cols-1 md:grid-cols-3 gap-12">
             <div className="space-y-4">
-              <h4 className="text-xl font-bold">1. Configure</h4>
-              <p className="text-white/40 text-sm leading-relaxed">Add the ZenOTA URL to your app.json. It takes less than 30 seconds to set up.</p>
+              <h4 className="text-xl font-bold">1. {t('Workflow.step1.title')}</h4>
+              <p className="text-white/40 text-sm leading-relaxed">{t('Workflow.step1.desc')}</p>
             </div>
             <div className="space-y-4">
-              <h4 className="text-xl font-bold">2. Publish</h4>
-              <p className="text-white/40 text-sm leading-relaxed">Run the command. We bundle, hash, and upload your assets to our global edge network.</p>
+              <h4 className="text-xl font-bold">2. {t('Workflow.step2.title')}</h4>
+              <p className="text-white/40 text-sm leading-relaxed">{t('Workflow.step2.desc')}</p>
             </div>
             <div className="space-y-4">
-              <h4 className="text-xl font-bold">3. Update</h4>
-              <p className="text-white/40 text-sm leading-relaxed">Users receive the update on the next launch. No App Store delays, no user action required.</p>
+              <h4 className="text-xl font-bold">3. {t('Workflow.step3.title')}</h4>
+              <p className="text-white/40 text-sm leading-relaxed">{t('Workflow.step3.desc')}</p>
             </div>
           </div>
         </div>
@@ -747,8 +756,8 @@ export default function LandingPage() {
             transition={{ duration: 0.8 }}
             className="flex flex-col mb-20"
           >
-            <h2 className="text-sm font-bold uppercase tracking-[0.4em] text-white/20 mb-4">Infrastructure</h2>
-            <p className="text-4xl font-bold tracking-tight">Built for speed. <br /> Designed for developers.</p>
+            <h2 className="text-sm font-bold uppercase tracking-[0.4em] text-white/20 mb-4">{t('Features.infra')}</h2>
+            <p className="text-4xl font-bold tracking-tight">{t.rich('Features.title', { lb: (chunks) => <br /> })}</p>
           </motion.div>
 
           <motion.div 
@@ -765,9 +774,9 @@ export default function LandingPage() {
             <motion.div variants={{ hidden: { opacity: 0, y: 40 }, show: { opacity: 1, y: 0, transition: { duration: 0.8 } } }} className="md:col-span-8 group relative overflow-hidden rounded-3xl glass p-12 transition-all hover:bg-white/[0.04]">
               <div className="relative z-10 h-full flex flex-col">
                 <Logo size={48} className="rounded-2xl mb-8 shadow-xl" />
-                <h3 className="text-3xl font-bold mb-4">Instant Edge Delivery</h3>
+                <h3 className="text-3xl font-bold mb-4">{t('Features.instant.title')}</h3>
                 <p className="text-white/40 text-lg max-w-md leading-relaxed font-medium">
-                  We ship your JS bundles across a global edge network. Your users get updates in milliseconds, not minutes.
+                  {t('Features.instant.desc')}
                 </p>
                 <div className="mt-auto pt-12 flex gap-2">
                   {[1, 2, 3, 4].map(i => (
@@ -790,9 +799,9 @@ export default function LandingPage() {
               >
                 <Shield className="h-5 w-5 text-white" />
               </motion.div>
-              <h3 className="text-xl font-bold mb-3">Military-Grade Security</h3>
+              <h3 className="text-xl font-bold mb-3">{t('Features.security.title')}</h3>
               <p className="text-white/40 text-sm leading-relaxed font-medium">
-                End-to-end cryptographic signing ensures that only your authorized code ever runs on your users' devices.
+                {t('Features.security.desc')}
               </p>
             </motion.div>
 
@@ -805,9 +814,9 @@ export default function LandingPage() {
               >
                 <Code className="h-5 w-5 text-white" />
               </motion.div>
-              <h3 className="text-xl font-bold mb-3">Intuitive CLI</h3>
+              <h3 className="text-xl font-bold mb-3">{t('Features.cli.title')}</h3>
               <p className="text-white/40 text-sm leading-relaxed font-medium">
-                A command-line experience that feels like magic. <code className="text-white/60">zenota publish</code> is all you need.
+                {t('Features.cli.desc')}
               </p>
             </motion.div>
 
@@ -815,9 +824,9 @@ export default function LandingPage() {
             <motion.div variants={{ hidden: { opacity: 0, y: 40 }, show: { opacity: 1, y: 0, transition: { duration: 0.8 } } }} className="md:col-span-8 group relative overflow-hidden rounded-3xl glass p-12 transition-all hover:bg-white/[0.04]">
               <div className="flex flex-col md:flex-row gap-12 items-center h-full">
                 <div className="flex-1">
-                  <h3 className="text-3xl font-bold mb-4 tracking-tight">Native-First Runtime</h3>
+                  <h3 className="text-3xl font-bold mb-4 tracking-tight">{t('Features.runtime.title')}</h3>
                   <p className="text-white/40 text-lg leading-relaxed font-medium">
-                    Zero overhead. ZenOTA leverages the native Expo Updates runtime you already trust, without adding bloat.
+                    {t('Features.runtime.desc')}
                   </p>
                 </div>
                 <div className="flex-1 w-full flex flex-col gap-3">
@@ -862,8 +871,8 @@ export default function LandingPage() {
             transition={{ duration: 0.8 }}
             className="text-center mb-16"
           >
-            <h2 className="text-3xl md:text-5xl font-bold tracking-tight mb-4">Frequently Asked Questions</h2>
-            <p className="text-white/40 font-medium text-lg">Everything you need to know about ZenOTA.</p>
+            <h2 className="text-3xl md:text-5xl font-bold tracking-tight mb-4">{t('FAQ.title')}</h2>
+            <p className="text-white/40 font-medium text-lg">{t('FAQ.subtitle')}</p>
           </motion.div>
 
           <motion.div 
@@ -878,26 +887,20 @@ export default function LandingPage() {
           >
             <motion.div variants={{ hidden: { opacity: 0, y: 20 }, show: { opacity: 1, y: 0 } }}>
               <FAQItem
-                question="Do I need to eject my Expo app?"
-                answer="No! ZenOTA works seamlessly with managed Expo workflows. It uses the exact same `expo-updates` library you already have installed. You just point the configuration to our servers in your app.json."
-              />
-            </motion.div>
-            {/* <motion.div variants={{ hidden: { opacity: 0, y: 20 }, show: { opacity: 1, y: 0 } }}>
-              <FAQItem
-                question="Is ZenOTA a replacement for EAS Update?"
-                answer="Yes. ZenOTA provides the same core functionality as EAS Update but is optimized for speed, simplicity, and affordability. Our CLI and infrastructure are built to get your bundles to users as fast as possible without complex workflows."
-              />
-            </motion.div> */}
-            <motion.div variants={{ hidden: { opacity: 0, y: 20 }, show: { opacity: 1, y: 0 } }}>
-              <FAQItem
-                question="What happens if an update crashes my app?"
-                answer="By default, the Expo Updates runtime will detect a fatal crash on startup and automatically roll back to the previously embedded bundle, ensuring your users are never stuck on a broken screen."
+                question={t('FAQ.q1.q')}
+                answer={t('FAQ.q1.a')}
               />
             </motion.div>
             <motion.div variants={{ hidden: { opacity: 0, y: 20 }, show: { opacity: 1, y: 0 } }}>
               <FAQItem
-                question="What is considered a 'Deployment'?"
-                answer="A deployment is a single push of a new bundle (using `zenota publish`). If you publish an update for both iOS and Android simultaneously, it counts as one deployment. There are no limits on how many users can download your updates."
+                question={t('FAQ.q2.q')}
+                answer={t('FAQ.q2.a')}
+              />
+            </motion.div>
+            <motion.div variants={{ hidden: { opacity: 0, y: 20 }, show: { opacity: 1, y: 0 } }}>
+              <FAQItem
+                question={t('FAQ.q3.q')}
+                answer={t('FAQ.q3.a')}
               />
             </motion.div>
           </motion.div>
@@ -914,8 +917,8 @@ export default function LandingPage() {
             transition={{ duration: 0.8 }}
             className="text-center mb-24"
           >
-            <h2 className="text-4xl md:text-5xl font-bold tracking-tight mb-6 text-white">Elite Infrastructure. <br /> Fair Pricing.</h2>
-            <p className="text-white/40 max-w-xl mx-auto font-medium">One flat rate. Unlimited possibilities. Scale your Expo apps without the bandwidth tax.</p>
+            <h2 className="text-4xl md:text-5xl font-bold tracking-tight mb-6 text-white">{t.rich('Pricing.title', { lb: (chunks) => <br /> })}</h2>
+            <p className="text-white/40 max-w-xl mx-auto font-medium">{t('Pricing.subtitle')}</p>
           </motion.div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl mx-auto">

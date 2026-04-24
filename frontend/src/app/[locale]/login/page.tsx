@@ -4,12 +4,13 @@ import { useState, useRef, useEffect } from "react";
 import { CloudLightning, Eye, EyeOff, Loader2, ArrowRight } from "lucide-react";
 import { useLogin } from "@/hooks/useAuth";
 import axios from "axios";
-import { useRouter } from "next/navigation";
-import Link from "next/link";
+import { Link, useRouter } from "@/i18n/routing";
 import { signIn } from "next-auth/react";
 import posthog from "posthog-js";
+import { useTranslations } from "next-intl";
 
 export default function LoginPage() {
+  const t = useTranslations("Login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -39,8 +40,8 @@ export default function LoginPage() {
         onError: (err) => {
           const msg =
             axios.isAxiosError(err) && err.response?.status === 401
-              ? "Invalid email or password."
-              : "Connection error. Please try again.";
+              ? t("error401")
+              : t("errorGeneric");
           setError(msg);
           setPassword("");
           posthog.captureException(err, { extra: { context: "login" } });
@@ -79,10 +80,10 @@ export default function LoginPage() {
             </Link>
             <div className="text-center">
               <h1 className="text-2xl font-bold tracking-tighter text-white">
-                Log in to ZenOTA
+                {t("title")}
               </h1>
               <p className="mt-1 text-sm text-white/40 font-medium">
-                Enter your details to access your dashboard.
+                {t("subtitle")}
               </p>
             </div>
           </div>
@@ -115,13 +116,13 @@ export default function LoginPage() {
                       d="M12 5.38c1.62 0 3.06.56 4.21 1.66l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 12-4.53z"
                     />
                   </svg>
-                  <span>Continue with Google</span>
+                  <span>{t("google")}</span>
                 </>
               )}
             </button>
             <div className="flex items-center gap-4 py-2">
               <div className="h-[1px] flex-1 bg-white/[0.08]" />
-              <span className="text-[10px] font-bold uppercase tracking-widest text-white/20">or</span>
+              <span className="text-[10px] font-bold uppercase tracking-widest text-white/20">{t("or")}</span>
               <div className="h-[1px] flex-1 bg-white/[0.08]" />
             </div>
           </div>
@@ -129,7 +130,7 @@ export default function LoginPage() {
           {/* Form */}
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="space-y-2">
-              <label htmlFor="email" className="text-[11px] font-bold uppercase tracking-widest text-white/40">Email</label>
+              <label htmlFor="email" className="text-[11px] font-bold uppercase tracking-widest text-white/40">{t("email")}</label>
               <input
                 ref={emailRef}
                 id="email"
@@ -144,8 +145,8 @@ export default function LoginPage() {
 
             <div className="space-y-2">
               <div className="flex justify-between items-center">
-                <label htmlFor="password" className="text-[11px] font-bold uppercase tracking-widest text-white/40">Password</label>
-                <a href="#" className="text-[11px] font-bold uppercase tracking-widest text-white/30 hover:text-white transition-colors">Forgot?</a>
+                <label htmlFor="password" className="text-[11px] font-bold uppercase tracking-widest text-white/40">{t("password")}</label>
+                <a href="#" className="text-[11px] font-bold uppercase tracking-widest text-white/30 hover:text-white transition-colors">{t("forgot")}</a>
               </div>
               <div className="relative">
                 <input
@@ -182,7 +183,7 @@ export default function LoginPage() {
                 <Loader2 className="h-4 w-4 animate-spin" />
               ) : (
                 <>
-                  <span>Log in</span>
+                  <span>{t("submit")}</span>
                   <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
                 </>
               )}
@@ -190,9 +191,9 @@ export default function LoginPage() {
           </form>
 
           <p className="mt-8 text-center text-[13px] font-medium text-white/40">
-            Don&apos;t have an account?{" "}
+            {t("noAccount")}{" "}
             <Link href="/register" className="text-white hover:underline">
-              Sign up for free
+              {t("signup")}
             </Link>
           </p>
         </div>
