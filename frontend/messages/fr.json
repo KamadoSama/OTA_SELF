@@ -1,0 +1,240 @@
+{
+  "Common": {
+    "login": "Connexion",
+    "signup": "S'inscrire",
+    "docs": "Docs",
+    "features": "Fonctionnalités",
+    "pricing": "Tarifs",
+    "getStarted": "Commencer gratuitement",
+    "documentation": "Documentation"
+  },
+  "Hero": {
+    "badge": "Optimisé pour Expo SDK 50+",
+    "title1": "Déployez vos mises à jour",
+    "title2": "en toute sérénité",
+    "title3": "Zen.",
+    "description": "L'infrastructure OTA haute performance pour React Native. Contournez les cycles de révision. Déployez instantanément. Passez à l'échelle sans limite."
+  },
+  "Loading": {
+    "initializing": "Initialisation de ZenOTA"
+  },
+  "Login": {
+    "title": "Connexion à ZenOTA",
+    "subtitle": "Entrez vos informations pour accéder à votre tableau de bord.",
+    "google": "Continuer avec Google",
+    "or": "ou",
+    "email": "Email",
+    "password": "Mot de passe",
+    "forgot": "Oublié ?",
+    "submit": "Se connecter",
+    "noAccount": "Vous n'avez pas de compte ?",
+    "signup": "Inscrivez-vous gratuitement",
+    "error401": "Email ou mot de passe invalide.",
+    "errorGeneric": "Erreur de connexion. Veuillez réessayer."
+  },
+  "Problem": {
+    "title": "Le jeu d'attente de l'App Store est terminé.",
+    "subtitle": "La correction d'une faute de frappe ne devrait pas prendre 3 jours de révision. Contournez la bureaucratie et livrez les mises à jour directement sur les appareils de vos utilisateurs.",
+    "oldWay": "L'Ancienne Méthode",
+    "zenotaWay": "La Méthode ZenOTA",
+    "oldSteps": [
+      "Construire des binaires natifs (AAB/IPA)",
+      "Télécharger sur l'App Store / Play Store",
+      "Attendre la révision manuelle (1-3 jours)",
+      "Les utilisateurs doivent télécharger manuellement la mise à jour"
+    ],
+    "zenotaSteps": [
+      "Modifiez votre code en JS/TS",
+      "Lancez `zenota publish`",
+      "Mises à jour distribuées via Global Edge CDN",
+      "Les utilisateurs reçoivent la mise à jour instantanément au prochain lancement"
+    ]
+  },
+  "Workflow": {
+    "pipeline": "Le Pipeline",
+    "title": "Déploiement sans friction.",
+    "step1": {
+      "title": "Changements Locaux",
+      "desc": "Ajoutez l'URL ZenOTA à votre app.json. La configuration prend moins de 30 secondes."
+    },
+    "step2": {
+      "title": "zenota publish",
+      "desc": "Lancez la commande. Nous empaquetons, hachons et téléchargeons vos actifs sur notre réseau périphérique mondial."
+    },
+    "step3": {
+      "title": "Réseau Edge",
+      "desc": "Les utilisateurs reçoivent la mise à jour au prochain lancement. Aucun délai d'App Store, aucune action utilisateur requise."
+    },
+    "stepLabel": "Étape",
+    "iosUsers": "Utilisateurs iOS",
+    "androidUsers": "Utilisateurs Android"
+  },
+  "Features": {
+    "infra": "Infrastructure",
+    "title": "Conçu pour la vitesse. <lb></lb> Pensé pour les développeurs.",
+    "instant": {
+      "title": "Livraison Instantanée sur le Edge",
+      "desc": "Nous expédions vos bundles JS sur un réseau périphérique mondial. Vos utilisateurs reçoivent les mises à jour en millisecondes, pas en minutes."
+    },
+    "security": {
+      "title": "Sécurité de Grade Militaire",
+      "desc": "La signature cryptographique de bout en bout garantit que seul votre code autorisé s'exécute sur les appareils de vos utilisateurs."
+    },
+    "cli": {
+      "title": "CLI Intuitive",
+      "desc": "Une expérience en ligne de commande magique. zenota publish est tout ce dont vous avez besoin."
+    },
+    "runtime": {
+      "title": "Runtime Natif d'Abord",
+      "desc": "Zéro surcharge. ZenOTA exploite le runtime natif Expo Updates en lequel vous avez déjà confiance, sans ajouter de poids superflu."
+    }
+  },
+  "FAQ": {
+    "title": "Questions Fréquemment Posées",
+    "subtitle": "Tout ce que vous devez savoir sur ZenOTA.",
+    "q1": {
+      "q": "Dois-je éjecter mon application Expo ?",
+      "a": "Non ! ZenOTA fonctionne parfaitement avec les workflows Expo managés. Il utilise la bibliothèque expo-updates exacte que vous avez déjà installée. Il vous suffit de pointer la configuration vers nos serveurs dans votre app.json."
+    },
+    "q2": {
+      "q": "Que se passe-t-il si une mise à jour fait planter mon application ?",
+      "a": "Par défaut, le runtime Expo Updates détectera un plantage fatal au démarrage et reviendra automatiquement au bundle précédemment embarqué, garantissant que vos utilisateurs ne soient jamais bloqués."
+    },
+    "q3": {
+      "q": "Qu'est-ce qui est considéré comme un 'Déploiement' ?",
+      "a": "Un déploiement est une seule publication d'un nouveau bundle (via zenota publish). Si vous publiez une mise à jour pour iOS et Android simultanément, cela compte pour un seul déploiement. Il n'y a pas de limite au nombre d'utilisateurs pouvant télécharger vos mises à jour."
+    }
+  },
+  "Pricing": {
+    "title": "Infrastructure d'Élite. <lb></lb> Prix Équitable.",
+    "subtitle": "Un tarif forfaitaire unique. Des possibilités illimitées. Faites évoluer vos applications Expo sans la taxe sur la bande passante."
+  },
+  "Metrics": {
+    "latency": "Latence Edge 50ms",
+    "signing": "Signature de bout en bout",
+    "uptime": "99,99 % de disponibilité SLA",
+    "config": "Zéro configuration native"
+  },
+  "Docs": {
+    "navbar": {
+      "home": "Accueil",
+      "backHome": "Retour à l'accueil",
+      "version": "v1.0.0",
+      "resources": "Ressources",
+      "changelog": "Journal"
+    },
+    "sections": {
+      "gettingStarted": {
+        "title": "Mise en Route",
+        "intro": "Introduction",
+        "prerequisites": "Prérequis",
+        "quickstart": "Démarrage Rapide"
+      },
+      "cliReference": {
+        "title": "Référence CLI",
+        "installation": "Installation",
+        "authentication": "Authentification",
+        "publishing": "Publication des Mises à Jour"
+      },
+      "platform": {
+        "title": "Plateforme",
+        "apiKeys": "Clés API",
+        "manifest": "Manifeste et Versionnage"
+      }
+    },
+    "introduction": {
+      "badge": "Introduction",
+      "title": "Qu'est-ce que ZenOTA ?",
+      "desc": "ZenOTA est une plateforme de mise à jour <bold>Over-The-Air (OTA)</bold> de classe entreprise pour les applications React Native Expo. Livrez des bundles JavaScript et des actifs directement sur les appareils des utilisateurs sans les délais de l'App Store — votre propre alternative auto-hébergée à EAS Update.",
+      "features": {
+        "instant": {
+          "title": "Livraison Instantanée",
+          "desc": "Le CDN Edge garantit que les mises à jour atteignent les utilisateurs en millisecondes dans le monde entier."
+        },
+        "pricing": {
+          "title": "Prix Forfaitaire",
+          "desc": "Pas de facturation à la bande passante. Un seul abonnement pour toutes vos applications."
+        },
+        "cli": {
+          "title": "CLI Puissante",
+          "desc": "Une seule commande pour exporter, compresser et déployer votre bundle."
+        }
+      }
+    },
+    "prerequisites": {
+      "title": "Prérequis",
+      "subtitle": "Configurez votre projet Expo pour les mises à jour OTA avant d'utiliser ZenOTA.",
+      "desc": "ZenOTA remplace le point de terminaison EAS Update par défaut par le sien. Pour que cela fonctionne, vous devez avoir installé la bibliothèque <codeTag>expo-updates</codeTag> et initialisé la configuration des mises à jour dans votre projet.",
+      "step1": "Étape 1 — Installer expo-updates",
+      "step2": "Étape 2 — Initialiser la config EAS Update",
+      "step2Desc": "Cela ajoutera un champ <codeTag>runtimeVersion</codeTag> et un champ <codeTag>updates.url</codeTag> à votre <codeTag>app.json</codeTag>.",
+      "step3": "Étape 3 — Configurer le point de terminaison ZenOTA",
+      "step3Desc": "Enfin, vous devrez mettre à jour <codeTag>updates.url</codeTag> dans votre <codeTag>app.json</codeTag> pour pointer vers votre point de terminaison de manifeste ZenOTA.",
+      "seeManifest": "Voir comment configurer app.json",
+      "critical": "<bold>Critique :</bold> Vous devez terminer ces étapes <bold>avant</bold> d'installer la CLI ZenOTA. Sans <codeTag>expo-updates</codeTag>, la commande d'exportation de la CLI échouera."
+    },
+    "quickstart": {
+      "title": "Démarrage Rapide",
+      "subtitle": "Livrez votre première mise à jour en moins de 5 minutes.",
+      "steps": {
+        "1": {
+          "title": "Installer la CLI ZenOTA",
+          "desc": "Installez la CLI globalement via npm ou yarn."
+        },
+        "2": {
+          "title": "Générer une Clé API",
+          "desc": "Allez dans votre Tableau de Bord → Jetons d'Accès CLI → Générer une Nouvelle Clé. Copiez la clé immédiatement — elle ne sera plus affichée."
+        },
+        "3": {
+          "title": "Authentifier la CLI",
+          "desc": "Lancez la commande login et collez votre clé API lorsque vous y êtes invité."
+        },
+        "4": {
+          "title": "Publier votre mise à jour",
+          "desc": "Accédez à la racine de votre projet Expo. Lancez publish et choisissez votre plateforme cible (Android, iOS ou les deux) dans le menu interactif."
+        }
+      },
+      "exploreCLI": "Explorer la Référence CLI"
+    },
+    "cliReference": {
+      "title": "Référence CLI",
+      "subtitle": "Toutes les commandes et drapeaux disponibles dans <codeTag>zenota-cli</codeTag>.",
+      "table": {
+        "flag": "Drapeau",
+        "default": "Par défaut",
+        "description": "Description"
+      },
+      "flags": {
+        "channel": "Canal de déploiement cible (ex: production, staging).",
+        "platform": "Plateforme cible : ios, android ou all. Ouvre un menu si omis.",
+        "version": "Afficher la version actuelle de la CLI."
+      },
+      "learnAPI": "En savoir plus sur les Clés API"
+    },
+    "apiKeys": {
+      "title": "Clés API",
+      "subtitle": "Sécurisez vos déploiements CLI avec des jetons API à portée limitée.",
+      "warning": {
+        "title": "Politique d'affichage unique",
+        "desc": "Les clés API ne sont affichées qu'une seule fois au moment de la création. Copiez-les et stockez-les dans un endroit sûr (ex: un gestionnaire de mots de passe ou un coffre-fort de secrets CI/CD). Si vous perdez une clé, vous devez la révoquer et la régénérer."
+      },
+      "steps": [
+        "Allez dans votre Tableau de Bord → Jetons d'Accès CLI.",
+        "Cliquez sur \"Générer une Nouvelle Clé\". La clé brute n'est affichée qu'une seule fois.",
+        "Lancez `zenota login` dans votre terminal et collez la clé lorsque vous y êtes invité.",
+        "La CLI stocke la clé en toute sécurité dans ~/.zenota-config.json."
+      ],
+      "seeVersioning": "Comprendre les Manifestes et le Versionnage"
+    },
+    "manifest": {
+      "title": "Manifeste et Versionnage",
+      "subtitle": "Comment ZenOTA fait correspondre les mises à jour aux builds natifs.",
+      "desc": "ZenOTA génère des <bold>manifestes compatibles Expo</bold>. Le build natif de votre application doit avoir une <codeTag>runtimeVersion</codeTag> correspondante configurée dans <codeTag>app.json</codeTag> pour qu'une mise à jour soit appliquée.",
+      "config": "Configuration Recommandée",
+      "proTip": "<bold>Conseil de Pro :</bold> Utilisez la politique <codeTag>sdkVersion</codeTag> pendant le développement et passez à une politique <codeTag>nativeVersion</codeTag> pour la production après votre première soumission à l'App Store."
+    },
+    "footer": {
+      "lastUpdated": "Docs ZenOTA — Dernière mise à jour Avril 2024"
+    }
+  }
+}
