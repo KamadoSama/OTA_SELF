@@ -1,12 +1,14 @@
 "use client";
 
-import { ArrowRight, ChevronRight, CloudLightning, Code, ExternalLink, Shield, Zap, Clock, XCircle, CheckCircle, ChevronDown, Terminal, Server, Smartphone } from 'lucide-react';
+import { ArrowRight, ChevronRight, CloudLightning, Code, ExternalLink, Shield, Zap, Clock, XCircle, CheckCircle, ChevronDown, Terminal, Server, Smartphone, Menu, X } from 'lucide-react';
 import { Logo } from '@/components/ui/Logo';
 import { Link } from '@/i18n/routing';
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from 'framer-motion';
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
 import { LanguageSwitcher } from '@/components/ui/LanguageSwitcher';
+import { useRouter, usePathname } from '@/i18n/routing';
+import { locales } from '@/i18n/config';
 
 
 function FAQItem({ question, answer }: { question: string, answer: string }) {
@@ -471,8 +473,23 @@ function LoadingScreen() {
 
 export default function LandingPage() {
   const t = useTranslations();
+  const locale = useLocale();
+  const router = useRouter();
+  const pathname = usePathname();
   const [mounted, setMounted] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+  useEffect(() => {
+    if (isMenuOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, [isMenuOpen]);
 
   useEffect(() => {
     setMounted(true);
@@ -513,12 +530,12 @@ export default function LandingPage() {
       {/* Header */}
       <header className="fixed top-0 inset-x-0 z-50 h-20 flex items-center">
         <div className="container flex items-center justify-between">
-          <div className="flex items-center gap-2.5 group cursor-pointer">
+          <div className="flex items-center gap-2.5 group cursor-pointer" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
             <Logo size={32} className="group-hover:scale-110" />
             <span className="text-xl font-bold tracking-tight">ZenOTA</span>
           </div>
 
-          <nav className="hidden md:flex items-center gap-12">
+          <nav className="hidden lg:flex items-center gap-12">
             <a
               href="#features"
               className="text-sm font-medium text-white/40 hover:text-white transition-all hover:tracking-widest duration-300"
@@ -537,15 +554,159 @@ export default function LandingPage() {
             </Link>
           </nav>
 
-          <div className="flex items-center gap-8">
-            <LanguageSwitcher />
-            <Link href="/login" className="text-sm font-medium text-white/40 hover:text-white transition-colors">{t('Common.login')}</Link>
-            <Link href="/register" className="glass h-10 px-6 flex items-center justify-center rounded-full text-sm font-bold hover:bg-white hover:text-black transition-all duration-500 hover:scale-105 active:scale-95">
-              {t('Common.signup')}
-            </Link>
+          <div className="flex items-center gap-4">
+            <div className="hidden lg:flex items-center gap-8">
+              <LanguageSwitcher />
+              <Link href="/login" className="text-sm font-medium text-white/40 hover:text-white transition-colors">{t('Common.login')}</Link>
+              <Link href="/register" className="glass h-12 px-6 flex items-center justify-center rounded-full text-sm font-bold hover:bg-white hover:text-black transition-all duration-500 hover:scale-105 active:scale-95">
+                {t('Common.signup')}
+              </Link>
+            </div>
+
+            {/* Mobile Actions */}
+            <div className="lg:hidden flex items-center gap-3">
+              <Link href="/register" className="glass h-9 px-4 flex items-center justify-center rounded-full text-[10px] font-bold hover:bg-white hover:text-black transition-all">
+                {t('Common.signup')}
+              </Link>
+              <button 
+                onClick={() => setIsMenuOpen(!isMenuOpen)}
+                className="w-10 h-10 rounded-full glass flex items-center justify-center text-white relative z-[60]"
+              >
+                <AnimatePresence mode="wait">
+                  {isMenuOpen ? (
+                    <motion.div
+                      key="close"
+                      initial={{ opacity: 0, rotate: -90 }}
+                      animate={{ opacity: 1, rotate: 0 }}
+                      exit={{ opacity: 0, rotate: 90 }}
+                      transition={{ duration: 0.2 }}
+                    >
+                      <X className="h-5 w-5" />
+                    </motion.div>
+                  ) : (
+                    <motion.div
+                      key="menu"
+                      initial={{ opacity: 0, rotate: 90 }}
+                      animate={{ opacity: 1, rotate: 0 }}
+                      exit={{ opacity: 0, rotate: -90 }}
+                      transition={{ duration: 0.2 }}
+                    >
+                      <Menu className="h-5 w-5" />
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </button>
+            </div>
           </div>
         </div>
       </header>
+
+      {/* Mobile Menu Overlay */}
+      <AnimatePresence>
+        {isMenuOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[55] lg:hidden"
+          >
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="absolute inset-0 bg-black/60 backdrop-blur-2xl"
+              onClick={() => setIsMenuOpen(false)}
+            />
+            
+            <motion.div
+              initial={{ x: '100%' }}
+              animate={{ x: 0 }}
+              exit={{ x: '100%' }}
+              transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+              className="absolute inset-y-0 right-0 w-full max-w-sm bg-black/40 border-l border-white/10 backdrop-blur-3xl p-8  flex flex-col"
+            >
+              {/* Header Logo (Mobile Only) */}
+            <div className="flex items-center justify-end mb-12">
+            
+              
+              <button 
+                onClick={() => setIsMenuOpen(false)}
+                className="w-10 h-10 rounded-full glass flex items-center justify-center text-white relative z-[60] border border-white/10 hover:bg-white hover:text-black transition-all duration-300"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>  
+              <nav className="flex flex-col gap-8 mb-12">
+                <a
+                  href="#features"
+                  onClick={() => setIsMenuOpen(false)}
+                  className="text-2xl font-bold text-white/60 hover:text-white transition-colors"
+                >
+                  {t('Common.features')}
+                </a>
+                <a
+                  href="#pricing"
+                  onClick={() => setIsMenuOpen(false)}
+                  className="text-2xl font-bold text-white/60 hover:text-white transition-colors"
+                >
+                  {t('Common.pricing')}
+                </a>
+                <Link 
+                  href="/docs" 
+                  onClick={() => setIsMenuOpen(false)}
+                  className="text-2xl font-bold text-white/60 hover:text-white transition-colors flex items-center gap-2"
+                >
+                  {t('Common.docs')}
+                  <ExternalLink className="h-5 w-5 opacity-40" />
+                </Link>
+              </nav>
+
+              <div className="mt-auto space-y-8">
+                <div className="flex flex-col gap-4">
+                  <div className="text-[10px] font-bold uppercase tracking-widest text-white/20 px-2">
+                    {t('Common.language')}
+                  </div>
+                  <div className="flex gap-2">
+                    {locales.map((l) => (
+                      <button
+                        key={l}
+                        onClick={() => {
+                          router.replace(pathname, { locale: l });
+                          setIsMenuOpen(false);
+                        }}
+                        className={`flex-1 h-12 rounded-xl border transition-all font-bold text-xs uppercase tracking-widest flex items-center justify-center gap-2 ${
+                          locale === l 
+                            ? 'bg-white text-black border-white' 
+                            : 'bg-white/5 text-white/40 border-white/10'
+                        }`}
+                      >
+                        {l === 'fr' ? 'Français' : 'English'}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="flex flex-col gap-4 border-t border-white/10 pt-8">
+                  <Link 
+                    href="/login" 
+                    onClick={() => setIsMenuOpen(false)}
+                    className="h-14 rounded-2xl glass flex items-center justify-center text-lg font-bold"
+                  >
+                    {t('Common.login')}
+                  </Link>
+                  <Link 
+                    href="/register" 
+                    onClick={() => setIsMenuOpen(false)}
+                    className="h-14 rounded-2xl bg-white text-black flex items-center justify-center text-lg font-bold shadow-[0_0_30px_rgba(255,255,255,0.1)]"
+                  >
+                    {t('Common.signup')}
+                  </Link>
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Hero Section */}
       <section className="relative md:pt-60 pt-20 pb-10 px-6 z-10 overflow-hidden">

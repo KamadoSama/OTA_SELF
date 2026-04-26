@@ -6,7 +6,8 @@
     "features": "Fonctionnalités",
     "pricing": "Tarifs",
     "getStarted": "Commencer gratuitement",
-    "documentation": "Documentation"
+    "documentation": "Documentation",
+    "language": "Langue"
   },
   "Hero": {
     "badge": "Optimisé pour Expo SDK 50+",
