@@ -12,11 +12,16 @@ import { PrismaModule } from './prisma.module';
 import { SubscriptionModule } from './subscription/subscription.module';
 import { InvoiceModule } from './invoice/invoice.module';
 import { ScheduleModule } from '@nestjs/schedule';
+import { CacheModule } from '@nestjs/cache-manager';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
+    }),
+    CacheModule.register({
+      isGlobal: true,
+      ttl: 0, // No expiration by default, we use manual invalidation
     }),
     ScheduleModule.forRoot(),
     PrismaModule,

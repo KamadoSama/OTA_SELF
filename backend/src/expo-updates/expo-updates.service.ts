@@ -2,6 +2,9 @@ import { Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from '../prisma.service';
 import { StorageService } from '../storage/storage.service';
 import { createHmac } from 'crypto';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import { Cache } from 'cache-manager';
+import { Inject } from '@nestjs/common';
 
 @Injectable()
 export class ExpoUpdatesService {
@@ -10,6 +13,7 @@ export class ExpoUpdatesService {
   constructor(
     private prisma: PrismaService,
     private storageService: StorageService,
+    @Inject(CACHE_MANAGER) private cacheManager: Cache,
   ) {}
 
   private shouldSignAssetRequests(): boolean {
@@ -45,6 +49,15 @@ export class ExpoUpdatesService {
     appId: string,
     baseUrl?: string,
   ) {
+    const cacheKey = `manifest:${appId}:${runtimeVersion}:${platform}:${channelName}`;
+    const cachedManifest = await this.cacheManager.get<any>(cacheKey);
+
+    if (cachedManifest) {
+      // Still need to increment download count even if served from cache
+      this.incrementDownloadCount(cachedManifest.manifest.id);
+      return cachedManifest;
+    }
+
     // 1. Find the specific channel and get the latest update that matches runtimeVersion & platform
     const latestUpdate = await this.prisma.update.findFirst({
       where: {
@@ -131,14 +144,19 @@ export class ExpoUpdatesService {
       },
     };
 
-    return {
+
+    const response = {
       manifest,
       extensions: {
         assetRequestHeaders,
       },
-      // signature mechanism omitted for simplicity here, but required if you enforce it in expo app
       signature: 'TODO: Implement RS256 signature if needed',
     };
+
+    // Store in cache for future requests
+    await this.cacheManager.set(cacheKey, response);
+
+    return response;
   }
 
   async incrementDownloadCount(updateId: string) {

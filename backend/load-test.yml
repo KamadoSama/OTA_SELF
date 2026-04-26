@@ -1,0 +1,26 @@
+config:
+  target: "https://api-zenota.diesestudio.com"
+  phases:
+    - duration: 10
+      arrivalRate: 5
+      name: "Warm up"
+    - duration: 40
+      arrivalRate: 5
+      rampTo: 100
+      name: "Ramp up to high load"
+    - duration: 60
+      arrivalRate: 100
+      name: "Sustained peak load (100 req/s)"
+  defaults:
+    headers:
+      expo-runtime-version: "1.0.0"
+      expo-platform: "android"
+      expo-channel-name: "production"
+      expo-protocol-version: "1"
+      expo-sfv-version: "0"
+
+scenarios:
+  - name: "Check for update (Manifest request)"
+    flow:
+      - get:
+          url: "/api/update/manifest/artisanHub"

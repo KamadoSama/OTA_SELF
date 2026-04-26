@@ -1,4 +1,6 @@
-import { Injectable, Logger, BadRequestException } from '@nestjs/common';
+import { Injectable, Logger, BadRequestException, Inject } from '@nestjs/common';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import { Cache } from 'cache-manager';
 import AdmZip from 'adm-zip';
 import * as fs from 'fs';
 import * as path from 'path';
@@ -33,6 +35,7 @@ export class AdminApiService {
     private prisma: PrismaService,
     private storage: StorageService,
     private subscriptionService: SubscriptionService,
+    @Inject(CACHE_MANAGER) private cacheManager: Cache,
   ) {}
 
   private calculateHash(filePath: string): string {
@@ -280,6 +283,14 @@ export class AdminApiService {
             });
           }
         }
+      }
+
+      // Invalidate manifest cache for all affected platforms
+      const runtimeVersionForCache = metadata.runtimeVersion ?? '1.0.0';
+      for (const platform of platforms) {
+        const cacheKey = `manifest:${appName}:${runtimeVersionForCache}:${platform}:${channelName}`;
+        await (this.cacheManager as any).del(cacheKey);
+        this.logger.log(`Invalidated cache for ${cacheKey}`);
       }
 
       return platforms[0];
