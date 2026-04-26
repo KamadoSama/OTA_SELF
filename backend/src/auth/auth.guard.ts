@@ -43,6 +43,10 @@ export class AuthGuard implements CanActivate {
         secret: this.configService.get<string>('JWT_SECRET'),
       });
 
+      if (!payload.sub) {
+        throw new UnauthorizedException('Invalid token payload.');
+      }
+
       const customer = await this.prisma.customer.findUnique({
         where: { id: payload.sub },
       });

@@ -1,4 +1,4 @@
-import { Injectable, UnauthorizedException, Logger } from '@nestjs/common';
+import { Injectable, UnauthorizedException, Logger, BadRequestException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { PrismaService } from '../prisma.service';
@@ -13,6 +13,9 @@ export class AuthService {
   ) {}
 
   async login(email: string, password: string) {
+    if (!email || !password) {
+      throw new BadRequestException('Email and password are required');
+    }
     const customer = await this.prisma.customer.findUnique({ where: { email } });
     if (!customer) {
       throw new UnauthorizedException('Invalid email or password');
@@ -36,6 +39,9 @@ export class AuthService {
   }
 
   async register(email: string, password: string, tier: 'FREE' | 'PRO' = 'FREE') {
+    if (!email || !password) {
+      throw new BadRequestException('Email and password are required');
+    }
     const existing = await this.prisma.customer.findUnique({ where: { email } });
     if (existing) {
       throw new UnauthorizedException('Email already in use');
@@ -74,6 +80,9 @@ export class AuthService {
   }
 
   async googleAuth(email: string, name: string, tier: 'FREE' | 'PRO' = 'FREE') {
+    if (!email) {
+      throw new BadRequestException('Email is required');
+    }
     let customer = await this.prisma.customer.findUnique({ where: { email } });
 
     if (!customer) {
