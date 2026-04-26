@@ -27,6 +27,8 @@ export class ExpoUpdatesController {
     @Headers('expo-platform') expoPlatform: string,
     @Headers('expo-channel-name') expoChannelName: string,
     @Headers('expo-project-id') expoProjectId: string,
+    @Headers('expo-current-update-id') currentUpdateId: string,
+    @Headers('expo-embedded-update-id') embeddedUpdateId: string,
   ) {
     try {
       this.logger.log(
@@ -72,6 +74,12 @@ export class ExpoUpdatesController {
       }
 
       const { manifest, extensions } = manifestResponse;
+
+      // Protocol 1: If the client already has this update, return 204 No Content
+      if (currentUpdateId === manifest.id || embeddedUpdateId === manifest.id) {
+        this.logger.log(`Client already up-to-date: ${manifest.id}`);
+        return res.status(204).send();
+      }
       const boundary = `ExpoManifestBoundary-${Math.random().toString(36).slice(2)}`;
 
       // Set Required Protocol Headers
