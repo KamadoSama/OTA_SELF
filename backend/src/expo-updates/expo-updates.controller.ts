@@ -12,7 +12,7 @@ import {
 import type { Request, Response } from 'express';
 import { ExpoUpdatesService } from './expo-updates.service';
 
-@Controller('api/manifest')
+@Controller('api/update/manifest')
 export class ExpoUpdatesController {
   private logger = new Logger(ExpoUpdatesController.name);
 
