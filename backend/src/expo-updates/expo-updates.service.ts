@@ -69,12 +69,6 @@ export class ExpoUpdatesService {
       return null;
     }
 
-    // 1b. Increment download count (async fire & forget to avoid blocking manifest)
-    this.prisma.update.update({
-      where: { id: latestUpdate.id },
-      data: { downloadCount: { increment: 1 } }
-    }).catch(err => this.logger.error(`Failed to increment download count for update ${latestUpdate.id}: ${err.message}`));
-
     // 2. Separate launch asset (JS bundle) from other assets (images, fonts)
     const launchAsset = latestUpdate.assets.find((a) => a.isLaunchAsset);
     const otherAssets = latestUpdate.assets.filter((a) => !a.isLaunchAsset);
@@ -145,5 +139,18 @@ export class ExpoUpdatesService {
       // signature mechanism omitted for simplicity here, but required if you enforce it in expo app
       signature: 'TODO: Implement RS256 signature if needed',
     };
+  }
+
+  async incrementDownloadCount(updateId: string) {
+    this.prisma.update
+      .update({
+        where: { id: updateId },
+        data: { downloadCount: { increment: 1 } },
+      })
+      .catch((err) =>
+        this.logger.error(
+          `Failed to increment download count for update ${updateId}: ${err.message}`,
+        ),
+      );
   }
 }

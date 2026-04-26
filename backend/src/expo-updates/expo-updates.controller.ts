@@ -80,6 +80,10 @@ export class ExpoUpdatesController {
         this.logger.log(`Client already up-to-date: ${manifest.id}`);
         return res.status(204).send();
       }
+
+      // Increment download count only when we actually serve a new manifest
+      await this.expoService.incrementDownloadCount(manifest.id);
+
       const boundary = `ExpoManifestBoundary-${Math.random().toString(36).slice(2)}`;
 
       // Set Required Protocol Headers
