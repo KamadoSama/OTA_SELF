@@ -7,3 +7,4 @@ node_modules
 temp_pdf_gen
 zenota-server/zenota
 zenota-server/*.blob
+docs/
