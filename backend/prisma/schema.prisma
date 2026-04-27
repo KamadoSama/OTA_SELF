@@ -68,8 +68,8 @@ model Customer {
   email            String           @unique
   passwordHash     String
   subscriptionTier SubscriptionTier @default(FREE)
-  subscriptionStartDate DateTime?    // When the PRO subscription started
-  trialEndsAt           DateTime?    // When the free month ends
+  subscriptionStartDate DateTime?    
+  trialEndsAt           DateTime?    
   
   // Payment info
   cardLast4             String?

@@ -83,7 +83,7 @@ export function Header() {
             onClick={() => setIsMenuOpen(!isMenuOpen)}
             className={`lg:hidden w-12 h-12 rounded-full glass flex items-center justify-center text-white border border-white/10 transition-all ${isMenuOpen ? 'bg-white text-black border-white rotate-90' : 'bg-black/40'}`}
           >
-            {isMenuOpen ? <X size={20} /> : <Menu size={20} />}
+            {isMenuOpen ? <X size={20} color="#000" /> : <Menu size={20}  />}
           </button>
         </div>
       </div>
