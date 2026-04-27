@@ -580,29 +580,7 @@ export default function LandingPage() {
                 onClick={() => setIsMenuOpen(!isMenuOpen)}
                 className="w-10 h-10 rounded-full glass flex items-center justify-center text-white relative z-[60]"
               >
-                <AnimatePresence mode="wait">
-                  {isMenuOpen ? (
-                    <motion.div
-                      key="close"
-                      initial={{ opacity: 0, rotate: -90 }}
-                      animate={{ opacity: 1, rotate: 0 }}
-                      exit={{ opacity: 0, rotate: 90 }}
-                      transition={{ duration: 0.2 }}
-                    >
-                      <X className="h-5 w-5" />
-                    </motion.div>
-                  ) : (
-                    <motion.div
-                      key="menu"
-                      initial={{ opacity: 0, rotate: 90 }}
-                      animate={{ opacity: 1, rotate: 0 }}
-                      exit={{ opacity: 0, rotate: -90 }}
-                      transition={{ duration: 0.2 }}
-                    >
-                      <Menu className="h-5 w-5" />
-                    </motion.div>
-                  )}
-                </AnimatePresence>
+                {isMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
               </button>
             </div>
           </div>
@@ -616,13 +594,15 @@ export default function LandingPage() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
+            transition={{ duration: 0.15 }}
             className="fixed inset-0 z-[55] lg:hidden"
           >
             <motion.div 
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="absolute inset-0 bg-black/60 backdrop-blur-2xl"
+              transition={{ duration: 0.15 }}
+              className="absolute inset-0 bg-black/80 backdrop-blur-md"
               onClick={() => setIsMenuOpen(false)}
             />
             
@@ -630,8 +610,8 @@ export default function LandingPage() {
               initial={{ x: '100%' }}
               animate={{ x: 0 }}
               exit={{ x: '100%' }}
-              transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-              className="absolute inset-y-0 right-0 w-full max-w-sm bg-black/40 border-l border-white/10 backdrop-blur-3xl p-8  flex flex-col"
+              transition={{ type: 'spring', damping: 30, stiffness: 350 }}
+              className="absolute inset-y-0 right-0 w-full max-w-sm bg-black/90 border-l border-white/10 backdrop-blur-xl p-8 flex flex-col"
             >
               {/* Header Logo (Mobile Only) */}
             <div className="flex items-center justify-end mb-12">
