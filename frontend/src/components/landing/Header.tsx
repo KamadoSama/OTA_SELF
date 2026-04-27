@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { motion, AnimatePresence } from 'framer-motion';
 import { Menu, X, ExternalLink, ArrowRight } from 'lucide-react';
 import { Logo } from '@/components/ui/Logo';
 import { Link, useRouter, usePathname } from '@/i18n/routing';
@@ -31,20 +30,7 @@ export function Header() {
     }
   }, [isMenuOpen]);
 
-  const menuVariants = {
-    closed: {
-      opacity: 0,
-      scale: 0.95,
-      y: -20,
-      transition: { duration: 0.2, ease: "easeInOut" }
-    },
-    open: {
-      opacity: 1,
-      scale: 1,
-      y: 0,
-      transition: { duration: 0.3, ease: [0.22, 1, 0.36, 1] }
-    }
-  };
+
 
   const navLinks = [
     { href: "#features", label: t('features') },
@@ -103,85 +89,81 @@ export function Header() {
       </div>
 
       {/* Modern Mobile Menu - Simple & Fast */}
-      <AnimatePresence>
-        {isMenuOpen && (
-          <motion.div
-            initial="closed"
-            animate="open"
-            exit="closed"
-            variants={menuVariants}
-            className="absolute top-20 inset-x-4 pointer-events-auto lg:hidden"
-          >
-            <div className="glass rounded-[32px] border border-white/10 p-8 shadow-2xl bg-black/90 backdrop-blur-xl">
-              <div className="flex flex-col gap-10">
-                <nav className="flex flex-col gap-6">
-                  {navLinks.map((link) => (
-                    link.external ? (
-                      <Link 
-                        key={link.href} 
-                        href={link.href}
-                        onClick={() => setIsMenuOpen(false)}
-                        className="text-3xl font-black tracking-tighter text-white/40 hover:text-white transition-colors flex items-center gap-4"
-                      >
-                        {link.label}
-                        <ExternalLink size={24} className="opacity-20" />
-                      </Link>
-                    ) : (
-                      <a 
-                        key={link.href} 
-                        href={link.href}
-                        onClick={() => setIsMenuOpen(false)}
-                        className="text-3xl font-black tracking-tighter text-white/40 hover:text-white transition-colors"
-                      >
-                        {link.label}
-                      </a>
-                    )
+      <div
+        className={`absolute top-20 inset-x-4 pointer-events-auto lg:hidden transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] ${
+          isMenuOpen 
+            ? 'opacity-100 translate-y-0 scale-100' 
+            : 'opacity-0 -translate-y-4 scale-95 pointer-events-none'
+        }`}
+      >
+        <div className="glass rounded-[32px] border border-white/10 p-8 shadow-2xl bg-black/90 backdrop-blur-xl">
+          <div className="flex flex-col gap-10">
+            <nav className="flex flex-col gap-6">
+              {navLinks.map((link) => (
+                link.external ? (
+                  <Link 
+                    key={link.href} 
+                    href={link.href}
+                    onClick={() => setIsMenuOpen(false)}
+                    className="text-3xl font-black tracking-tighter text-white/40 hover:text-white transition-colors flex items-center gap-4"
+                  >
+                    {link.label}
+                    <ExternalLink size={24} className="opacity-20" />
+                  </Link>
+                ) : (
+                  <a 
+                    key={link.href} 
+                    href={link.href}
+                    onClick={() => setIsMenuOpen(false)}
+                    className="text-3xl font-black tracking-tighter text-white/40 hover:text-white transition-colors"
+                  >
+                    {link.label}
+                  </a>
+                )
+              ))}
+            </nav>
+
+            <div className="h-px bg-white/5" />
+
+            <div className="flex flex-col gap-6">
+              <div className="flex justify-between items-center text-[10px] font-black uppercase tracking-[0.2em] text-white/20">
+                {t('language')}
+                <div className="flex gap-4">
+                  {locales.map((l) => (
+                    <button
+                      key={l}
+                      onClick={() => {
+                        router.replace(pathname, { locale: l });
+                        setIsMenuOpen(false);
+                      }}
+                      className={`transition-colors ${locale === l ? 'text-white' : 'hover:text-white/60'}`}
+                    >
+                      {l}
+                    </button>
                   ))}
-                </nav>
-
-                <div className="h-px bg-white/5" />
-
-                <div className="flex flex-col gap-6">
-                  <div className="flex justify-between items-center text-[10px] font-black uppercase tracking-[0.2em] text-white/20">
-                    {t('language')}
-                    <div className="flex gap-4">
-                      {locales.map((l) => (
-                        <button
-                          key={l}
-                          onClick={() => {
-                            router.replace(pathname, { locale: l });
-                            setIsMenuOpen(false);
-                          }}
-                          className={`transition-colors ${locale === l ? 'text-white' : 'hover:text-white/60'}`}
-                        >
-                          {l}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-4">
-                    <Link 
-                      href="/login" 
-                      onClick={() => setIsMenuOpen(false)}
-                      className="h-14 rounded-2xl glass flex items-center justify-center font-bold text-white border border-white/5"
-                    >
-                      {t('login')}
-                    </Link>
-                    <Link 
-                      href="/register" 
-                      onClick={() => setIsMenuOpen(false)}
-                      className="h-14 rounded-2xl bg-white text-black flex items-center justify-center font-bold"
-                    >
-                      {t('signup')}
-                    </Link>
-                  </div>
                 </div>
               </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <Link 
+                  href="/login" 
+                  onClick={() => setIsMenuOpen(false)}
+                  className="h-14 rounded-2xl glass flex items-center justify-center font-bold text-white border border-white/5"
+                >
+                  {t('login')}
+                </Link>
+                <Link 
+                  href="/register" 
+                  onClick={() => setIsMenuOpen(false)}
+                  className="h-14 rounded-2xl bg-white text-black flex items-center justify-center font-bold"
+                >
+                  {t('signup')}
+                </Link>
+              </div>
             </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+          </div>
+        </div>
+      </div>
     </nav>
   );
 }
