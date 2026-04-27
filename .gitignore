@@ -5,3 +5,5 @@ node_modules
 
 .DS_Store
 temp_pdf_gen
+zenota-server/zenota
+zenota-server/*.blob

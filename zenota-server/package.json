@@ -1,0 +1,26 @@
+{
+  "name": "zenota-server",
+  "version": "1.0.0",
+  "description": "ZenOTA Self-Hosted Server CLI",
+  "main": "dist/index.js",
+  "bin": {
+    "zenota": "dist/index.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "ts-node src/index.ts"
+  },
+  "dependencies": {
+    "chalk": "^4.1.2",
+    "commander": "^11.1.0",
+    "ora": "^5.4.1",
+    "prompts": "^2.4.2"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "@types/prompts": "^2.4.9",
+    "postject": "^1.0.0-alpha.6",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.7.0"
+  }
+}

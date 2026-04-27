@@ -19,27 +19,46 @@ program.name('zenota').description('ZenOTA CLI for Expo updates').version(packag
 
 const CONFIG_PATH = path.join(os.homedir(), '.zenota-config.json');
 
-// By default localhost for local dev, but should be customizable
-// Production API URL by default
-const API_URL = process.env.ZENOTA_API_URL || 'https://api-zenota.diesestudio.com/api'; 
+const getApiUrl = () => {
+  if (process.env.ZENOTA_API_URL) return process.env.ZENOTA_API_URL;
+  if (fs.existsSync(CONFIG_PATH)) {
+    try {
+      const config = JSON.parse(fs.readFileSync(CONFIG_PATH, 'utf-8'));
+      if (config.apiUrl) return config.apiUrl;
+    } catch (e) {}
+  }
+  return 'https://api-zenota.diesestudio.com/api';
+};
 
 program
   .command('login')
   .description('Login to ZenOTA using your API Key')
   .action(async () => {
     console.log(chalk.blue('Welcome to ZenOTA!'));
-    const response = await prompts({
-      type: 'password',
-      name: 'apiKey',
-      message: 'Enter your ZenOTA API Key:',
-    });
+    
+    const response = await prompts([
+      {
+        type: 'text',
+        name: 'apiUrl',
+        message: 'Enter ZenOTA API URL:',
+        initial: getApiUrl()
+      },
+      {
+        type: 'password',
+        name: 'apiKey',
+        message: 'Enter your ZenOTA API Key:',
+      }
+    ]);
 
-    if (!response.apiKey) {
+    if (!response.apiKey || !response.apiUrl) {
       console.log(chalk.red('Login cancelled.'));
       return;
     }
 
-    fs.writeFileSync(CONFIG_PATH, JSON.stringify({ apiKey: response.apiKey }));
+    fs.writeFileSync(CONFIG_PATH, JSON.stringify({ 
+      apiKey: response.apiKey,
+      apiUrl: response.apiUrl.replace(/\/$/, '') // Remove trailing slash
+    }));
     console.log(chalk.green('Successfully logged in!'));
   });
 
@@ -124,7 +143,7 @@ program
         contentType: 'application/zip',
       });
 
-      const response = await axios.post(`${API_URL}/cli/publish`, form, {
+      const response = await axios.post(`${getApiUrl()}/cli/publish`, form, {
         headers: {
           ...form.getHeaders(),
           Authorization: `Bearer ${apiKey}`

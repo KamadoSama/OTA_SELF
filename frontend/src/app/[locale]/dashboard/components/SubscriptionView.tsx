@@ -21,7 +21,8 @@ export function SubscriptionView() {
   const [formError, setFormError] = useState<string | null>(null);
 
   const isPro = stats?.tier === 'PRO';
-  const isExpired = stats?.trialEndsAt && new Date(stats.trialEndsAt) < new Date() && !stats.cardLast4;
+  const isSelfHosted = process.env.NEXT_PUBLIC_SELF_HOSTED === 'true';
+  const isExpired = !isSelfHosted && stats?.trialEndsAt && new Date(stats.trialEndsAt) < new Date() && !stats.cardLast4;
 
   useEffect(() => {
     if (isExpired) {
@@ -125,15 +126,21 @@ export function SubscriptionView() {
 
       <div className="flex flex-col sm:flex-row sm:items-end justify-between border-b border-white/[0.06] pb-10 gap-4">
         <div className="space-y-2">
-          <h1 className="text-3xl font-bold tracking-tighter">Subscription</h1>
-          <p className="text-sm text-white/40 font-medium">Manage your current plan and usage limits.</p>
+          <h1 className="text-3xl font-bold tracking-tighter">
+            {isSelfHosted ? 'Server Status' : 'Subscription'}
+          </h1>
+          <p className="text-sm text-white/40 font-medium">
+            {isSelfHosted 
+              ? 'Community Edition - All features unlocked.' 
+              : 'Manage your current plan and usage limits.'}
+          </p>
         </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 space-y-6">
           <div className="rounded border border-white/[0.06] bg-[#050505] p-6 sm:p-8 space-y-8 relative overflow-hidden">
-            {isPro && (
+            {(isPro || isSelfHosted) && (
               <div className="absolute top-0 right-0 p-4">
                 <ShieldCheck className="h-24 w-24 text-white/[0.03] -mr-8 -mt-8" />
               </div>
@@ -141,22 +148,26 @@ export function SubscriptionView() {
             
             <div className="flex flex-col sm:flex-row items-start justify-between gap-6 relative z-10">
               <div className="space-y-1">
-                <div className={`inline-flex items-center gap-2 px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider mb-2 ${isPro ? 'bg-white text-black' : 'bg-white/5 text-white/40 border border-white/10'}`}>
-                  <Zap className={`h-3 w-3 ${isPro ? 'fill-black' : ''}`} /> Current Plan: {stats.tier}
+                <div className={`inline-flex items-center gap-2 px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider mb-2 ${ (isPro || isSelfHosted) ? 'bg-white text-black' : 'bg-white/5 text-white/40 border border-white/10'}`}>
+                  <Zap className={`h-3 w-3 ${(isPro || isSelfHosted) ? 'fill-black' : ''}`} /> Current Plan: {isSelfHosted ? 'Self-Hosted' : stats.tier}
                 </div>
-                <h3 className="text-2xl font-bold tracking-tight">{isPro ? 'Professional' : 'Hobby'} Tier</h3>
+                <h3 className="text-2xl font-bold tracking-tight">{isSelfHosted ? 'Unlimited' : (isPro ? 'Professional' : 'Hobby')} Tier</h3>
                 <p className="text-sm text-white/40 font-medium max-w-sm">
-                  {isPro 
-                    ? 'Pro-grade update delivery for growing teams. No limits on apps or deployments.' 
-                    : 'Great for getting started. Perfect for personal projects and small experiments.'}
+                  {isSelfHosted
+                    ? 'You are running your own ZenOTA instance. All features are enabled by default without any usage limits.'
+                    : isPro 
+                      ? 'Pro-grade update delivery for growing teams. No limits on apps or deployments.' 
+                      : 'Great for getting started. Perfect for personal projects and small experiments.'}
                 </p>
               </div>
-              <div className="sm:text-right">
-                <div className="text-3xl font-bold">${isPro ? '19' : '0'}<span className="text-sm text-white/20 font-medium">/mo</span></div>
-                <p className="text-[11px] text-white/30 font-bold uppercase tracking-widest mt-1">
-                  {isPro ? 'Billed monthly' : 'Free forever'}
-                </p>
-              </div>
+              {!isSelfHosted && (
+                <div className="sm:text-right">
+                  <div className="text-3xl font-bold">${isPro ? '19' : '0'}<span className="text-sm text-white/20 font-medium">/mo</span></div>
+                  <p className="text-[11px] text-white/30 font-bold uppercase tracking-widest mt-1">
+                    {isPro ? 'Billed monthly' : 'Free forever'}
+                  </p>
+                </div>
+              )}
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4 border-t border-white/[0.06]">
@@ -164,25 +175,27 @@ export function SubscriptionView() {
                 <h4 className="text-[10px] font-bold uppercase tracking-widest text-white/30">Features</h4>
                 <ul className="space-y-2">
                   <li className="flex items-center gap-2 text-xs font-medium"><ShieldCheck className="h-3.5 w-3.5 text-white/40" /> Unlimited Apps & Channels</li>
-                  <li className="flex items-center gap-2 text-xs font-medium"><ShieldCheck className="h-3.5 w-3.5 text-white/40" /> Priority CDN Distribution</li>
-                  <li className="flex items-center gap-2 text-xs font-medium"><ShieldCheck className="h-3.5 w-3.5 text-white/40" /> Advanced CLI Analytics</li>
+                  <li className="flex items-center gap-2 text-xs font-medium"><ShieldCheck className="h-3.5 w-3.5 text-white/40" /> Private Storage (MinIO)</li>
+                  <li className="flex items-center gap-2 text-xs font-medium"><ShieldCheck className="h-3.5 w-3.5 text-white/40" /> Full CLI Analytics</li>
                 </ul>
               </div>
               <div className="flex flex-col justify-end gap-3">
-                {!isPro ? (
-                  <button 
-                    onClick={() => setShowPaymentModal(true)}
-                    className="w-full flex items-center justify-center gap-2 rounded bg-white py-2.5 text-[13px] font-bold text-black hover:bg-white/90 transition-all"
-                  >
-                    Upgrade to Pro <ArrowRight className="h-3.5 w-3.5" />
-                  </button>
-                ) : (
-                  <button 
-                    onClick={() => setShowConfirmDowngrade(true)}
-                    className="w-full rounded border border-white/10 py-2.5 text-[13px] font-bold text-white/40 hover:text-white hover:bg-white/5 transition-all"
-                  >
-                    Downgrade to Hobby
-                  </button>
+                {!isSelfHosted && (
+                  !isPro ? (
+                    <button 
+                      onClick={() => setShowPaymentModal(true)}
+                      className="w-full flex items-center justify-center gap-2 rounded bg-white py-2.5 text-[13px] font-bold text-black hover:bg-white/90 transition-all"
+                    >
+                      Upgrade to Pro <ArrowRight className="h-3.5 w-3.5" />
+                    </button>
+                  ) : (
+                    <button 
+                      onClick={() => setShowConfirmDowngrade(true)}
+                      className="w-full rounded border border-white/10 py-2.5 text-[13px] font-bold text-white/40 hover:text-white hover:bg-white/5 transition-all"
+                    >
+                      Downgrade to Hobby
+                    </button>
+                  )
                 )}
               </div>
             </div>
@@ -206,52 +219,54 @@ export function SubscriptionView() {
           </div>
         </div>
 
-        <div className="space-y-6">
-          <div className="rounded border border-white/[0.06] bg-[#050505] p-6 space-y-6">
-            <h4 className="text-[11px] font-bold uppercase tracking-widest text-white/30">Billing Method</h4>
-            {stats.cardLast4 ? (
-              <div className="space-y-4">
-                <div className="flex items-center gap-4 p-4 rounded-lg bg-white/[0.03] border border-white/5">
-                  <div className="w-10 h-10 rounded bg-white/5 flex items-center justify-center">
-                    <CreditCard className="h-5 w-5 text-white/40" />
+        {!isSelfHosted && (
+          <div className="space-y-6">
+            <div className="rounded border border-white/[0.06] bg-[#050505] p-6 space-y-6">
+              <h4 className="text-[11px] font-bold uppercase tracking-widest text-white/30">Billing Method</h4>
+              {stats.cardLast4 ? (
+                <div className="space-y-4">
+                  <div className="flex items-center gap-4 p-4 rounded-lg bg-white/[0.03] border border-white/5">
+                    <div className="w-10 h-10 rounded bg-white/5 flex items-center justify-center">
+                      <CreditCard className="h-5 w-5 text-white/40" />
+                    </div>
+                    <div>
+                      <div className="text-sm font-bold">{stats.cardBrand} •••• {stats.cardLast4}</div>
+                      <div className="text-[11px] text-white/30">Expires {stats.cardExpMonth}/{stats.cardExpYear}</div>
+                    </div>
                   </div>
-                  <div>
-                    <div className="text-sm font-bold">{stats.cardBrand} •••• {stats.cardLast4}</div>
-                    <div className="text-[11px] text-white/30">Expires {stats.cardExpMonth}/{stats.cardExpYear}</div>
+                  <button className="w-full text-xs font-bold text-white/40 hover:text-white transition-colors">Update card details</button>
+                </div>
+              ) : (
+                <div className="flex flex-col items-center justify-center py-6 text-center space-y-4">
+                  <div className="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center">
+                    <CreditCard className="h-6 w-6 text-white/20" />
                   </div>
+                  <p className="text-[13px] text-white/40 max-w-[180px]">No payment method on file.</p>
+                  <button 
+                    onClick={() => setShowPaymentModal(true)}
+                    className="text-xs font-bold text-white hover:underline"
+                  >
+                    Add Payment Method
+                  </button>
                 </div>
-                <button className="w-full text-xs font-bold text-white/40 hover:text-white transition-colors">Update card details</button>
-              </div>
-            ) : (
-              <div className="flex flex-col items-center justify-center py-6 text-center space-y-4">
-                <div className="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center">
-                  <CreditCard className="h-6 w-6 text-white/20" />
-                </div>
-                <p className="text-[13px] text-white/40 max-w-[180px]">No payment method on file.</p>
-                <button 
-                  onClick={() => setShowPaymentModal(true)}
-                  className="text-xs font-bold text-white hover:underline"
-                >
-                  Add Payment Method
-                </button>
-              </div>
-            )}
-          </div>
-
-          <div className="rounded border border-white/[0.06] bg-[#050505] p-6 space-y-4">
-            <h4 className="text-[11px] font-bold uppercase tracking-widest text-white/30">Next Payment</h4>
-            <div className="flex items-center gap-3">
-              <Clock className="h-4 w-4 text-white/20" />
-              <div className="text-sm font-medium">
-                {stats.nextBillingDate ? new Date(stats.nextBillingDate).toLocaleDateString() : 'N/A'}
-              </div>
+              )}
             </div>
-            <p className="text-[11px] text-white/30 leading-relaxed">
-              Your next invoice will be generated on {stats.nextBillingDate ? new Date(stats.nextBillingDate).toLocaleDateString() : 'N/A'}. 
-              You will be charged <span className="text-white font-bold">${isPro ? '19.00' : '0.00'}</span>.
-            </p>
+
+            <div className="rounded border border-white/[0.06] bg-[#050505] p-6 space-y-4">
+              <h4 className="text-[11px] font-bold uppercase tracking-widest text-white/30">Next Payment</h4>
+              <div className="flex items-center gap-3">
+                <Clock className="h-4 w-4 text-white/20" />
+                <div className="text-sm font-medium">
+                  {stats.nextBillingDate ? new Date(stats.nextBillingDate).toLocaleDateString() : 'N/A'}
+                </div>
+              </div>
+              <p className="text-[11px] text-white/30 leading-relaxed">
+                Your next invoice will be generated on {stats.nextBillingDate ? new Date(stats.nextBillingDate).toLocaleDateString() : 'N/A'}. 
+                You will be charged <span className="text-white font-bold">${isPro ? '19.00' : '0.00'}</span>.
+              </p>
+            </div>
           </div>
-        </div>
+        )}
       </div>
 
       {/* Confirmation Downgrade Modal */}

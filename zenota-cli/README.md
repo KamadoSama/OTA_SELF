@@ -18,13 +18,17 @@ npm install -g zenota-cli
 ```
 
 ### 1. Login
-Securely authenticate with your ZenOTA API key:
+
+Securely authenticate with your ZenOTA instance. You can use the official Cloud or your own self-hosted server:
 
 ```bash
 zenota login
 ```
 
+- **Self-Hosted**: Enter your own API URL (e.g., `https://ota.yourcompany.com/api`)
+
 ### 2. Publish
+
 Deploy your changes to the global edge network in seconds:
 
 ```bash

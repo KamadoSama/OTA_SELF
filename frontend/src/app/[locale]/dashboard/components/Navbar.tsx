@@ -22,12 +22,14 @@ export function Navbar({
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const pathname = usePathname();
 
-  const tabs = [
+  const isSelfHosted = process.env.NEXT_PUBLIC_SELF_HOSTED === 'true';
+
+  const tabs = ([
     { id: 'overview', label: 'Overview', href: '/dashboard' },
-    { id: 'subscription', label: 'Subscription', href: '/dashboard/subscription' },
-    { id: 'billing', label: 'Billing', href: '/dashboard/billing' },
+    !isSelfHosted && { id: 'subscription', label: 'Subscription', href: '/dashboard/subscription' },
+    !isSelfHosted && { id: 'billing', label: 'Billing', href: '/dashboard/billing' },
     { id: 'settings', label: 'Settings', href: '/dashboard/settings' },
-  ] as const;
+  ].filter(Boolean) as { id: string; label: string; href: string }[]);
 
   const isActive = (href: string) => {
     if (href === '/dashboard') return pathname === '/dashboard';
