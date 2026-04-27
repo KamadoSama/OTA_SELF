@@ -23,7 +23,8 @@ export function ApiKeyTable({
   activeKeysCount,
   keysLimit
 }: ApiKeyTableProps) {
-  const isLimitReached = typeof keysLimit === 'number' && activeKeysCount !== undefined && activeKeysCount >= keysLimit;
+  const isSelfHosted = process.env.NEXT_PUBLIC_SELF_HOSTED === 'true';
+  const isLimitReached = !isSelfHosted && typeof keysLimit === 'number' && activeKeysCount !== undefined && activeKeysCount >= keysLimit;
 
   return (
     <div className="space-y-3">

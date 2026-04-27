@@ -1,0 +1,76 @@
+name: Release ZenOTA Server CLI
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build:
+    name: Build for ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-latest
+            artifact_name: zenota-linux-x64
+          - os: macos-latest
+            artifact_name: zenota-macos-arm64
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'npm'
+          cache-dependency-path: zenota-server/package-lock.json
+
+      - name: Install dependencies
+        run: |
+          cd zenota-server
+          npm install
+
+      - name: Build TypeScript
+        run: |
+          cd zenota-server
+          npm run build
+
+      - name: Prepare SEA Blob
+        run: |
+          cd zenota-server
+          node --experimental-sea-config sea-config.json
+
+      - name: Inject Blob into Node binary
+        run: |
+          cd zenota-server
+          cp $(which node) ${{ matrix.artifact_name }}
+          npx postject ${{ matrix.artifact_name }} NODE_SEA_BLOB sea-prep.blob --sentinel-fuse NODE_SEA_FUSE_fce680ab2cc467b6e072b8b5df1996b2
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact_name }}
+          path: zenota-server/${{ matrix.artifact_name }}
+
+  release:
+    name: Create GitHub Release
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            artifacts/zenota-linux-x64/zenota-linux-x64
+            artifacts/zenota-macos-arm64/zenota-macos-arm64
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

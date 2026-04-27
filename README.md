@@ -65,6 +65,27 @@ Detailed documentation, including CLI reference and API specifications, is avail
    npm run dev
    ```
 
+## 🌐 Self-Hosting (Community Edition)
+
+You can deploy ZenOTA on your own server (VPS) in minutes using our specialized management CLI.
+
+### Quick Install
+Run this command on your server:
+
+```bash
+curl -fsSL https://get-zenota.diesestudio.com | sh
+```
+
+### Server Management
+Once installed, use the `zenota` command to manage your instance:
+
+- `zenota init`: Interactive setup (Docker, Dokploy detection, secrets generation).
+- `zenota status`: Check the health of your containers.
+- `zenota logs`: View real-time logs from the backend and frontend.
+- `zenota restart`: Quickly restart the platform.
+
+For more details, see the [zenota-server](file:///Users/kamado/Documents/one_day_one_technology/OTA_SELF/zenota-server/README.md) directory.
+
 ## ⚖️ Pricing Model
 ZenOTA follows a tier-based subscription model:
 - **Hobby**: $0/mo (1 App, 10 deploys/day)

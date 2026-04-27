@@ -480,6 +480,14 @@ export default function LandingPage() {
   const [loading, setLoading] = useState(true);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
+  const isSelfHosted = process.env.NEXT_PUBLIC_SELF_HOSTED === 'true';
+
+  useEffect(() => {
+    if (isSelfHosted) {
+      router.replace('/dashboard');
+    }
+  }, [isSelfHosted, router]);
+
   useEffect(() => {
     if (isMenuOpen) {
       document.body.style.overflow = 'hidden';

@@ -9,6 +9,10 @@ export class SubscriptionService {
 
   constructor(private prisma: PrismaService) {}
 
+  private isSelfHosted(): boolean {
+    return process.env.SELF_HOSTED === 'true';
+  }
+
   async getCustomerData(customerId: string) {
     const customer = await this.prisma.customer.findUnique({
       where: { id: customerId },
@@ -27,6 +31,7 @@ export class SubscriptionService {
   }
 
   async checkSubscriptionStatus(customerId: string) {
+    if (this.isSelfHosted()) return;
     const customer = await this.getCustomerData(customerId);
 
     if (customer.subscriptionTier === SubscriptionTier.PRO && customer.trialEndsAt) {
@@ -40,6 +45,7 @@ export class SubscriptionService {
   }
 
   async checkCanCreateApp(customerId: string) {
+    if (this.isSelfHosted()) return true;
     await this.checkSubscriptionStatus(customerId);
     const customer = await this.getCustomerData(customerId);
     const tier = customer.subscriptionTier;
@@ -55,6 +61,7 @@ export class SubscriptionService {
   }
 
   async checkCanDeploy(customerId: string) {
+    if (this.isSelfHosted()) return true;
     await this.checkSubscriptionStatus(customerId);
     const customer = await this.getCustomerData(customerId);
     const tier = customer.subscriptionTier;
@@ -79,6 +86,7 @@ export class SubscriptionService {
   }
 
   async checkCanCreateApiKey(customerId: string) {
+    if (this.isSelfHosted()) return true;
     await this.checkSubscriptionStatus(customerId);
     const customer = await this.getCustomerData(customerId);
     const tier = customer.subscriptionTier;
@@ -121,8 +129,10 @@ export class SubscriptionService {
     });
     
     const totalDownloads = updates.reduce((acc, curr) => acc + curr.downloadCount, 0);
-    const tier = customer.subscriptionTier;
-    const limits = PLAN_LIMITS[tier];
+    const tier = this.isSelfHosted() ? SubscriptionTier.PRO : customer.subscriptionTier;
+    const limits = this.isSelfHosted() 
+      ? { maxApps: -1, maxDeploymentsPerDay: -1, maxApiKeys: -1, maxDownloadsPerMonth: -1 }
+      : PLAN_LIMITS[tier];
 
     return {
       tier,

@@ -43,7 +43,8 @@ function AndroidLogo({ className }: { className?: string }) {
 
 export default function Dashboard() {
   const { data: stats } = useSubscription();
-  const isExpired = stats?.trialEndsAt && new Date(stats.trialEndsAt) < new Date() && !stats.cardLast4;
+  const isSelfHosted = process.env.NEXT_PUBLIC_SELF_HOSTED === 'true';
+  const isExpired = !isSelfHosted && stats?.trialEndsAt && new Date(stats.trialEndsAt) < new Date() && !stats.cardLast4;
 
   const [showDialog, setShowDialog] = useState(false);
   const [search, setSearch] = useState("");
