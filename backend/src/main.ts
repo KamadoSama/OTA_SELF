@@ -9,6 +9,9 @@ async function bootstrap() {
     credentials: true, // Keep true if frontend needs to send other credentials, but cookies are gone.
   });
 
+  // console BD URL
+  console.log("DATABASE_URL: ",process.env.DATABASE_URL);
+
   await app.listen(process.env.PORT ?? 3001);
 }
 void bootstrap();

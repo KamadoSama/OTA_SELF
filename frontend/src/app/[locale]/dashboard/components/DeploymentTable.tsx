@@ -1,6 +1,7 @@
 "use client";
 
 import { Smartphone, DownloadCloud, Trash2, Loader2 } from "lucide-react";
+import { Icon } from "@iconify/react";
 import { Update } from "@/services/updates.service";
 
 interface DeploymentTableProps {
@@ -9,8 +10,13 @@ interface DeploymentTableProps {
   deletingId: string | null;
   onDeleteItem: (id: string, type: 'update') => void;
   isActive: (u: Update) => boolean;
-  AppleLogo: (props: { className?: string }) => React.ReactElement;
-  AndroidLogo: (props: { className?: string }) => React.ReactElement;
+  pagination?: {
+    total: number;
+    page: number;
+    limit: number;
+    totalPages: number;
+  };
+  onPageChange?: (page: number) => void;
 }
 
 export function DeploymentTable({
@@ -19,8 +25,8 @@ export function DeploymentTable({
   deletingId,
   onDeleteItem,
   isActive,
-  AppleLogo,
-  AndroidLogo
+  pagination,
+  onPageChange,
 }: DeploymentTableProps) {
   return (
     <div className="rounded border border-white/[0.06] bg-[#050505] overflow-hidden">
@@ -68,9 +74,9 @@ export function DeploymentTable({
                 <td className="hidden lg:table-cell px-6 py-5">
                   <div className="flex items-center gap-2.5">
                     {update.platform === "ios" ? (
-                      <AppleLogo className="h-4 w-4 text-white" />
+                      <Icon icon="fa6-brands:apple" className="h-4 w-4 text-white" />
                     ) : (
-                      <AndroidLogo className="h-4 w-4 text-emerald-400" />
+                      <Icon icon="fa6-brands:android" className="h-4 w-4 text-emerald-400" />
                     )}
                     <span className="font-medium capitalize">{update.platform}</span>
                   </div>
@@ -113,6 +119,54 @@ export function DeploymentTable({
           </tbody>
         </table>
       </div>
+
+      {pagination && pagination.totalPages > 1 && (
+        <div className="flex items-center justify-between border-t border-white/[0.06] px-6 py-4 bg-white/[0.02]">
+          <div className="text-[11px] font-bold uppercase tracking-widest text-white/20">
+            Page {pagination.page} of {pagination.totalPages}
+          </div>
+          <div className="flex items-center gap-2">
+            <button
+              disabled={pagination.page === 1}
+              onClick={() => onPageChange?.(pagination.page - 1)}
+              className="px-3 py-1.5 rounded border border-white/10 text-[10px] font-bold uppercase tracking-widest hover:bg-white/5 disabled:opacity-30 transition-all"
+            >
+              Prev
+            </button>
+            <div className="flex items-center gap-1">
+              {Array.from({ length: Math.min(5, pagination.totalPages) }).map((_, i) => {
+                // Simple logic for showing 5 pages around current
+                let pageNum = pagination.page;
+                if (pagination.totalPages <= 5) pageNum = i + 1;
+                else {
+                   if (pagination.page <= 3) pageNum = i + 1;
+                   else if (pagination.page >= pagination.totalPages - 2) pageNum = pagination.totalPages - 4 + i;
+                   else pageNum = pagination.page - 2 + i;
+                }
+
+                return (
+                  <button
+                    key={i}
+                    onClick={() => onPageChange?.(pageNum)}
+                    className={`h-7 w-7 rounded text-[10px] font-bold transition-all ${
+                      pagination.page === pageNum ? "bg-white text-black" : "text-white/40 hover:text-white hover:bg-white/5"
+                    }`}
+                  >
+                    {pageNum}
+                  </button>
+                );
+              })}
+            </div>
+            <button
+              disabled={pagination.page === pagination.totalPages}
+              onClick={() => onPageChange?.(pagination.page + 1)}
+              className="px-3 py-1.5 rounded border border-white/10 text-[10px] font-bold uppercase tracking-widest hover:bg-white/5 disabled:opacity-30 transition-all"
+            >
+              Next
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

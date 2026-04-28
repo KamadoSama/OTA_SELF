@@ -78,6 +78,7 @@ model Customer {
   cardExpYear           Int?
 
   createdAt             DateTime         @default(now())
+  preferences           Json?            @default("{\"notifEmail\": true, \"notifUsage\": true, \"devMode\": false}")
 
   apps             App[]
   apiKeys          ApiKey[]

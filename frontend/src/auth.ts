@@ -36,6 +36,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
               id: data.id,
               email: data.email,
               tier: data.tier,
+              preferences: data.preferences,
               accessToken: data.access_token,
             };
           }
@@ -72,6 +73,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           // Store backend data in the user object for the JWT callback
           (user as any).id = data.id;
           (user as any).tier = data.tier;
+          (user as any).preferences = data.preferences;
           (user as any).accessToken = data.access_token;
           return true;
         } catch (error) {
@@ -85,6 +87,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       if (user) {
         token.id = (user as any).id || user.id;
         token.tier = (user as any).tier;
+        token.preferences = (user as any).preferences;
         token.accessToken = (user as any).accessToken;
       }
       return token;
@@ -93,6 +96,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       if (token) {
         (session.user as any).id = token.id;
         (session.user as any).tier = token.tier;
+        (session.user as any).preferences = token.preferences;
         (session.user as any).accessToken = token.accessToken;
       }
       return session;

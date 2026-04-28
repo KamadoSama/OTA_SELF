@@ -131,20 +131,38 @@ export class AdminApiService {
     };
   }
 
-  async listUpdates(customerId?: string) {
-    return this.prisma.update.findMany({
-      where: customerId ? { channel: { app: { customerId } } } : {},
-      orderBy: { createdAt: 'desc' },
-      include: {
-        channel: {
-          include: { app: true },
+  async listUpdates(customerId?: string, page = 2, limit = 5) {
+    const skip = (page - 1) * limit;
+    const where = customerId ? { channel: { app: { customerId } } } : {};
+
+    const [data, total] = await Promise.all([
+      this.prisma.update.findMany({
+        where,
+        orderBy: { createdAt: 'desc' },
+        skip,
+        take: limit,
+        include: {
+          channel: {
+            include: { app: true },
+          },
+          assets: {
+            where: { isLaunchAsset: true },
+            take: 1,
+          },
         },
-        assets: {
-          where: { isLaunchAsset: true },
-          take: 1,
-        },
+      }),
+      this.prisma.update.count({ where }),
+    ]);
+
+    return {
+      data,
+      meta: {
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit),
       },
-    });
+    };
   }
 
   async deleteUpdate(id: string, customerId?: string) {

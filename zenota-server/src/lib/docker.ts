@@ -47,16 +47,3 @@ export function runMigrations(installDir: string): void {
     throw error;
   }
 }
-
-export function seedAdmin(installDir: string, email: string, password: string): void {
-  const spinner = ora('Seeding admin user...').start();
-  try {
-    // This assumes there's a script or command to create a user in the backend
-    // For now, we'll just log that it should be done or implement a small script
-    console.log(chalk.blue(`\n[TODO] Create admin user: ${email} / ${password}`));
-    spinner.succeed('Admin user seeding requested.');
-  } catch (error) {
-    spinner.fail('Failed to seed admin user.');
-    throw error;
-  }
-}

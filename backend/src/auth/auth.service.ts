@@ -12,6 +12,11 @@ export class AuthService {
     private jwtService: JwtService,
   ) {}
 
+  async needsSetup() {
+    const count = await this.prisma.customer.count();
+    return count === 0;
+  }
+
   async login(email: string, password: string) {
     if (!email || !password) {
       throw new BadRequestException('Email and password are required');
@@ -34,6 +39,7 @@ export class AuthService {
       id: customer.id,
       email: customer.email,
       tier: customer.subscriptionTier,
+      preferences: customer.preferences,
       access_token: token,
     };
   }
@@ -67,6 +73,7 @@ export class AuthService {
       id: customer.id,
       email: customer.email,
       tier: customer.subscriptionTier,
+      preferences: customer.preferences,
       access_token: token,
     };
   }
@@ -74,7 +81,7 @@ export class AuthService {
   async getMe(email: string) {
     const customer = await this.prisma.customer.findUnique({
       where: { email },
-      select: { id: true, email: true, subscriptionTier: true, createdAt: true },
+      select: { id: true, email: true, subscriptionTier: true, createdAt: true, preferences: true },
     });
     return customer;
   }
@@ -111,7 +118,16 @@ export class AuthService {
       id: customer.id,
       email: customer.email,
       tier: customer.subscriptionTier,
+      preferences: customer.preferences,
       access_token: token,
     };
+  }
+
+  async updatePreferences(email: string, preferences: any) {
+    const customer = await this.prisma.customer.update({
+      where: { email },
+      data: { preferences },
+    });
+    return customer.preferences;
   }
 }

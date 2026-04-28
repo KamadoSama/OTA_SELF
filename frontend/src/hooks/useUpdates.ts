@@ -3,10 +3,10 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { updatesService } from "@/services/updates.service";
 
-export function useUpdates() {
+export function useUpdates(page = 1, limit = 10) {
   return useQuery({
-    queryKey: ["updates"],
-    queryFn: () => updatesService.fetchUpdates(),
+    queryKey: ["updates", page, limit],
+    queryFn: () => updatesService.fetchUpdates(page, limit),
   });
 }
 
@@ -16,16 +16,20 @@ export function useDeleteUpdate() {
   return useMutation({
     mutationFn: (id: string) => updatesService.deleteUpdate(id),
     onMutate: async (deletedId) => {
-      // Cancel outgoing refetches
       await queryClient.cancelQueries({ queryKey: ["updates"] });
-
-      // Snapshot the previous value
       const previous = queryClient.getQueryData(["updates"]);
 
-      // Optimistically remove the update
-      queryClient.setQueryData(["updates"], (old: { id: string }[] | undefined) =>
-        old?.filter((u) => u.id !== deletedId),
-      );
+      queryClient.setQueriesData({ queryKey: ["updates"] }, (old: any) => {
+        if (!old || !old.data) return old;
+        return {
+          ...old,
+          data: old.data.filter((u: any) => u.id !== deletedId),
+          meta: {
+            ...old.meta,
+            total: old.meta.total - 1,
+          }
+        };
+      });
 
       return { previous };
     },

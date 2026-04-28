@@ -264,6 +264,15 @@
       "lastUpdated": "ZenOTA Docs — Last updated April 2024"
     }
   },
+  "Setup": {
+    "title": "Initial Setup",
+    "subtitle": "Create your master administrator account to get started.",
+    "email": "Admin Email",
+    "password": "Master Password",
+    "submit": "Initialize Server",
+    "errorAlreadyConfigured": "Server is already configured. Please log in.",
+    "success": "Server initialized successfully!"
+  },
   "Footer": {
     "desc": "The enterprise-grade standard for Expo updates. Built for performance, security, and developer joy.",
     "developedBy": "ZenOTA © 2024 • Developed by KamadoSama",

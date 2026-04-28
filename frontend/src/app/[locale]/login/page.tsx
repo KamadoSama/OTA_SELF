@@ -1,50 +1,74 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
-import { CloudLightning, Eye, EyeOff, Loader2, ArrowRight } from "lucide-react";
+import { useState, useEffect } from "react";
+import { CloudLightning, Eye, EyeOff, Loader2 } from "lucide-react";
+import { Icon } from "@iconify/react";
 import { useLogin } from "@/hooks/useAuth";
 import axios from "axios";
 import { Link, useRouter } from "@/i18n/routing";
 import { signIn } from "next-auth/react";
-import posthog from "posthog-js";
 import { useTranslations } from "next-intl";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
+import { AuthButton } from "@/components/ui/auth-button";
+
+const loginSchema = z.object({
+  email: z.string().email("Invalid email address"),
+  password: z.string().min(1, "Password is required"),
+});
+
+type LoginValues = z.infer<typeof loginSchema>;
 
 export default function LoginPage() {
   const t = useTranslations("Login");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [mounted, setMounted] = useState(false);
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
-  const emailRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
+
+  const { register: registerField, handleSubmit, formState: { errors } } = useForm<LoginValues>({
+    resolver: zodResolver(loginSchema),
+    defaultValues: {
+      email: "",
+      password: "",
+    }
+  });
 
   const { mutate: login, isPending } = useLogin();
 
   useEffect(() => {
     setMounted(true);
-    emailRef.current?.focus();
-  }, []);
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+    // Check if setup is needed
+    const checkSetup = async () => {
+      try {
+        const res = await axios.get("/api/auth/setup/status");
+        console.log("Setup status check:", res.data);
+        
+        if (res.data.needsSetup) {
+          router.push("/setup");
+        }
+      } catch (err) {
+        console.error("Setup check failed", err);
+      }
+    };
+    checkSetup();
+  }, [router]);
+
+  const onSubmit = (data: LoginValues) => {
     setError("");
     login(
-      { email, password },
+      { email: data.email, password: data.password },
       {
-        onSuccess: () => {
-          posthog.identify(email, { email });
-          posthog.capture("user_logged_in", { method: "email" });
-        },
+        onSuccess: () => {},
         onError: (err) => {
           const msg =
             axios.isAxiosError(err) && err.response?.status === 401
               ? t("error401")
               : t("errorGeneric");
           setError(msg);
-          setPassword("");
-          posthog.captureException(err, { extra: { context: "login" } });
         },
       },
     );
@@ -52,13 +76,11 @@ export default function LoginPage() {
 
   const handleGoogleSignIn = () => {
     setIsGoogleLoading(true);
-    posthog.capture("user_logged_in_with_google", { method: "google" });
     signIn("google", { callbackUrl: "/dashboard" });
   };
 
   return (
     <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-black text-white font-sans selection:bg-white selection:text-black">
-      {/* Subtle texture background */}
       <div 
         className="absolute inset-0 opacity-[0.05]" 
         style={{ 
@@ -73,7 +95,6 @@ export default function LoginPage() {
         }`}
       >
         <div className="rounded-lg border border-white/[0.08] bg-[#050505] p-10 shadow-2xl">
-          {/* Logo */}
           <div className="mb-10 flex flex-col items-center gap-4">
             <Link href="/" className="flex h-12 w-12 items-center justify-center rounded bg-white">
               <CloudLightning className="h-6 w-6 text-black fill-black" />
@@ -98,24 +119,7 @@ export default function LoginPage() {
                 <Loader2 className="h-4 w-4 animate-spin" />
               ) : (
                 <>
-                  <svg className="h-5 w-5" viewBox="0 0 24 24">
-                    <path
-                      fill="currentColor"
-                      d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
-                    />
-                    <path
-                      fill="currentColor"
-                      d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
-                    />
-                    <path
-                      fill="currentColor"
-                      d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"
-                    />
-                    <path
-                      fill="currentColor"
-                      d="M12 5.38c1.62 0 3.06.56 4.21 1.66l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 12-4.53z"
-                    />
-                  </svg>
+                  <Icon icon="logos:google-icon" className="h-5 w-5" />
                   <span>{t("google")}</span>
                 </>
               )}
@@ -127,20 +131,19 @@ export default function LoginPage() {
             </div>
           </div>
 
-          {/* Form */}
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
             <div className="space-y-2">
               <label htmlFor="email" className="text-[11px] font-bold uppercase tracking-widest text-white/40">{t("email")}</label>
               <input
-                ref={emailRef}
                 id="email"
                 type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                {...registerField("email")}
                 placeholder="developer@example.com"
-                required
-                className="w-full rounded border border-white/10 bg-white/[0.03] px-4 py-3 text-sm font-medium outline-none transition-all focus:border-white/30"
+                className={`w-full rounded border ${errors.email ? 'border-red-500/50' : 'border-white/10'} bg-white/[0.03] px-4 py-3 text-sm font-medium outline-none transition-all focus:border-white/30`}
               />
+              {errors.email && (
+                <p className="text-[10px] font-bold text-red-400 uppercase tracking-tighter">{errors.email.message}</p>
+              )}
             </div>
 
             <div className="space-y-2">
@@ -152,11 +155,9 @@ export default function LoginPage() {
                 <input
                   id="password"
                   type={showPassword ? "text" : "password"}
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
+                  {...registerField("password")}
                   placeholder="••••••••••••"
-                  required
-                  className="w-full rounded border border-white/10 bg-white/[0.03] px-4 py-3 pr-12 text-sm font-medium outline-none transition-all focus:border-white/30"
+                  className={`w-full rounded border ${errors.password ? 'border-red-500/50' : 'border-white/10'} bg-white/[0.03] px-4 py-3 pr-12 text-sm font-medium outline-none transition-all focus:border-white/30`}
                 />
                 <button
                   type="button"
@@ -166,6 +167,9 @@ export default function LoginPage() {
                   {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </button>
               </div>
+              {errors.password && (
+                <p className="text-[10px] font-bold text-red-400 uppercase tracking-tighter">{errors.password.message}</p>
+              )}
             </div>
 
             {error && (
@@ -174,20 +178,9 @@ export default function LoginPage() {
               </div>
             )}
 
-            <button
-              type="submit"
-              disabled={isPending || !email || !password}
-              className="group w-full flex items-center justify-center gap-2 rounded bg-white py-3.5 text-sm font-bold text-black transition-all hover:bg-white/90 disabled:opacity-40"
-            >
-              {isPending ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : (
-                <>
-                  <span>{t("submit")}</span>
-                  <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-                </>
-              )}
-            </button>
+            <AuthButton isLoading={isPending}>
+              {t("submit")}
+            </AuthButton>
           </form>
 
           <p className="mt-8 text-center text-[13px] font-medium text-white/40">
