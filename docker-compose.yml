@@ -66,6 +66,7 @@ services:
         - NEXT_PUBLIC_POSTHOG_PROJECT_TOKEN=${NEXT_PUBLIC_POSTHOG_PROJECT_TOKEN}
         - NEXT_PUBLIC_POSTHOG_HOST=${NEXT_PUBLIC_POSTHOG_HOST}
         - INTERNAL_API_URL=${INTERNAL_API_URL}
+        - NEXT_PUBLIC_SELF_HOSTED=${NEXT_PUBLIC_SELF_HOSTED}
     container_name: ota_frontend
     restart: always
     environment:
