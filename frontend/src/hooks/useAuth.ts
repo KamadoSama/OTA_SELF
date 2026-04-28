@@ -13,6 +13,7 @@ export function useCurrentUser() {
       id: (session.user as any).id,
       email: session.user.email,
       subscriptionTier: (session.user as any).tier,
+      preferences: (session.user as any).preferences,
     } : null,
     isLoading: status === "loading",
     status,

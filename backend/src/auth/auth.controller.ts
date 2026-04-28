@@ -17,6 +17,14 @@ export class AuthController {
 
   constructor(private readonly authService: AuthService) {}
 
+  @Get('setup/status')
+  async getSetupStatus() {
+    const needsSetup = await this.authService.needsSetup();
+    console.log('Checking setup status... ');
+    console.log(needsSetup);
+    return { needsSetup };
+  }
+
   @Post('register')
   async register(
     @Body() body: { email: string; password: string; plan?: 'FREE' | 'PRO' },
@@ -56,5 +64,12 @@ export class AuthController {
       throw new UnauthorizedException('Customer not found');
     }
     return customer;
+  }
+
+  @Post('preferences')
+  @UseGuards(AuthGuard)
+  async updatePreferences(@Req() req: AuthenticatedRequest, @Body() body: any) {
+    const email = req.user.email;
+    return this.authService.updatePreferences(email, body);
   }
 }

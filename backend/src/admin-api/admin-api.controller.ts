@@ -4,6 +4,7 @@ import {
   Get,
   Delete,
   Param,
+  Query,
   UseInterceptors,
   UploadedFile,
   Body,
@@ -25,8 +26,14 @@ export class AdminApiController {
   constructor(private readonly adminService: AdminApiService) {}
 
   @Get()
-  async listUpdates(@Req() req: AuthenticatedRequest) {
-    return this.adminService.listUpdates(req.user.id);
+  async listUpdates(
+    @Req() req: AuthenticatedRequest,
+    @Query('page') page?: string,
+    @Query('limit') limit?: string,
+  ) {
+    const p = page ? parseInt(page, 10) : 1;
+    const l = limit ? parseInt(limit, 10) : 10;
+    return this.adminService.listUpdates(req.user.id, p, l);
   }
 
   @Post('upload')

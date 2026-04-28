@@ -58,9 +58,21 @@ export interface SubscriptionStats {
   cardExpYear?: number;
 }
 
+export interface PaginatedResponse<T> {
+  data: T[];
+  meta: {
+    total: number;
+    page: number;
+    limit: number;
+    totalPages: number;
+  };
+}
+
 export const updatesService = {
-  async fetchUpdates(): Promise<Update[]> {
-    const { data } = await apiClient.get<Update[]>('/api/admin/updates');
+  async fetchUpdates(page = 1, limit = 10): Promise<PaginatedResponse<Update>> {
+    const { data } = await apiClient.get<PaginatedResponse<Update>>('/api/admin/updates', {
+      params: { page, limit },
+    });
     return data;
   },
 

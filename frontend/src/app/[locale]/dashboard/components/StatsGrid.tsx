@@ -1,23 +1,25 @@
 "use client";
 
-import { Smartphone, GitBranch, Activity, Shield } from "lucide-react";
-import { Update } from "@/services/updates.service";
+import { Smartphone, GitBranch, Layout, Shield } from "lucide-react";
+import { Update, SubscriptionStats } from "@/services/updates.service";
 
 interface StatsGridProps {
   updates: Update[];
+  totalUpdates: number;
+  stats?: SubscriptionStats | null;
 }
 
-export function StatsGrid({ updates }: StatsGridProps) {
-  const stats = [
-    { label: "Total Updates", value: updates.length, icon: Smartphone },
+export function StatsGrid({ updates, totalUpdates, stats }: StatsGridProps) {
+  const statsList = [
+    { label: "Total Updates", value: totalUpdates, icon: Smartphone },
     { label: "Channels", value: new Set(updates.map(u => u.channel.name)).size, icon: GitBranch },
-    { label: "API Uptime", value: "99.9%", icon: Activity },
+    { label: "Active Apps", value: stats?.activeApps || 0, icon: Layout },
     // { label: "Storage", value: "MinIO S3", icon: Shield }
   ];
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-px bg-white/[0.06] border border-white/[0.06] rounded overflow-hidden">
-      {stats.map((stat, i) => {
+      {statsList.map((stat, i) => {
         const Icon = stat.icon;
         return (
           <div key={i} className="bg-black p-6 space-y-3">

@@ -264,6 +264,15 @@
       "lastUpdated": "Docs ZenOTA — Dernière mise à jour Avril 2024"
     }
   },
+  "Setup": {
+    "title": "Configuration Initiale",
+    "subtitle": "Créez votre compte administrateur maître pour commencer.",
+    "email": "Email Admin",
+    "password": "Mot de Passe Maître",
+    "submit": "Initialiser le Serveur",
+    "errorAlreadyConfigured": "Le serveur est déjà configuré. Veuillez vous connecter.",
+    "success": "Serveur initialisé avec succès !"
+  },
   "Footer": {
     "desc": "La norme d'entreprise pour les mises à jour Expo. Conçu pour la performance, la sécurité et le plaisir des développeurs.",
     "developedBy": "ZenOTA © 2024 • Développé par KamadoSama",

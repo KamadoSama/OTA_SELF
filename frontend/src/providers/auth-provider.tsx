@@ -16,7 +16,7 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 const PUBLIC_PREFIXES = ['/docs','/en/docs','/fr/docs'];
-const PUBLIC_EXACT = ['/', '/en', '/fr', '/en/login', '/fr/login', '/en/register', '/fr/register'];
+const PUBLIC_EXACT = ['/', '/en', '/fr', '/en/login', '/fr/login', '/en/register', '/fr/register', '/setup', '/en/setup', '/fr/setup'];
 const GUEST_ONLY_ROUTES = ['/login', '/register', '/en/login', '/fr/login', '/en/register', '/fr/register'];
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
@@ -69,6 +69,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const register = async (email: string, pass: string, plan?: string) => {
     // Note: NextAuth doesn't have a built-in register. 
     // Usually you'd call your API then sign in.
+    console.log('Attempting registration for:', email);
     const res = await fetch(`/api/auth/register`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -76,9 +77,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     });
 
     if (!res.ok) {
-      const error = await res.json();
-      throw new Error(error.message || 'Registration failed');
+      const errorData = await res.json().catch(() => ({}));
+      console.error('Registration failed:', res.status, errorData);
+      throw new Error(errorData.message || 'Registration failed');
     }
+
+    console.log('Registration successful, logging in...');
 
     await login(email, pass);
   };

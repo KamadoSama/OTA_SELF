@@ -9,7 +9,7 @@ import { standaloneCompose } from '../templates/docker-compose.standalone';
 import { dokployCompose } from '../templates/docker-compose.dokploy';
 import { caddyfile } from '../templates/caddyfile';
 import { envFile } from '../templates/env';
-import { runCompose, waitForHealthy, runMigrations, seedAdmin } from '../lib/docker';
+import { runCompose, waitForHealthy, runMigrations } from '../lib/docker';
 
 export async function initCommand() {
   console.log(chalk.blue.bold('\n🚀 Welcome to ZenOTA Self-Hosted Installer\n'));
@@ -34,21 +34,9 @@ export async function initCommand() {
       message: 'Enter your domain name (e.g., ota.yourdomain.com):',
       validate: value => value.length > 0 ? true : 'Domain is required'
     },
-    {
-      type: 'text',
-      name: 'email',
-      message: 'Enter admin email:',
-      validate: value => value.includes('@') ? true : 'Invalid email'
-    },
-    {
-      type: 'password',
-      name: 'password',
-      message: 'Enter admin password:',
-      validate: value => value.length >= 8 ? true : 'Password must be at least 8 characters'
-    }
   ]);
 
-  if (!response.domain || !response.email || !response.password) {
+  if (!response.domain) {
     console.log(chalk.red('\nInstallation cancelled.'));
     return;
   }
@@ -81,10 +69,9 @@ export async function initCommand() {
   await waitForHealthy('ota_postgres');
   
   runMigrations(installDir);
-  seedAdmin(installDir, response.email, response.password);
 
   console.log(chalk.green.bold('\n✨ ZenOTA successfully installed!'));
   console.log(`URL: https://${response.domain}`);
-  console.log(`Admin: ${response.email}`);
+  console.log(chalk.yellow('\nℹ ACTION REQUIRED: Open the URL above to create your administrator account.'));
   console.log(chalk.gray('\nRun "zenota status" to check service state.'));
 }

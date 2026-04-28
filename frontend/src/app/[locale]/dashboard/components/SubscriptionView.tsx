@@ -5,7 +5,6 @@ import { useSubscription, useUpgradePlan, useDowngradePlan } from "@/hooks/useUp
 import { useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
-import posthog from "posthog-js";
 
 export function SubscriptionView() {
   const { data: stats, isLoading } = useSubscription();
@@ -93,12 +92,9 @@ export function SubscriptionView() {
       expYear: year ? (year < 100 ? 2000 + year : year) : 2026
     }, {
       onSuccess: () => {
-        posthog.capture("plan_upgraded", { plan: "PRO", amount: 19 });
         setShowPaymentModal(false);
       },
-      onError: (err) => {
-        posthog.captureException(err, { extra: { context: "upgrade_plan" } });
-      },
+      onError: (err) => {},
     });
   };
 
@@ -283,12 +279,9 @@ export function SubscriptionView() {
               <button
                 onClick={() => downgrade(undefined, {
                   onSuccess: () => {
-                    posthog.capture("plan_downgraded", { from_plan: "PRO", to_plan: "FREE" });
                     setShowConfirmDowngrade(false);
                   },
-                  onError: (err) => {
-                    posthog.captureException(err, { extra: { context: "downgrade_plan" } });
-                  },
+                  onError: (err) => {},
                 })}
                 className="w-full py-2.5 bg-white text-black font-bold text-sm rounded-lg hover:bg-white/90 transition-all"
               >

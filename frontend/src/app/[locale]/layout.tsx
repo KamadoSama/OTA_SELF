@@ -52,7 +52,6 @@ export const metadata: Metadata = {
   },
 };
 
-import { PostHogProvider } from '@/providers/posthog-provider';
 
 export default async function RootLayout({
   children,
@@ -76,15 +75,13 @@ export default async function RootLayout({
     <html lang={locale} className="dark">
       <body className={`${geistSans.variable} ${geistMono.variable} font-sans bg-[#000000] text-slate-50 antialiased min-h-screen`}>
         <NextIntlClientProvider messages={messages}>
-          <PostHogProvider>
-            <QueryProvider>
-              <AuthSessionProvider>
-                <AuthProvider>
-                  {children}
-                </AuthProvider>
-              </AuthSessionProvider>
-            </QueryProvider>
-          </PostHogProvider>
+          <QueryProvider>
+            <AuthSessionProvider>
+              <AuthProvider>
+                {children}
+              </AuthProvider>
+            </AuthSessionProvider>
+          </QueryProvider>
         </NextIntlClientProvider>
       </body>
     </html>
