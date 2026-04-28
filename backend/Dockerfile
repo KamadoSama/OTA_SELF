@@ -31,6 +31,7 @@ RUN apk add --no-cache \
 
 ENV PUPPETEER_SKIP_DOWNLOAD=true
 ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
+ENV HOSTNAME="0.0.0.0"
 
 WORKDIR /app
 
@@ -43,6 +44,6 @@ COPY --from=builder /app/src/invoice/templates ./src/invoice/templates
 
 
 
-EXPOSE 3001
+EXPOSE 4001
 
 CMD ["npm", "run", "start:prod"]
