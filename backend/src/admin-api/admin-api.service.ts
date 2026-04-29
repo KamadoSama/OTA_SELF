@@ -182,6 +182,7 @@ export class AdminApiService {
     appName: string,
     channelName: string,
     customerId?: string,
+    overrideRuntimeVersion?: string,
   ): Promise<string> {
     // 1. Check subscription limits first
     if (customerId) {
@@ -236,7 +237,7 @@ export class AdminApiService {
         create: { appId: app.id, name: channelName },
       });
 
-      const runtimeVersion = metadata.runtimeVersion ?? '1.0.0';
+      const runtimeVersion = metadata.runtimeVersion ?? overrideRuntimeVersion ?? '1.0.0';
       const platforms = Object.keys(metadata.fileMetadata);
 
       for (const platform of platforms) {
@@ -272,39 +273,42 @@ export class AdminApiService {
           },
         });
 
-        for (const asset of platformData.assets ?? []) {
-          const assetPath = path.join(tempDir, asset.path);
-          if (!fs.existsSync(assetPath)) continue;
+        // 3. Upload assets in parallel for better performance
+        if (platformData.assets && platformData.assets.length > 0) {
+          await Promise.all(platformData.assets.map(async (asset) => {
+            const assetPath = path.join(tempDir, asset.path);
+            if (!fs.existsSync(assetPath)) return;
 
-          const assetHash = this.calculateHash(assetPath);
+            const assetHash = this.calculateHash(assetPath);
 
-          await this.storage.uploadFile(
-            assetPath,
-            asset.path,
-            'application/octet-stream',
-          );
+            await this.storage.uploadFile(
+              assetPath,
+              asset.path,
+              'application/octet-stream',
+            );
 
-          const existingAsset = await this.prisma.asset.findFirst({
-            where: { updateId: update.id, hash: assetHash },
-          });
-
-          if (!existingAsset) {
-            await this.prisma.asset.create({
-              data: {
-                updateId: update.id,
-                hash: assetHash,
-                key: asset.path,
-                contentType: 'application/octet-stream',
-                fileExtension: asset.ext ? `.${asset.ext}` : null,
-                isLaunchAsset: false,
-              },
+            const existingAsset = await this.prisma.asset.findFirst({
+              where: { updateId: update.id, hash: assetHash },
             });
-          }
+
+            if (!existingAsset) {
+              await this.prisma.asset.create({
+                data: {
+                  updateId: update.id,
+                  hash: assetHash,
+                  key: asset.path,
+                  contentType: 'application/octet-stream',
+                  fileExtension: asset.ext ? `.${asset.ext}` : null,
+                  isLaunchAsset: false,
+                },
+              });
+            }
+          }));
         }
       }
 
       // Invalidate manifest cache for all affected platforms
-      const runtimeVersionForCache = metadata.runtimeVersion ?? '1.0.0';
+      const runtimeVersionForCache = metadata.runtimeVersion ?? overrideRuntimeVersion ?? '1.0.0';
       for (const platform of platforms) {
         const cacheKey = `manifest:${appName}:${runtimeVersionForCache}:${platform}:${channelName}`;
         await (this.cacheManager as any).del(cacheKey);

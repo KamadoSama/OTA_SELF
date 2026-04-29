@@ -27,6 +27,7 @@ export class OtaPublishController {
     @UploadedFile() file: Express.Multer.File,
     @Body('app') appName: string,
     @Body('channel') channelName: string,
+    @Body('runtimeVersion') runtimeVersion?: string,
   ) {
     if (!file) {
       throw new BadRequestException('No file uploaded');
@@ -52,6 +53,7 @@ export class OtaPublishController {
       appName,
       channelName,
       req.customer.id, 
+      runtimeVersion,
     );
 
     return {

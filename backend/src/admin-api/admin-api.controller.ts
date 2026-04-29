@@ -43,6 +43,7 @@ export class AdminApiController {
     @UploadedFile() file: Express.Multer.File,
     @Body('app') appName: string,
     @Body('channel') channelName: string,
+    @Body('runtimeVersion') runtimeVersion?: string,
   ) {
     if (!file) {
       throw new BadRequestException('No file uploaded');
@@ -60,6 +61,7 @@ export class AdminApiController {
       appName || 'MyExpoApp',
       channelName || 'production',
       req.user.id,
+      runtimeVersion,
     );
 
     return {

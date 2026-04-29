@@ -82,8 +82,20 @@ program
       process.exit(1);
     }
 
-    const appJson = JSON.parse(fs.readFileSync(appJsonPath, 'utf-8'));
+    const appJsonContent = fs.readFileSync(appJsonPath, 'utf-8');
+    // Basic comment stripping (handles // comments but ignores them in URLs like https://)
+    const cleanAppJson = appJsonContent.replace(/(^|[^:])\/\/.*$/gm, '$1');
+    
+    let appJson;
+    try {
+      appJson = JSON.parse(cleanAppJson);
+    } catch (e: any) {
+      console.log(chalk.red(`Error: app.json is not valid JSON. ${e.message}`));
+      process.exit(1);
+    }
+
     const appName = appJson?.expo?.slug || appJson?.expo?.name;
+    const runtimeVersion = appJson?.expo?.runtimeVersion;
     const channelName = options.channel;
 
     if (!appName) {
@@ -113,17 +125,27 @@ program
       return;
     }
 
-    const platformArg = platform === 'all' ? '' : `--platform ${platform}`;
+    const platformArg = platform === 'all' ? '--platform android --platform ios' : `--platform ${platform}`;
     const displayPlatform = platform === 'all' ? 'Android & iOS' : platform.toUpperCase();
 
     console.log(chalk.blue(`Publishing "${appName}" to channel "${channelName}" [${displayPlatform}]...`));
 
     const exportSpinner = ora(`Running "npx expo export ${platformArg}"...`).start();
     try {
-      execSync(`npx expo export ${platformArg} --non-interactive`, { stdio: 'ignore' });
+      // Use CI=1 for non-interactive mode and remove --runtime-version which is handled via backend override
+      execSync(`npx expo export ${platformArg}`, { 
+        stdio: 'pipe', 
+        env: { ...process.env, CI: '1' } 
+      });
       exportSpinner.succeed('Expo export finished successfully.');
-    } catch (e) {
+    } catch (e: any) {
       exportSpinner.fail('Expo export failed.');
+      if (e.stderr) {
+        console.error(chalk.red(e.stderr.toString()));
+      }
+      if (e.stdout) {
+        console.log(e.stdout.toString());
+      }
       process.exit(1);
     }
 
@@ -138,6 +160,9 @@ program
       const form = new FormData();
       form.append('app', appName);
       form.append('channel', channelName);
+      if (runtimeVersion) {
+        form.append('runtimeVersion', runtimeVersion);
+      }
       form.append('file', zipBuffer, {
         filename: 'update.zip',
         contentType: 'application/zip',
@@ -147,7 +172,10 @@ program
         headers: {
           ...form.getHeaders(),
           Authorization: `Bearer ${apiKey}`
-        }
+        },
+        maxContentLength: Infinity,
+        maxBodyLength: Infinity,
+        timeout: 0 // Wait indefinitely
       });
 
       uploadSpinner.succeed(chalk.green(`Update published! ID: ${response.data.updateId}`));
