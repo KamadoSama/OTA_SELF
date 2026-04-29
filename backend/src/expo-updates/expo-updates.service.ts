@@ -53,8 +53,6 @@ export class ExpoUpdatesService {
     const cachedManifest = await this.cacheManager.get<any>(cacheKey);
 
     if (cachedManifest) {
-      // Still need to increment download count even if served from cache
-      this.incrementDownloadCount(cachedManifest.manifest.id);
       return cachedManifest;
     }
 
