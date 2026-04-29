@@ -52,24 +52,45 @@ const packageJson = JSON.parse(fs.readFileSync(path.join(__dirname, '../package.
 const program = new commander_1.Command();
 program.name('zenota').description('ZenOTA CLI for Expo updates').version(packageJson.version);
 const CONFIG_PATH = path.join(os.homedir(), '.zenota-config.json');
-// By default localhost for local dev, but should be customizable
-// Production API URL by default
-const API_URL = process.env.ZENOTA_API_URL || 'https://api-zenota.diesestudio.com/api';
+const getApiUrl = () => {
+    if (process.env.ZENOTA_API_URL)
+        return process.env.ZENOTA_API_URL;
+    if (fs.existsSync(CONFIG_PATH)) {
+        try {
+            const config = JSON.parse(fs.readFileSync(CONFIG_PATH, 'utf-8'));
+            if (config.apiUrl)
+                return config.apiUrl;
+        }
+        catch (e) { }
+    }
+    return 'https://api-zenota.diesestudio.com/api';
+};
 program
     .command('login')
     .description('Login to ZenOTA using your API Key')
     .action(async () => {
     console.log(chalk_1.default.blue('Welcome to ZenOTA!'));
-    const response = await (0, prompts_1.default)({
-        type: 'password',
-        name: 'apiKey',
-        message: 'Enter your ZenOTA API Key:',
-    });
-    if (!response.apiKey) {
+    const response = await (0, prompts_1.default)([
+        {
+            type: 'text',
+            name: 'apiUrl',
+            message: 'Enter ZenOTA API URL:',
+            initial: getApiUrl()
+        },
+        {
+            type: 'password',
+            name: 'apiKey',
+            message: 'Enter your ZenOTA API Key:',
+        }
+    ]);
+    if (!response.apiKey || !response.apiUrl) {
         console.log(chalk_1.default.red('Login cancelled.'));
         return;
     }
-    fs.writeFileSync(CONFIG_PATH, JSON.stringify({ apiKey: response.apiKey }));
+    fs.writeFileSync(CONFIG_PATH, JSON.stringify({
+        apiKey: response.apiKey,
+        apiUrl: response.apiUrl.replace(/\/$/, '') // Remove trailing slash
+    }));
     console.log(chalk_1.default.green('Successfully logged in!'));
 });
 program
@@ -89,8 +110,19 @@ program
         console.log(chalk_1.default.red('Error: app.json not found in current directory.'));
         process.exit(1);
     }
-    const appJson = JSON.parse(fs.readFileSync(appJsonPath, 'utf-8'));
+    const appJsonContent = fs.readFileSync(appJsonPath, 'utf-8');
+    // Basic comment stripping (handles // comments but ignores them in URLs like https://)
+    const cleanAppJson = appJsonContent.replace(/(^|[^:])\/\/.*$/gm, '$1');
+    let appJson;
+    try {
+        appJson = JSON.parse(cleanAppJson);
+    }
+    catch (e) {
+        console.log(chalk_1.default.red(`Error: app.json is not valid JSON. ${e.message}`));
+        process.exit(1);
+    }
     const appName = appJson?.expo?.slug || appJson?.expo?.name;
+    const runtimeVersion = appJson?.expo?.runtimeVersion;
     const channelName = options.channel;
     if (!appName) {
         console.log(chalk_1.default.red('Error: Could not determine app name from app.json'));
@@ -116,16 +148,26 @@ program
         console.log(chalk_1.default.red('Publication cancelled.'));
         return;
     }
-    const platformArg = platform === 'all' ? '' : `--platform ${platform}`;
+    const platformArg = platform === 'all' ? '--platform android --platform ios' : `--platform ${platform}`;
     const displayPlatform = platform === 'all' ? 'Android & iOS' : platform.toUpperCase();
     console.log(chalk_1.default.blue(`Publishing "${appName}" to channel "${channelName}" [${displayPlatform}]...`));
     const exportSpinner = (0, ora_1.default)(`Running "npx expo export ${platformArg}"...`).start();
     try {
-        (0, child_process_1.execSync)(`npx expo export ${platformArg} --non-interactive`, { stdio: 'ignore' });
+        // Use CI=1 for non-interactive mode and remove --runtime-version which is handled via backend override
+        (0, child_process_1.execSync)(`npx expo export ${platformArg}`, {
+            stdio: 'pipe',
+            env: { ...process.env, CI: '1' }
+        });
         exportSpinner.succeed('Expo export finished successfully.');
     }
     catch (e) {
         exportSpinner.fail('Expo export failed.');
+        if (e.stderr) {
+            console.error(chalk_1.default.red(e.stderr.toString()));
+        }
+        if (e.stdout) {
+            console.log(e.stdout.toString());
+        }
         process.exit(1);
     }
     const zipSpinner = (0, ora_1.default)('Zipping dist folder...').start();
@@ -138,15 +180,21 @@ program
         const form = new form_data_1.default();
         form.append('app', appName);
         form.append('channel', channelName);
+        if (runtimeVersion) {
+            form.append('runtimeVersion', runtimeVersion);
+        }
         form.append('file', zipBuffer, {
             filename: 'update.zip',
             contentType: 'application/zip',
         });
-        const response = await axios_1.default.post(`${API_URL}/cli/publish`, form, {
+        const response = await axios_1.default.post(`${getApiUrl()}/cli/publish`, form, {
             headers: {
                 ...form.getHeaders(),
                 Authorization: `Bearer ${apiKey}`
-            }
+            },
+            maxContentLength: Infinity,
+            maxBodyLength: Infinity,
+            timeout: 0 // Wait indefinitely
         });
         uploadSpinner.succeed(chalk_1.default.green(`Update published! ID: ${response.data.updateId}`));
     }
