@@ -21,7 +21,7 @@ import { CacheModule } from '@nestjs/cache-manager';
     }),
     CacheModule.register({
       isGlobal: true,
-      ttl: 0, // No expiration by default, we use manual invalidation
+      ttl: 300000, // 5 minutes in milliseconds
     }),
     ScheduleModule.forRoot(),
     PrismaModule,
