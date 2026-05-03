@@ -75,10 +75,15 @@ export class StorageService implements OnModuleInit {
     // Use the public URL (HTTPS) for client-facing asset URLs
     // Falls back to internal MinIO URL for local development
     const publicBaseUrl = process.env.MINIO_PUBLIC_URL;
+    console.log('[getPublicUrl] MINIO_PUBLIC_URL =', JSON.stringify(publicBaseUrl), 'objectName =', objectName.substring(0, 30));
     if (publicBaseUrl) {
-      return `${publicBaseUrl.replace(/\/$/, '')}/${this.bucketName}/${objectName}`;
+      const url = `${publicBaseUrl.replace(/\/$/, '')}/${this.bucketName}/${objectName}`;
+      console.log('[getPublicUrl] Returning HTTPS URL:', url.substring(0, 60));
+      return url;
     }
-    return `http://${process.env.MINIO_ENDPOINT || 'localhost'}:${process.env.MINIO_PORT || 9000}/${this.bucketName}/${objectName}`;
+    const url = `http://${process.env.MINIO_ENDPOINT || 'localhost'}:${process.env.MINIO_PORT || 9000}/${this.bucketName}/${objectName}`;
+    console.log('[getPublicUrl] Returning HTTP URL:', url.substring(0, 60));
+    return url;
   }
 
   async getObjectStream(objectName: string): Promise<Readable> {
