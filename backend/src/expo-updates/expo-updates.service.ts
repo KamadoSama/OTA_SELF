@@ -133,11 +133,13 @@ export class ExpoUpdatesService {
         url: getAssetUrl(asset.key),
         fileExtension: asset.fileExtension,
       })),
-      metadata: latestUpdate.metadata || {},
+      metadata: {},
       extra: {
         expoClient: {
-          // You can include custom app variables here
-          // e.g., projectId: 'your-project-id'
+          name: appId,
+          slug: appId,
+          runtimeVersion: latestUpdate.runtimeVersion,
+          platform: platform,
         },
       },
     };
