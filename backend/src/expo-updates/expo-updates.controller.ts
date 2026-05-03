@@ -68,6 +68,9 @@ export class ExpoUpdatesController {
       );
 
       if (!manifestResponse) {
+        this.logger.warn(
+          `No update found — appId: ${targetAppId}, runtime: ${expoRuntimeVersion}, platform: ${expoPlatform}, channel: ${resolvedChannel}`,
+        );
         throw new NotFoundException(
           'No update found for this runtime version and platform',
         );
