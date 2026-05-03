@@ -67,10 +67,16 @@ export class StorageService implements OnModuleInit {
       filePath,
       metaData,
     );
-    return `http://${process.env.MINIO_ENDPOINT || 'localhost'}:${process.env.MINIO_PORT || 9000}/${this.bucketName}/${destFileName}`;
+    return this.getPublicUrl(destFileName);
   }
 
   getPublicUrl(objectName: string): string {
+    // Use the public URL (HTTPS) for client-facing asset URLs
+    // Falls back to internal MinIO URL for local development
+    const publicBaseUrl = process.env.MINIO_PUBLIC_URL;
+    if (publicBaseUrl) {
+      return `${publicBaseUrl.replace(/\/$/, '')}/${this.bucketName}/${objectName}`;
+    }
     return `http://${process.env.MINIO_ENDPOINT || 'localhost'}:${process.env.MINIO_PORT || 9000}/${this.bucketName}/${objectName}`;
   }
 
