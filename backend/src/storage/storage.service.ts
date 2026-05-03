@@ -10,6 +10,7 @@ export class StorageService implements OnModuleInit {
 
   constructor() {
     console.log('User:', process.env.MINIO_ROOT_USER);
+    console.log('MINIO_PUBLIC_URL:', JSON.stringify(process.env.MINIO_PUBLIC_URL));
     this.minioClient = new Minio.Client({
       endPoint: process.env.MINIO_ENDPOINT || 'localhost',
       port: Number(process.env.MINIO_PORT) || 9000,
