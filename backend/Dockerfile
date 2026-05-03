@@ -12,6 +12,9 @@ ENV PUPPETEER_SKIP_DOWNLOAD=true
 # Installation des dépendances
 RUN npm install
 
+# Cache bust to ensure fresh code copy
+ARG CACHEBUST=1
+
 # Copie du reste du code et build
 COPY . .
 RUN npx prisma generate
