@@ -94,28 +94,24 @@ export class ExpoUpdatesController {
       res.setHeader('expo-sfv-version', '0');
       res.setHeader('expo-manifest-filters', '[]');
       res.setHeader('cache-control', 'private, no-cache, no-store');
-      
-      // CORRECTION : Ajout des guillemets autour de la valeur du boundary
-      res.setHeader('content-type', `multipart/mixed; boundary="${boundary}"`);
+      res.setHeader('content-type', `multipart/mixed; boundary=${boundary}`);
 
       // Construct Multipart Body
       let body = '';
 
       // Part 1: Manifest
       body += `--${boundary}\r\n`;
-      // CORRECTION : Suppression de Content-Disposition et ajout du charset=utf-8
-      body += `Content-Type: application/json; charset=utf-8\r\n\r\n`;
+      body += `Content-Disposition: form-data; name="manifest"\r\n`;
+      body += `Content-Type: application/json\r\n\r\n`;
       body += JSON.stringify(manifest);
       body += `\r\n`;
 
       // Part 2: Extensions (assetRequestHeaders, etc.)
       body += `--${boundary}\r\n`;
-      // CORRECTION : Suppression de Content-Disposition et ajout du charset=utf-8
-      body += `Content-Type: application/json; charset=utf-8\r\n\r\n`;
+      body += `Content-Disposition: form-data; name="extensions"\r\n`;
+      body += `Content-Type: application/json\r\n\r\n`;
       body += JSON.stringify(extensions ?? {});
-      
-      // CORRECTION : Fin stricte du multipart sans \r\n supplémentaire à la fin
-      body += `\r\n--${boundary}--`;
+      body += `\r\n--${boundary}--\r\n`;
 
       return res.send(body);
     } catch (error) {
@@ -129,3 +125,4 @@ export class ExpoUpdatesController {
     }
   }
 }
+
