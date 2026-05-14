@@ -49,7 +49,7 @@ export class ExpoUpdatesService {
     appId: string,
     baseUrl?: string,
   ) {
-    const cacheKey = `manifest:${appId}:${runtimeVersion}:${platform}:${channelName}`;
+    const cacheKey = `manifest:v2:${appId}:${runtimeVersion}:${platform}:${channelName}`;
     const cachedManifest = await this.cacheManager.get<any>(cacheKey);
 
     if (cachedManifest) {
