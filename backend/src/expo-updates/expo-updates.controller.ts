@@ -97,7 +97,7 @@ export class ExpoUpdatesController {
       // IMPORTANT: Set Content-Type manually and remove any charset that Express might add.
       // The iOS expo-updates parser is very strict about the boundary format.
       res.removeHeader('content-type');
-      res.setHeader('content-type', `multipart/mixed;boundary=${boundary}`);
+      res.setHeader('content-type', `multipart/mixed; boundary="${boundary}"`);
 
       // Construct Multipart Body
       let body = '';
