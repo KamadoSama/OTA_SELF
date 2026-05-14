@@ -100,7 +100,7 @@ export class ExpoUpdatesController {
       res.setHeader('content-type', `multipart/mixed; boundary=${boundary}`);
 
       // Construct Multipart Body
-      let body = '';
+      let body = '\r\n'; // Preamble vide pour forcer la détection du premier boundary sur iOS
 
       // Part 1: Manifest
       body += `--${boundary}\r\n`;
