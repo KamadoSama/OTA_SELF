@@ -139,13 +139,18 @@ export class ExpoUpdatesService {
         url: getAssetUrl(launchAsset.key),
         fileExtension: launchAsset.fileExtension || '.js',
       },
-      assets: otherAssets.map((asset) => ({
-        hash: asset.hash,
-        key: getEffectiveKey(asset.key),
-        contentType: asset.contentType,
-        url: getAssetUrl(asset.key),
-        fileExtension: asset.fileExtension,
-      })),
+      assets: otherAssets.map((asset) => {
+        const obj: any = {
+          hash: asset.hash,
+          key: getEffectiveKey(asset.key),
+          contentType: asset.contentType,
+          url: getAssetUrl(asset.key),
+        };
+        if (asset.fileExtension) {
+          obj.fileExtension = asset.fileExtension;
+        }
+        return obj;
+      }),
       metadata: {},
       extra: {
         expoClient: {
