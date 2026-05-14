@@ -73,6 +73,11 @@ export class ExpoUpdatesService {
       },
       include: {
         assets: true,
+        channel: {
+          include: {
+            app: true,
+          },
+        },
       },
     });
 
@@ -146,6 +151,7 @@ export class ExpoUpdatesService {
         expoClient: {
           name: appId,
           slug: appId,
+          scheme: (latestUpdate.channel as any).app.scheme || appId.toLowerCase(),
           runtimeVersion: latestUpdate.runtimeVersion,
           platform: platform,
         },
