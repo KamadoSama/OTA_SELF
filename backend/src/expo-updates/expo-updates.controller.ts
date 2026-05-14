@@ -97,7 +97,7 @@ export class ExpoUpdatesController {
       // IMPORTANT: Set Content-Type manually and remove any charset that Express might add.
       // The iOS expo-updates parser is very strict about the boundary format.
       res.removeHeader('content-type');
-      res.setHeader('content-type', `multipart/mixed; boundary="${boundary}"`);
+      res.setHeader('content-type', `multipart/mixed; boundary=${boundary}`);
 
       // Construct Multipart Body
       let body = '';
@@ -114,13 +114,9 @@ export class ExpoUpdatesController {
       body += `Content-Disposition: form-data; name="extensions"\r\n`;
       body += `Content-Type: application/json\r\n\r\n`;
       body += JSON.stringify(extensions ?? {});
-      body += `\r\n--${boundary}--\r\n`;
+      body += `\r\n--${boundary}--`;
 
-      // Use res.end() with a Buffer to prevent Express from appending charset=utf-8
-      // to the Content-Type header, which breaks the iOS multipart parser.
-      const bodyBuffer = Buffer.from(body, 'utf-8');
-      res.setHeader('content-length', bodyBuffer.length);
-      return res.end(bodyBuffer);
+      return res.status(200).send(body);
     } catch (error) {
       if (error instanceof NotFoundException) {
         return res.status(404).json({ error: error.message });
