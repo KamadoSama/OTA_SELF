@@ -87,32 +87,43 @@ export class ExpoUpdatesController {
       // Increment download count only when we actually serve a new manifest
       await this.expoService.incrementDownloadCount(manifest.id);
 
-      const boundary = `ExpoManifestBoundary-${Math.random().toString(36).slice(2)}`;
+      // Création de la boundary sans caractères spéciaux problématiques
+      const boundary = `ExpoManifestBoundary${Math.random().toString(36).slice(2)}`;
 
-      // Set Required Protocol Headers
+      // 1. On construit TOUT le corps multipart en une seule string avec les \r\n stricts
+      const multipartBody =
+        `--${boundary}\r\n` +
+        `Content-Disposition: form-data; name="manifest"\r\n` +
+        `Content-Type: application/json; charset=utf-8\r\n\r\n` +
+        JSON.stringify(manifest) +
+        `\r\n` +
+        `--${boundary}\r\n` +
+        `Content-Disposition: form-data; name="extensions"\r\n` +
+        `Content-Type: application/json; charset=utf-8\r\n\r\n` +
+        JSON.stringify(extensions ?? {}) +
+        `\r\n` +
+        `--${boundary}--\r\n`;
+
+      // 2. Conversion en Buffer UTF-8 pour garantir la bonne taille
+      const bodyBuffer = Buffer.from(multipartBody, 'utf8');
+
+      // 3. Configuration stricte des headers Expo
       res.setHeader('expo-protocol-version', '1');
       res.setHeader('expo-sfv-version', '0');
       res.setHeader('expo-manifest-filters', '[]');
       res.setHeader('cache-control', 'private, no-cache, no-store');
-      // IMPORTANT: Set Content-Type manually and remove any charset that Express might add.
-      // The iOS expo-updates parser is very strict about the boundary format.
+      
+      // Nettoyage et forçage du Content-Type et Content-Length
       res.removeHeader('content-type');
-      res.setHeader('content-type', `multipart/mixed; boundary=${boundary}`);
+      res.setHeader('Content-Type', `multipart/mixed; boundary=${boundary}`);
+      res.setHeader('Content-Length', bodyBuffer.length.toString());
 
-      // Use chunked streaming exactly like the official @expo/server implementation
-      res.write(`--${boundary}\r\n`);
-      res.write(`Content-Disposition: form-data; name="manifest"\r\n`);
-      res.write(`Content-Type: application/json\r\n\r\n`);
-      res.write(JSON.stringify(manifest));
-      res.write(`\r\n`);
+      // 4. Envoi de la réponse d'un seul coup
+      res.status(200).end(bodyBuffer);
 
-      res.write(`--${boundary}\r\n`);
-      res.write(`Content-Disposition: form-data; name="extensions"\r\n`);
-      res.write(`Content-Type: application/json\r\n\r\n`);
-      res.write(JSON.stringify(extensions ?? {}));
-      res.write(`\r\n--${boundary}--\r\n`);
-
-      return res.end();
+      // 5. Retour vide pour empêcher NestJS de modifier la réponse Express
+      return;
+      
     } catch (error) {
       if (error instanceof NotFoundException) {
         return res.status(404).json({ error: error.message });
@@ -124,4 +135,3 @@ export class ExpoUpdatesController {
     }
   }
 }
-
