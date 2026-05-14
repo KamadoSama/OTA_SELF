@@ -259,6 +259,22 @@ export class AdminApiService {
           },
         });
 
+        // Conserver uniquement les 3 dernières mises à jour pour cette plateforme/canal
+        const oldUpdates = await this.prisma.update.findMany({
+          where: {
+            channelId: channel.id,
+            runtimeVersion,
+            platform,
+          },
+          orderBy: { createdAt: 'desc' },
+          skip: 3,
+        });
+
+        for (const oldUpdate of oldUpdates) {
+          await this.prisma.update.delete({ where: { id: oldUpdate.id } });
+          this.logger.log(`Suppression de l'ancienne mise à jour ${oldUpdate.id} pour ne garder que les 3 plus récentes.`);
+        }
+
         const bundlePath = path.join(tempDir, bundleRelPath);
         const bundleHash = this.calculateHash(bundlePath);
 
