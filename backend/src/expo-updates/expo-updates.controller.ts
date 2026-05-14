@@ -16,7 +16,7 @@ import { ExpoUpdatesService } from './expo-updates.service';
 export class ExpoUpdatesController {
   private logger = new Logger(ExpoUpdatesController.name);
 
-  constructor(private readonly expoService: ExpoUpdatesService) {}
+  constructor(private readonly expoService: ExpoUpdatesService) { }
 
   @Get(':appId')
   async getManifest(
@@ -80,7 +80,7 @@ export class ExpoUpdatesController {
 
       // Protocol 1: If the client already has this update, return 204 No Content
       if (currentUpdateId === manifest.id || embeddedUpdateId === manifest.id) {
-        this.logger.log(`Client already up-to-date: ${manifest.id}`);
+        this.logger.log(`Client already up-to-date: ${manifest.id} app name ${appId}`);
         return res.status(204).send();
       }
 
@@ -112,7 +112,7 @@ export class ExpoUpdatesController {
       res.setHeader('expo-sfv-version', '0');
       res.setHeader('expo-manifest-filters', '[]');
       res.setHeader('cache-control', 'private, no-cache, no-store');
-      
+
       // Nettoyage et forçage du Content-Type et Content-Length
       res.removeHeader('content-type');
       res.setHeader('Content-Type', `multipart/mixed; boundary=${boundary}`);
@@ -123,7 +123,7 @@ export class ExpoUpdatesController {
 
       // 5. Retour vide pour empêcher NestJS de modifier la réponse Express
       return;
-      
+
     } catch (error) {
       if (error instanceof NotFoundException) {
         return res.status(404).json({ error: error.message });

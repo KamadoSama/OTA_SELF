@@ -183,6 +183,7 @@ export class AdminApiService {
     channelName: string,
     customerId?: string,
     overrideRuntimeVersion?: string,
+    appVersion?: string,
   ): Promise<string> {
     // 1. Check subscription limits first
     if (customerId) {
@@ -243,13 +244,18 @@ export class AdminApiService {
       for (const platform of platforms) {
         const platformData = metadata.fileMetadata[platform];
         const bundleRelPath = platformData.bundle;
+        
+        const updateMetadata = { ...metadata };
+        if (appVersion) {
+            (updateMetadata as any).version = appVersion; // Inject appVersion here so service can read it
+        }
 
         const update = await this.prisma.update.create({
           data: {
             channelId: channel.id,
             runtimeVersion,
             platform,
-            metadata: metadata as any,
+            metadata: updateMetadata as any,
           },
         });
 

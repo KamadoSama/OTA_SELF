@@ -157,6 +157,7 @@ export class ExpoUpdatesService {
           name: appId,
           slug: appId,
           scheme: (latestUpdate.channel as any).app.scheme || appId.toLowerCase(),
+          version: (latestUpdate.metadata as any)?.version ?? (latestUpdate.metadata as any)?.expoClient?.version ?? undefined,
           runtimeVersion: latestUpdate.runtimeVersion,
           platform: platform,
         },

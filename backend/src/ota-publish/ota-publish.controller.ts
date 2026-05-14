@@ -28,6 +28,7 @@ export class OtaPublishController {
     @Body('app') appName: string,
     @Body('channel') channelName: string,
     @Body('runtimeVersion') runtimeVersion?: string,
+    @Body('appVersion') appVersion?: string,
   ) {
     if (!file) {
       throw new BadRequestException('No file uploaded');
@@ -54,6 +55,7 @@ export class OtaPublishController {
       channelName,
       req.customer.id, 
       runtimeVersion,
+      appVersion,
     );
 
     return {

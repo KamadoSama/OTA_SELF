@@ -123,6 +123,7 @@ program
     }
     const appName = appJson?.expo?.slug || appJson?.expo?.name;
     const runtimeVersion = appJson?.expo?.runtimeVersion;
+    const appVersion = appJson?.expo?.version;
     const channelName = options.channel;
     if (!appName) {
         console.log(chalk_1.default.red('Error: Could not determine app name from app.json'));
@@ -182,6 +183,9 @@ program
         form.append('channel', channelName);
         if (runtimeVersion) {
             form.append('runtimeVersion', runtimeVersion);
+        }
+        if (appVersion) {
+            form.append('appVersion', appVersion);
         }
         form.append('file', zipBuffer, {
             filename: 'update.zip',
