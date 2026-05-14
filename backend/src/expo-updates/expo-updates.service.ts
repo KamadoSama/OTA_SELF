@@ -95,6 +95,13 @@ export class ExpoUpdatesService {
     const expiresAtSeconds = Math.floor(Date.now() / 1000) + 15 * 60;
     const assetRequestHeaders: Record<string, Record<string, string>> = {};
 
+    const getEffectiveKey = (assetKey: string): string => {
+      if (platform === 'ios') {
+        return assetKey.split('/').pop() || assetKey;
+      }
+      return assetKey;
+    };
+
     const getAssetUrl = (assetKey: string): string => {
       if (!shouldSignAssets || !assetBaseUrl) {
         return this.storageService.getPublicUrl(`${assetKey}`);
@@ -104,7 +111,8 @@ export class ExpoUpdatesService {
 
     const registerAssetHeaders = (assetKey: string) => {
       if (!shouldSignAssets) return;
-      assetRequestHeaders[assetKey] = {
+      const effectiveKey = getEffectiveKey(assetKey);
+      assetRequestHeaders[effectiveKey] = {
         authorization: this.createAssetAuthorizationHeader(
           assetKey,
           expiresAtSeconds,
@@ -121,14 +129,14 @@ export class ExpoUpdatesService {
       runtimeVersion: latestUpdate.runtimeVersion,
       launchAsset: {
         hash: launchAsset.hash,
-        key: launchAsset.key,
+        key: getEffectiveKey(launchAsset.key),
         contentType: launchAsset.contentType,
         url: getAssetUrl(launchAsset.key),
         fileExtension: launchAsset.fileExtension || '.js',
       },
       assets: otherAssets.map((asset) => ({
         hash: asset.hash,
-        key: asset.key,
+        key: getEffectiveKey(asset.key),
         contentType: asset.contentType,
         url: getAssetUrl(asset.key),
         fileExtension: asset.fileExtension,

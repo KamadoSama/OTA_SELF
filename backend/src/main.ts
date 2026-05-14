@@ -5,8 +5,10 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
   app.enableCors({
-    origin: process.env.FRONTEND_URL || 'http://localhost:3000',
-    credentials: true, // Keep true if frontend needs to send other credentials, but cookies are gone.
+    origin: process.env.FRONTEND_URL
+      ? [process.env.FRONTEND_URL, 'http://localhost:3000']
+      : true, // Allow all origins (needed for mobile apps that don't send Origin header)
+    credentials: true,
   });
 
   // console BD URL
