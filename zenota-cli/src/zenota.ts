@@ -95,9 +95,18 @@ program
     }
 
     const appName = appJson?.expo?.slug || appJson?.expo?.name;
-    const runtimeVersion = appJson?.expo?.runtimeVersion;
     const appVersion = appJson?.expo?.version;
+    let runtimeVersion = appJson?.expo?.runtimeVersion;
     const channelName = options.channel;
+
+    // Resolve runtimeVersion if it's a policy object
+    if (typeof runtimeVersion === 'object' && runtimeVersion !== null) {
+      if (runtimeVersion.policy === 'appVersion') {
+        runtimeVersion = appVersion;
+      } else if (runtimeVersion.policy === 'sdkVersion') {
+        runtimeVersion = appJson?.expo?.sdkVersion;
+      }
+    }
 
     if (!appName) {
       console.log(chalk.red('Error: Could not determine app name from app.json'));
@@ -162,10 +171,12 @@ program
       form.append('app', appName);
       form.append('channel', channelName);
       if (runtimeVersion) {
-        form.append('runtimeVersion', runtimeVersion);
+        const rv = typeof runtimeVersion === 'object' ? JSON.stringify(runtimeVersion) : String(runtimeVersion);
+        form.append('runtimeVersion', rv);
       }
       if (appVersion) {
-        form.append('appVersion', appVersion);
+        const av = typeof appVersion === 'object' ? JSON.stringify(appVersion) : String(appVersion);
+        form.append('appVersion', av);
       }
       form.append('file', zipBuffer, {
         filename: 'update.zip',
