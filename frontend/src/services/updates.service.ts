@@ -69,9 +69,15 @@ export interface PaginatedResponse<T> {
 }
 
 export const updatesService = {
-  async fetchUpdates(page = 1, limit = 10): Promise<PaginatedResponse<Update>> {
+  async fetchUpdates(
+    page = 1,
+    limit = 10,
+    search?: string,
+    sortBy?: string,
+    sortOrder?: 'asc' | 'desc',
+  ): Promise<PaginatedResponse<Update>> {
     const { data } = await apiClient.get<PaginatedResponse<Update>>('/api/admin/updates', {
-      params: { page, limit },
+      params: { page, limit, search, sortBy, sortOrder },
     });
     return data;
   },

@@ -48,7 +48,7 @@ export default function Dashboard() {
   const limit = 5;
 
   const { data: user } = useCurrentUser();
-  const { data: updatesData, isLoading, refetch } = useUpdates(page, limit);
+  const { data: updatesData, isLoading, refetch } = useUpdates(page, limit, search, sortField, sortOrder);
   const updates = updatesData?.data || [];
   const meta = updatesData?.meta;
   const { data: apiKeys = [], isLoading: isLoadingKeys } = useApiKeys();
@@ -57,7 +57,13 @@ export default function Dashboard() {
   const { mutate: generateKey, isPending: isGeneratingKey } = useGenerateApiKey();
   const { mutate: deleteKey } = useDeleteApiKey();
 
+  const handleSearchChange = (val: string) => {
+    setSearch(val);
+    setPage(1);
+  };
+
   const handleSort = (field: SortField) => {
+    setPage(1);
     if (sortField === field) {
       setSortOrder((prev) => (prev === "asc" ? "desc" : "asc"));
     } else {
@@ -65,14 +71,6 @@ export default function Dashboard() {
       setSortOrder("asc");
     }
   };
-
-  const filtered = updates.filter(
-    (u: Update) =>
-      u.runtimeVersion.toLowerCase().includes(search.toLowerCase()) ||
-      u.channel.name.toLowerCase().includes(search.toLowerCase()) ||
-      u.platform.toLowerCase().includes(search.toLowerCase()) ||
-      u.channel.app.name.toLowerCase().includes(search.toLowerCase()),
-  );
 
   const isActive = (u: Update) => {
     const sorted = [...updates].sort(
@@ -86,47 +84,6 @@ export default function Dashboard() {
     );
     return latest?.id === u.id;
   };
-
-  const sortedUpdates = [...filtered].sort((a: Update, b: Update) => {
-    let valA: any;
-    let valB: any;
-
-    switch (sortField) {
-      case "app":
-        valA = a.channel.app.name.toLowerCase();
-        valB = b.channel.app.name.toLowerCase();
-        break;
-      case "channel":
-        valA = a.channel.name.toLowerCase();
-        valB = b.channel.name.toLowerCase();
-        break;
-      case "runtimeVersion":
-        valA = a.runtimeVersion.toLowerCase();
-        valB = b.runtimeVersion.toLowerCase();
-        break;
-      case "platform":
-        valA = a.platform.toLowerCase();
-        valB = b.platform.toLowerCase();
-        break;
-      case "downloadCount":
-        valA = a.downloadCount || 0;
-        valB = b.downloadCount || 0;
-        break;
-      case "status":
-        valA = isActive(a) ? 1 : 0;
-        valB = isActive(b) ? 1 : 0;
-        break;
-      case "createdAt":
-      default:
-        valA = new Date(a.createdAt).getTime();
-        valB = new Date(b.createdAt).getTime();
-        break;
-    }
-
-    if (valA < valB) return sortOrder === "asc" ? -1 : 1;
-    if (valA > valB) return sortOrder === "asc" ? 1 : -1;
-    return 0;
-  });
 
 
   const handleDelete = (id: string) => {
@@ -243,7 +200,7 @@ export default function Dashboard() {
                   type="text" 
                   placeholder="Search version..." 
                   value={search} 
-                  onChange={(e) => setSearch(e.target.value)}
+                  onChange={(e) => handleSearchChange(e.target.value)}
                   className="w-full bg-white/[0.03] border border-white/5 rounded pl-9 pr-4 py-1.5 text-xs font-medium outline-none focus:border-white/20 transition-all" 
                 />
               </div>
@@ -251,7 +208,7 @@ export default function Dashboard() {
             
             <DeploymentTable 
               isLoading={isLoading}
-              updates={sortedUpdates}
+              updates={updates}
               deletingId={deletingId}
               onDeleteItem={(id) => setItemToDelete({ id, type: 'update' })}
               isActive={isActive}

@@ -30,10 +30,13 @@ export class AdminApiController {
     @Req() req: AuthenticatedRequest,
     @Query('page') page?: string,
     @Query('limit') limit?: string,
+    @Query('search') search?: string,
+    @Query('sortBy') sortBy?: string,
+    @Query('sortOrder') sortOrder?: 'asc' | 'desc',
   ) {
     const p = page ? parseInt(page, 10) : 1;
     const l = limit ? parseInt(limit, 10) : 10;
-    return this.adminService.listUpdates(req.user.id, p, l);
+    return this.adminService.listUpdates(req.user.id, p, l, search, sortBy, sortOrder);
   }
 
   @Post('upload')

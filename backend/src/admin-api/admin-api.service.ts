@@ -131,14 +131,53 @@ export class AdminApiService {
     };
   }
 
-  async listUpdates(customerId?: string, page = 2, limit = 5) {
+  async listUpdates(
+    customerId?: string,
+    page = 1,
+    limit = 10,
+    search?: string,
+    sortBy?: string,
+    sortOrder: 'asc' | 'desc' = 'desc',
+  ) {
     const skip = (page - 1) * limit;
-    const where = customerId ? { channel: { app: { customerId } } } : {};
+    const where: any = customerId ? { channel: { app: { customerId } } } : {};
+
+    if (search && search.trim() !== '') {
+      const term = search.trim();
+      const baseFilter = customerId ? { channel: { app: { customerId } } } : {};
+      where.AND = [
+        baseFilter,
+        {
+          OR: [
+            { runtimeVersion: { contains: term, mode: 'insensitive' } },
+            { platform: { contains: term, mode: 'insensitive' } },
+            { channel: { name: { contains: term, mode: 'insensitive' } } },
+            { channel: { app: { name: { contains: term, mode: 'insensitive' } } } },
+          ],
+        },
+      ];
+      delete where.channel;
+    }
+
+    let orderBy: any = { createdAt: sortOrder };
+    if (sortBy === 'app') {
+      orderBy = { channel: { app: { name: sortOrder } } };
+    } else if (sortBy === 'channel') {
+      orderBy = { channel: { name: sortOrder } };
+    } else if (sortBy === 'runtimeVersion') {
+      orderBy = { runtimeVersion: sortOrder };
+    } else if (sortBy === 'platform') {
+      orderBy = { platform: sortOrder };
+    } else if (sortBy === 'downloadCount') {
+      orderBy = { downloadCount: sortOrder };
+    } else if (sortBy === 'createdAt') {
+      orderBy = { createdAt: sortOrder };
+    }
 
     const [data, total] = await Promise.all([
       this.prisma.update.findMany({
         where,
-        orderBy: { createdAt: 'desc' },
+        orderBy,
         skip,
         take: limit,
         include: {

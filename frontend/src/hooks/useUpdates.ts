@@ -3,10 +3,16 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { updatesService } from "@/services/updates.service";
 
-export function useUpdates(page = 1, limit = 10) {
+export function useUpdates(
+  page = 1,
+  limit = 10,
+  search?: string,
+  sortBy?: string,
+  sortOrder?: 'asc' | 'desc',
+) {
   return useQuery({
-    queryKey: ["updates", page, limit],
-    queryFn: () => updatesService.fetchUpdates(page, limit),
+    queryKey: ["updates", page, limit, search, sortBy, sortOrder],
+    queryFn: () => updatesService.fetchUpdates(page, limit, search, sortBy, sortOrder),
   });
 }
 
