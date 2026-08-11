@@ -14,7 +14,7 @@ import Link from "next/link";
 // Components
 import { Navbar } from "./components/Navbar";
 import { StatsGrid } from "./components/StatsGrid";
-import { DeploymentTable } from "./components/DeploymentTable";
+import { DeploymentTable, type SortField, type SortOrder } from "./components/DeploymentTable";
 import { ApiKeyTable } from "./components/ApiKeyTable";
 import { UploadDialog } from "./components/UploadDialog";
 import { ApiKeyModal } from "./components/ApiKeyModal";
@@ -41,6 +41,9 @@ export default function Dashboard() {
   const [keyError, setKeyError] = useState<string | null>(null);
   const [itemToDelete, setItemToDelete] = useState<{ id: string; type: 'key' | 'update' } | null>(null);
 
+  const [sortField, setSortField] = useState<SortField>("createdAt");
+  const [sortOrder, setSortOrder] = useState<SortOrder>("desc");
+
   const [page, setPage] = useState(1);
   const limit = 5;
 
@@ -54,6 +57,15 @@ export default function Dashboard() {
   const { mutate: generateKey, isPending: isGeneratingKey } = useGenerateApiKey();
   const { mutate: deleteKey } = useDeleteApiKey();
 
+  const handleSort = (field: SortField) => {
+    if (sortField === field) {
+      setSortOrder((prev) => (prev === "asc" ? "desc" : "asc"));
+    } else {
+      setSortField(field);
+      setSortOrder("asc");
+    }
+  };
+
   const filtered = updates.filter(
     (u: Update) =>
       u.runtimeVersion.toLowerCase().includes(search.toLowerCase()) ||
@@ -63,15 +75,58 @@ export default function Dashboard() {
   );
 
   const isActive = (u: Update) => {
-    if (page !== 1) return false;
     const sorted = [...updates].sort(
       (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
     );
     const latest = sorted.find(
-      (x) => x.channel.id === u.channel.id && x.platform === u.platform,
+      (x) =>
+        x.channel.app.name === u.channel.app.name &&
+        x.channel.name === u.channel.name &&
+        x.platform === u.platform,
     );
     return latest?.id === u.id;
   };
+
+  const sortedUpdates = [...filtered].sort((a: Update, b: Update) => {
+    let valA: any;
+    let valB: any;
+
+    switch (sortField) {
+      case "app":
+        valA = a.channel.app.name.toLowerCase();
+        valB = b.channel.app.name.toLowerCase();
+        break;
+      case "channel":
+        valA = a.channel.name.toLowerCase();
+        valB = b.channel.name.toLowerCase();
+        break;
+      case "runtimeVersion":
+        valA = a.runtimeVersion.toLowerCase();
+        valB = b.runtimeVersion.toLowerCase();
+        break;
+      case "platform":
+        valA = a.platform.toLowerCase();
+        valB = b.platform.toLowerCase();
+        break;
+      case "downloadCount":
+        valA = a.downloadCount || 0;
+        valB = b.downloadCount || 0;
+        break;
+      case "status":
+        valA = isActive(a) ? 1 : 0;
+        valB = isActive(b) ? 1 : 0;
+        break;
+      case "createdAt":
+      default:
+        valA = new Date(a.createdAt).getTime();
+        valB = new Date(b.createdAt).getTime();
+        break;
+    }
+
+    if (valA < valB) return sortOrder === "asc" ? -1 : 1;
+    if (valA > valB) return sortOrder === "asc" ? 1 : -1;
+    return 0;
+  });
 
 
   const handleDelete = (id: string) => {
@@ -196,10 +251,13 @@ export default function Dashboard() {
             
             <DeploymentTable 
               isLoading={isLoading}
-              updates={filtered}
+              updates={sortedUpdates}
               deletingId={deletingId}
               onDeleteItem={(id) => setItemToDelete({ id, type: 'update' })}
               isActive={isActive}
+              sortField={sortField}
+              sortOrder={sortOrder}
+              onSort={handleSort}
               pagination={meta}
               onPageChange={setPage}
             />

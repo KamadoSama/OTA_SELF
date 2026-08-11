@@ -1,8 +1,11 @@
 "use client";
 
-import { Smartphone, DownloadCloud, Trash2, Loader2 } from "lucide-react";
+import { Smartphone, DownloadCloud, Trash2, Loader2, ArrowUp, ArrowDown, ArrowUpDown } from "lucide-react";
 import { Icon } from "@iconify/react";
 import { Update } from "@/services/updates.service";
+
+export type SortField = "app" | "channel" | "runtimeVersion" | "platform" | "downloadCount" | "createdAt" | "status";
+export type SortOrder = "asc" | "desc";
 
 interface DeploymentTableProps {
   isLoading: boolean;
@@ -10,6 +13,9 @@ interface DeploymentTableProps {
   deletingId: string | null;
   onDeleteItem: (id: string, type: 'update') => void;
   isActive: (u: Update) => boolean;
+  sortField: SortField;
+  sortOrder: SortOrder;
+  onSort: (field: SortField) => void;
   pagination?: {
     total: number;
     page: number;
@@ -25,9 +31,35 @@ export function DeploymentTable({
   deletingId,
   onDeleteItem,
   isActive,
+  sortField,
+  sortOrder,
+  onSort,
   pagination,
   onPageChange,
 }: DeploymentTableProps) {
+  const renderSortHeader = (label: string, field: SortField, className?: string) => {
+    const isSelected = sortField === field;
+    return (
+      <th className={`px-6 py-3 font-semibold text-[11px] uppercase tracking-wider ${className || ""}`}>
+        <button
+          onClick={() => onSort(field)}
+          className="flex items-center gap-1.5 hover:text-white transition-colors cursor-pointer select-none"
+        >
+          <span>{label}</span>
+          {isSelected ? (
+            sortOrder === "asc" ? (
+              <ArrowUp className="h-3 w-3 text-white" />
+            ) : (
+              <ArrowDown className="h-3 w-3 text-white" />
+            )
+          ) : (
+            <ArrowUpDown className="h-3.5 w-3.5 text-white/20 hover:text-white/50" />
+          )}
+        </button>
+      </th>
+    );
+  };
+
   return (
     <div className="rounded border border-white/[0.06] bg-[#050505] overflow-hidden">
       <div className="flex items-center justify-between border-b border-white/[0.06] px-6 py-4">
@@ -38,13 +70,13 @@ export function DeploymentTable({
         <table className="w-full text-left text-[13px]">
           <thead>
             <tr className="border-b border-white/[0.06] text-white/30 font-medium">
-              <th className="px-6 py-3 font-semibold text-[11px] uppercase tracking-wider">App</th>
-              <th className="hidden sm:table-cell px-6 py-3 font-semibold text-[11px] uppercase tracking-wider">Channel</th>
-              <th className="px-6 py-3 font-semibold text-[11px] uppercase tracking-wider">Runtime</th>
-              <th className="hidden lg:table-cell px-6 py-3 font-semibold text-[11px] uppercase tracking-wider">Platform</th>
-              <th className="px-6 py-3 font-semibold text-[11px] uppercase tracking-wider text-center">Stats</th>
-              <th className="hidden md:table-cell px-6 py-3 font-semibold text-[11px] uppercase tracking-wider">Date</th>
-              <th className="px-6 py-3 font-semibold text-[11px] uppercase tracking-wider">Status</th>
+              {renderSortHeader("App", "app")}
+              {renderSortHeader("Channel", "channel", "hidden sm:table-cell")}
+              {renderSortHeader("Runtime", "runtimeVersion")}
+              {renderSortHeader("Platform", "platform", "hidden lg:table-cell")}
+              {renderSortHeader("Stats", "downloadCount", "text-center flex justify-center")}
+              {renderSortHeader("Date", "createdAt", "hidden md:table-cell")}
+              {renderSortHeader("Status", "status")}
               <th className="px-6 py-3 font-semibold text-[11px] uppercase tracking-wider text-right">Actions</th>
             </tr>
           </thead>
