@@ -27,7 +27,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const loading = status === 'loading';
 
+  const isSelfHosted = process.env.NEXT_PUBLIC_SELF_HOSTED === 'true';
+
   const isPublicRoute = (path: string) => {
+    if (isSelfHosted) {
+      if (path === '/' || path === '/en' || path === '/fr') {
+        return false;
+      }
+    }
     return (
       PUBLIC_EXACT.includes(path) ||
       PUBLIC_PREFIXES.some((prefix) => path.startsWith(prefix)) ||
@@ -45,7 +52,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         createdAt: '', // Not available in session by default
       });
 
-      if (GUEST_ONLY_ROUTES.includes(pathname)) {
+      if (
+        GUEST_ONLY_ROUTES.includes(pathname) ||
+        (isSelfHosted && (pathname === '/' || pathname === '/en' || pathname === '/fr'))
+      ) {
         router.push('/dashboard');
       }
 
@@ -55,7 +65,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         router.push('/login');
       }
     }
-  }, [session, loading, pathname, router]);
+  }, [session, loading, pathname, router, isSelfHosted]);
 
   const login = async (email: string, pass: string) => {
     const result = await signIn('credentials', {
@@ -95,7 +105,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const logout = async () => {
     await signOut({ redirect: false });
     setUser(null);
-    router.push('/');
+    if (isSelfHosted) {
+      router.push('/login');
+    } else {
+      router.push('/');
+    }
   };
 
   if (loading && !isPublicRoute(pathname)) {

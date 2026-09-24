@@ -3,6 +3,8 @@
 import { useEffect, useState } from "react";
 import { AnimatePresence } from 'framer-motion';
 import { useRouter } from '@/i18n/routing';
+import { useSession } from "next-auth/react";
+import { Loader2 } from "lucide-react";
 
 // Landing Components
 import { Header } from '@/components/landing/Header';
@@ -18,18 +20,40 @@ import { LoadingScreen } from '@/components/landing/LoadingScreen';
 
 export default function LandingPage() {
   const router = useRouter();
+  const { data: session, status } = useSession();
+  const isSelfHosted = process.env.NEXT_PUBLIC_SELF_HOSTED === "true";
+
   const [mounted, setMounted] = useState(false);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     setMounted(true);
+    if (isSelfHosted) {
+      if (status === "loading") return;
+      if (session?.user) {
+        router.replace("/dashboard");
+      } else {
+        router.replace("/login");
+      }
+      return;
+    }
+
     const timer = setTimeout(() => {
       setLoading(false);
     }, 1800);
     return () => clearTimeout(timer);
-  }, []);
+  }, [isSelfHosted, status, session, router]);
 
-  if (!mounted) return null;
+  if (!mounted || isSelfHosted) {
+    if (isSelfHosted) {
+      return (
+        <div className="min-h-screen bg-black flex items-center justify-center">
+          <Loader2 className="h-6 w-6 text-white/40 animate-spin" />
+        </div>
+      );
+    }
+    return null;
+  }
 
   return (
     <>
