@@ -103,6 +103,16 @@ export const updatesService = {
     return data;
   },
 
+  async toggleRollback(id: string): Promise<{ success: boolean; updateId: string; isRollback: boolean; message: string }> {
+    const { data } = await apiClient.post(`/api/admin/updates/${id}/rollback`);
+    return data;
+  },
+
+  async rollbackChannel(appName: string, channelName: string): Promise<{ success: boolean; rolledBackUpdateId: string; nowActiveUpdateId: string | null; message: string }> {
+    const { data } = await apiClient.post('/api/admin/updates/rollback-channel', { appName, channelName });
+    return data;
+  },
+
   async uploadUpdate(file: File, appName: string, channelName: string) {
     const formData = new FormData();
     formData.append('file', file);

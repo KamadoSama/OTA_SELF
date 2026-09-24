@@ -12,6 +12,8 @@ interface DeploymentTableProps {
   updates: Update[];
   deletingId: string | null;
   onDeleteItem: (id: string, type: 'update') => void;
+  rollingBackId?: string | null;
+  onRollbackItem?: (update: Update) => void;
   isActive: (u: Update) => boolean;
   sortField: SortField;
   sortOrder: SortOrder;
@@ -30,6 +32,8 @@ export function DeploymentTable({
   updates,
   deletingId,
   onDeleteItem,
+  rollingBackId,
+  onRollbackItem,
   isActive,
   sortField,
   sortOrder,
@@ -174,13 +178,38 @@ export function DeploymentTable({
                   </div>
                 </td>
                 <td className="px-6 py-5 text-right">
-                  <button 
-                    onClick={() => onDeleteItem(update.id, 'update')} 
-                    disabled={deletingId === update.id}
-                    className="p-2 rounded border border-white/10 text-white/20 hover:text-white hover:border-white/30 transition-all disabled:opacity-30"
-                  >
-                    {deletingId === update.id ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Trash2 className="h-3.5 w-3.5" />}
-                  </button>
+                  <div className="flex items-center justify-end gap-2">
+                    {onRollbackItem && (
+                      <button
+                        onClick={() => onRollbackItem(update)}
+                        disabled={rollingBackId === update.id}
+                        title={update.isRollback ? "Restaurer cette version" : "Rollback cette version"}
+                        className={`py-1.5 px-2.5 rounded border transition-all flex items-center gap-1.5 ${
+                          update.isRollback
+                            ? "border-emerald-500/30 text-emerald-400 bg-emerald-500/10 hover:bg-emerald-500/20 hover:border-emerald-500/50"
+                            : "border-amber-500/20 text-amber-400/80 bg-amber-500/5 hover:text-amber-300 hover:border-amber-500/40 hover:bg-amber-500/10"
+                        } disabled:opacity-30`}
+                      >
+                        {rollingBackId === update.id ? (
+                          <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                        ) : (
+                          <RotateCcw className="h-3.5 w-3.5" />
+                        )}
+                        <span className="hidden xl:inline text-[11px] font-bold">
+                          {update.isRollback ? "Restaurer" : "Rollback"}
+                        </span>
+                      </button>
+                    )}
+
+                    <button 
+                      onClick={() => onDeleteItem(update.id, 'update')} 
+                      disabled={deletingId === update.id}
+                      title="Supprimer la mise à jour"
+                      className="p-1.5 rounded border border-white/10 text-white/30 hover:text-red-400 hover:border-red-500/30 hover:bg-red-500/10 transition-all disabled:opacity-30"
+                    >
+                      {deletingId === update.id ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Trash2 className="h-3.5 w-3.5" />}
+                    </button>
+                  </div>
                 </td>
               </tr>
             );

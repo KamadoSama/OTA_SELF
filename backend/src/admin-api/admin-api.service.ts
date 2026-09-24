@@ -651,5 +651,49 @@ export class AdminApiService {
       message: `Successfully rolled back update on channel '${channelName}'.`,
     };
   }
+
+  async toggleUpdateRollback(updateId: string, customerId: string) {
+    const update = await this.prisma.update.findUnique({
+      where: { id: updateId },
+      include: {
+        channel: {
+          include: { app: true },
+        },
+      },
+    });
+
+    if (!update) {
+      throw new NotFoundException(`Update '${updateId}' not found.`);
+    }
+
+    if (update.channel.app.customerId !== customerId) {
+      throw new BadRequestException('Unauthorized to modify this update.');
+    }
+
+    const newRollbackState = !update.isRollback;
+
+    const updated = await this.prisma.update.update({
+      where: { id: updateId },
+      data: { isRollback: newRollbackState },
+    });
+
+    // Invalidate manifest cache so Expo clients immediately get the updated active release
+    await (this.cacheManager as any).reset?.();
+
+    this.logger.log(
+      `Update ${updateId} rollback toggled to ${newRollbackState} on ${update.channel.app.name}/${update.channel.name} by customer ${customerId}`,
+    );
+
+    return {
+      success: true,
+      updateId: updated.id,
+      isRollback: updated.isRollback,
+      appName: update.channel.app.name,
+      channelName: update.channel.name,
+      message: updated.isRollback
+        ? `Rollback appliqué avec succès. Cette version ne sera plus délivrée aux appareils.`
+        : `Version restaurée avec succès. Elle est de nouveau active.`,
+    };
+  }
 }
 

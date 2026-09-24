@@ -92,4 +92,24 @@ export class AdminApiController {
     }
     return { success: true, deletedId: id };
   }
+
+  @Post(':id/rollback')
+  async toggleUpdateRollback(
+    @Req() req: AuthenticatedRequest,
+    @Param('id') id: string,
+  ) {
+    return this.adminService.toggleUpdateRollback(id, req.user.id);
+  }
+
+  @Post('rollback-channel')
+  async rollbackChannel(
+    @Req() req: AuthenticatedRequest,
+    @Body('appName') appName: string,
+    @Body('channelName') channelName: string,
+  ) {
+    if (!appName || !channelName) {
+      throw new BadRequestException('appName and channelName are required');
+    }
+    return this.adminService.rollbackChannel(appName, channelName, req.user.id);
+  }
 }

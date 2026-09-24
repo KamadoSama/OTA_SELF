@@ -68,6 +68,33 @@ export function useUploadUpdate() {
   });
 }
 
+export function useToggleRollback() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (id: string) => updatesService.toggleRollback(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["updates"] });
+      queryClient.invalidateQueries({ queryKey: ["apps"] });
+      queryClient.invalidateQueries({ queryKey: ["analytics"] });
+    },
+  });
+}
+
+export function useRollbackChannel() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ appName, channelName }: { appName: string; channelName: string }) =>
+      updatesService.rollbackChannel(appName, channelName),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["updates"] });
+      queryClient.invalidateQueries({ queryKey: ["apps"] });
+      queryClient.invalidateQueries({ queryKey: ["analytics"] });
+    },
+  });
+}
+
 export function useBilling() {
   return useQuery({
     queryKey: ["billing"],
