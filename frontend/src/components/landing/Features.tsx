@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from 'framer-motion';
-import { Shield, Code, CloudLightning, Zap } from 'lucide-react';
+import { Shield, Code, CloudLightning, Zap, SlidersHorizontal, RotateCcw, Server } from 'lucide-react';
 import { Logo } from '@/components/ui/Logo';
 import { useTranslations } from 'next-intl';
 
@@ -116,6 +116,51 @@ export function Features() {
                   </div>
                 </div>
               </div>
+            </div>
+          </motion.div>
+
+          {/* Progressive Rollouts Card */}
+          <motion.div variants={{ hidden: { opacity: 0, y: 40 }, show: { opacity: 1, y: 0, transition: { duration: 0.8 } } }} className="md:col-span-4 group rounded-3xl glass p-10 flex flex-col transition-all hover:bg-white/[0.04]">
+            <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center mb-6">
+              <SlidersHorizontal className="h-5 w-5 text-emerald-400" />
+            </div>
+            <h3 className="text-xl font-bold mb-3 text-white">Canary Rollouts (%)</h3>
+            <p className="text-white/40 text-sm leading-relaxed font-medium">
+              Déployez d'abord à 10% ou 25% de votre parc d'appareils de façon déterministe avant de basculer à 100%. Zéro risque de bloquer tous vos utilisateurs.
+            </p>
+            <div className="mt-auto pt-6 flex items-center gap-2">
+              <span className="text-[11px] font-mono text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">--rollout 25</span>
+              <span className="text-[11px] text-white/30">deterministic hashing</span>
+            </div>
+          </motion.div>
+
+          {/* Instant Rollback Card */}
+          <motion.div variants={{ hidden: { opacity: 0, y: 40 }, show: { opacity: 1, y: 0, transition: { duration: 0.8 } } }} className="md:col-span-4 group rounded-3xl glass p-10 flex flex-col transition-all hover:bg-white/[0.04]">
+            <div className="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center mb-6">
+              <RotateCcw className="h-5 w-5 text-amber-400" />
+            </div>
+            <h3 className="text-xl font-bold mb-3 text-white">Instant Rollback (200ms)</h3>
+            <p className="text-white/40 text-sm leading-relaxed font-medium">
+              Un bug imprévu en production ? Restaurez instantanément la version stable précédente sans attendre un nouveau build d'Expo.
+            </p>
+            <div className="mt-auto pt-6 flex items-center gap-2">
+              <span className="text-[11px] font-mono text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/20">zenota rollback</span>
+              <span className="text-[11px] text-white/30">0-downtime</span>
+            </div>
+          </motion.div>
+
+          {/* 100% Self-Hosted Sovereignty Card */}
+          <motion.div variants={{ hidden: { opacity: 0, y: 40 }, show: { opacity: 1, y: 0, transition: { duration: 0.8 } } }} className="md:col-span-4 group rounded-3xl glass p-10 flex flex-col transition-all hover:bg-white/[0.04]">
+            <div className="w-10 h-10 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center mb-6">
+              <Server className="h-5 w-5 text-blue-400" />
+            </div>
+            <h3 className="text-xl font-bold mb-3 text-white">100% Self-Hosted</h3>
+            <p className="text-white/40 text-sm leading-relaxed font-medium">
+              Installez ZenOTA sur votre VPS en une ligne de commande. Vos bundles restent dans votre bucket S3/MinIO/R2, sans aucun compteur de MAU.
+            </p>
+            <div className="mt-auto pt-6 flex items-center gap-2">
+              <span className="text-[11px] font-mono text-blue-400 bg-blue-500/10 px-2 py-0.5 rounded border border-blue-500/20">curl | sh</span>
+              <span className="text-[11px] text-white/30">Docker & MinIO</span>
             </div>
           </motion.div>
         </motion.div>

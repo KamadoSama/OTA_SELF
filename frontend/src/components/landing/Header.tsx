@@ -7,6 +7,7 @@ import { Link, useRouter, usePathname } from '@/i18n/routing';
 import { LanguageSwitcher } from '@/components/ui/LanguageSwitcher';
 import { useTranslations, useLocale } from 'next-intl';
 import { locales } from '@/i18n/config';
+import { useSession } from 'next-auth/react';
 
 export function Header() {
   const t = useTranslations('Common');
@@ -15,6 +16,8 @@ export function Header() {
   const pathname = usePathname();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const { data: session } = useSession();
+  const isLoggedIn = Boolean(session?.user);
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 20);
@@ -70,13 +73,22 @@ export function Header() {
         <div className="flex items-center gap-3 pointer-events-auto">
           <div className={`hidden md:flex glass h-12 px-4 rounded-full items-center gap-6 border border-white/10 transition-all duration-500 ${scrolled ? 'bg-black/60' : 'bg-white/5'}`}>
             <LanguageSwitcher />
-            <Link href="/login" className="text-xs font-bold uppercase tracking-widest text-white/50 hover:text-white transition-colors">{t('login')}</Link>
+            {!isLoggedIn && (
+              <Link href="/login" className="text-xs font-bold uppercase tracking-widest text-white/50 hover:text-white transition-colors">{t('login')}</Link>
+            )}
           </div>
           
-          <Link href="/register" className="hidden sm:flex h-12 px-6 rounded-full bg-white text-black font-bold text-xs uppercase tracking-widest hover:scale-105 active:scale-95 transition-all shadow-xl items-center gap-2">
-            {t('signup')}
-            <ArrowRight size={14} />
-          </Link>
+          {isLoggedIn ? (
+            <Link href="/dashboard" className="hidden sm:flex h-12 px-6 rounded-full bg-white text-black font-bold text-xs uppercase tracking-widest hover:scale-105 active:scale-95 transition-all shadow-xl items-center gap-2">
+              Dashboard
+              <ArrowRight size={14} />
+            </Link>
+          ) : (
+            <Link href="/register" className="hidden sm:flex h-12 px-6 rounded-full bg-white text-black font-bold text-xs uppercase tracking-widest hover:scale-105 active:scale-95 transition-all shadow-xl items-center gap-2">
+              {t('signup')}
+              <ArrowRight size={14} />
+            </Link>
+          )}
 
           {/* Mobile Toggle */}
           <button 
@@ -144,22 +156,33 @@ export function Header() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              {isLoggedIn ? (
                 <Link 
-                  href="/login" 
+                  href="/dashboard" 
                   onClick={() => setIsMenuOpen(false)}
-                  className="h-14 rounded-2xl glass flex items-center justify-center font-bold text-white border border-white/5"
+                  className="h-14 rounded-2xl bg-white text-black flex items-center justify-center font-bold gap-2 text-sm uppercase tracking-wider"
                 >
-                  {t('login')}
+                  Dashboard
+                  <ArrowRight size={16} />
                 </Link>
-                <Link 
-                  href="/register" 
-                  onClick={() => setIsMenuOpen(false)}
-                  className="h-14 rounded-2xl bg-white text-black flex items-center justify-center font-bold"
-                >
-                  {t('signup')}
-                </Link>
-              </div>
+              ) : (
+                <div className="grid grid-cols-2 gap-4">
+                  <Link 
+                    href="/login" 
+                    onClick={() => setIsMenuOpen(false)}
+                    className="h-14 rounded-2xl glass flex items-center justify-center font-bold text-white border border-white/5"
+                  >
+                    {t('login')}
+                  </Link>
+                  <Link 
+                    href="/register" 
+                    onClick={() => setIsMenuOpen(false)}
+                    className="h-14 rounded-2xl bg-white text-black flex items-center justify-center font-bold"
+                  >
+                    {t('signup')}
+                  </Link>
+                </div>
+              )}
             </div>
           </div>
         </div>

@@ -29,6 +29,8 @@ export class ExpoUpdatesController {
     @Headers('expo-project-id') expoProjectId: string,
     @Headers('expo-current-update-id') currentUpdateId: string,
     @Headers('expo-embedded-update-id') embeddedUpdateId: string,
+    @Headers('expo-client-id') expoClientId?: string,
+    @Headers('expo-device-id') expoDeviceId?: string,
   ) {
     try {
       this.logger.log(
@@ -59,15 +61,49 @@ export class ExpoUpdatesController {
       const host = req.get('host');
       const baseUrl = host ? `${protocol}://${host}` : undefined;
 
+      const clientIdentifier = expoClientId || expoDeviceId || (req.ip as string) || 'anon-client';
+
       const manifestResponse = await this.expoService.getLatestManifest(
         expoRuntimeVersion,
         expoPlatform,
         resolvedChannel,
         targetAppId,
         baseUrl,
+        clientIdentifier,
+        currentUpdateId,
       );
 
       if (!manifestResponse) {
+        if (currentUpdateId && (await this.expoService.isUpdateRolledBack(currentUpdateId))) {
+          this.logger.log(
+            `Client running rolled back update ${currentUpdateId} and no other OTA release is active. Sending rollBackToEmbedded directive.`,
+          );
+          const boundary = `ExpoManifestBoundary${Math.random().toString(36).slice(2)}`;
+          const directive = {
+            type: 'rollBackToEmbedded',
+            parameters: {
+              commitTime: new Date().toISOString(),
+            },
+          };
+
+          const multipartBody =
+            `--${boundary}\r\n` +
+            `Content-Disposition: form-data; name="directive"\r\n` +
+            `Content-Type: application/json; charset=utf-8\r\n\r\n` +
+            JSON.stringify(directive) +
+            `\r\n` +
+            `--${boundary}--\r\n`;
+
+          const bodyBuffer = Buffer.from(multipartBody, 'utf8');
+
+          res.setHeader('expo-protocol-version', '1');
+          res.setHeader('expo-sfv-version', '0');
+          res.setHeader('cache-control', 'private, no-cache, no-store');
+          res.setHeader('Content-Type', `multipart/mixed; boundary=${boundary}`);
+          res.setHeader('Content-Length', bodyBuffer.length.toString());
+          return res.status(200).end(bodyBuffer);
+        }
+
         this.logger.warn(
           `No update found — appId: ${targetAppId}, runtime: ${expoRuntimeVersion}, platform: ${expoPlatform}, channel: ${resolvedChannel}`,
         );
@@ -81,11 +117,13 @@ export class ExpoUpdatesController {
       // Protocol 1: If the client already has this update, return 204 No Content
       if (currentUpdateId === manifest.id || embeddedUpdateId === manifest.id) {
         this.logger.log(`Client already up-to-date: ${manifest.id} app name ${appId}`);
+        void this.expoService.recordDeviceInstallation(manifest.id, clientIdentifier, expoPlatform);
         return res.status(204).send();
       }
 
-      // Increment download count only when we actually serve a new manifest
+      // Increment download count and record unique device installation
       await this.expoService.incrementDownloadCount(manifest.id);
+      void this.expoService.recordDeviceInstallation(manifest.id, clientIdentifier, expoPlatform);
 
       // Création de la boundary sans caractères spéciaux problématiques
       const boundary = `ExpoManifestBoundary${Math.random().toString(36).slice(2)}`;

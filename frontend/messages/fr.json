@@ -167,6 +167,16 @@
         "title": "Plateforme",
         "apiKeys": "Clés API",
         "manifest": "Manifeste et Versionnage"
+      },
+      "selfHosting": {
+        "title": "Auto-Hébergement (Self-Host)",
+        "quickstart": "Installation Rapide (curl)",
+        "docker": "Docker & MinIO"
+      },
+      "releaseOps": {
+        "title": "Rollout & Rollback",
+        "rollouts": "Canary Rollouts (%)",
+        "rollback": "Instant Rollback"
       }
     },
     "introduction": {

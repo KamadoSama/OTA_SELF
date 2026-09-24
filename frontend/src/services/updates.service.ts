@@ -25,9 +25,24 @@ export interface Update {
   runtimeVersion: string;
   platform: string;
   downloadCount: number;
+  rolloutPercentage?: number;
+  isRollback?: boolean;
+  installationsCount?: number;
   createdAt: string;
   channel: Channel;
   assets: UpdateAsset[];
+}
+
+export interface AnalyticsHistoryPoint {
+  date: string;
+  total: number;
+  ios: number;
+  android: number;
+}
+
+export interface AnalyticsResponse {
+  history: AnalyticsHistoryPoint[];
+  totalUniqueDevices: number;
 }
 
 export interface Invoice {
@@ -75,15 +90,26 @@ export const updatesService = {
     search?: string,
     sortBy?: string,
     sortOrder?: 'asc' | 'desc',
+    app?: string,
   ): Promise<PaginatedResponse<Update>> {
     const { data } = await apiClient.get<PaginatedResponse<Update>>('/api/admin/updates', {
-      params: { page, limit, search, sortBy, sortOrder },
+      params: { page, limit, search, sortBy, sortOrder, app },
     });
     return data;
   },
 
   async deleteUpdate(id: string) {
     const { data } = await apiClient.delete(`/api/admin/updates/${id}`);
+    return data;
+  },
+
+  async toggleRollback(id: string): Promise<{ success: boolean; updateId: string; isRollback: boolean; message: string }> {
+    const { data } = await apiClient.post(`/api/admin/updates/${id}/rollback`);
+    return data;
+  },
+
+  async rollbackChannel(appName: string, channelName: string): Promise<{ success: boolean; rolledBackUpdateId: string; nowActiveUpdateId: string | null; message: string }> {
+    const { data } = await apiClient.post('/api/admin/updates/rollback-channel', { appName, channelName });
     return data;
   },
 
@@ -138,5 +164,12 @@ export const updatesService = {
     link.click();
     link.remove();
     window.URL.revokeObjectURL(url);
+  },
+
+  async fetchAnalytics(days = 14, app?: string): Promise<AnalyticsResponse> {
+    const { data } = await apiClient.get<AnalyticsResponse>('/api/admin/updates/analytics/history', {
+      params: { days, app },
+    });
+    return data;
   },
 };

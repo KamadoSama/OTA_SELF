@@ -28,7 +28,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const loading = status === 'loading';
 
   const isPublicRoute = (path: string) => {
-    return PUBLIC_EXACT.includes(path) || PUBLIC_PREFIXES.some(prefix => path.startsWith(prefix));
+    return (
+      PUBLIC_EXACT.includes(path) ||
+      PUBLIC_PREFIXES.some((prefix) => path.startsWith(prefix)) ||
+      path === '/docs' ||
+      /^\/[a-z]{2}\/docs(\/.*)?$/.test(path)
+    );
   };
 
   useEffect(() => {
@@ -63,7 +68,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       throw new Error(result.error);
     }
 
-    router.push('/');
+    router.push('/dashboard');
   };
 
   const register = async (email: string, pass: string, plan?: string) => {
@@ -90,7 +95,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const logout = async () => {
     await signOut({ redirect: false });
     setUser(null);
-    router.push('/login');
+    router.push('/');
   };
 
   if (loading && !isPublicRoute(pathname)) {

@@ -9,10 +9,11 @@ export function useUpdates(
   search?: string,
   sortBy?: string,
   sortOrder?: 'asc' | 'desc',
+  app?: string,
 ) {
   return useQuery({
-    queryKey: ["updates", page, limit, search, sortBy, sortOrder],
-    queryFn: () => updatesService.fetchUpdates(page, limit, search, sortBy, sortOrder),
+    queryKey: ["updates", page, limit, search, sortBy, sortOrder, app],
+    queryFn: () => updatesService.fetchUpdates(page, limit, search, sortBy, sortOrder, app),
   });
 }
 
@@ -67,6 +68,33 @@ export function useUploadUpdate() {
   });
 }
 
+export function useToggleRollback() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (id: string) => updatesService.toggleRollback(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["updates"] });
+      queryClient.invalidateQueries({ queryKey: ["apps"] });
+      queryClient.invalidateQueries({ queryKey: ["analytics"] });
+    },
+  });
+}
+
+export function useRollbackChannel() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ appName, channelName }: { appName: string; channelName: string }) =>
+      updatesService.rollbackChannel(appName, channelName),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["updates"] });
+      queryClient.invalidateQueries({ queryKey: ["apps"] });
+      queryClient.invalidateQueries({ queryKey: ["analytics"] });
+    },
+  });
+}
+
 export function useBilling() {
   return useQuery({
     queryKey: ["billing"],
@@ -111,5 +139,13 @@ export function useDeleteAccount() {
 export function useDownloadInvoice() {
   return useMutation({
     mutationFn: (id: string) => updatesService.downloadInvoicePdf(id),
+  });
+}
+
+export function useAnalytics(days = 14, app?: string) {
+  return useQuery({
+    queryKey: ["analytics", days, app],
+    queryFn: () => updatesService.fetchAnalytics(days, app),
+    refetchInterval: 30000, // Refresh every 30s
   });
 }

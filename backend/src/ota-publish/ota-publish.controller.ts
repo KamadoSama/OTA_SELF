@@ -29,6 +29,7 @@ export class OtaPublishController {
     @Body('channel') channelName: string,
     @Body('runtimeVersion') runtimeVersion?: string,
     @Body('appVersion') appVersion?: string,
+    @Body('rollout') rollout?: string,
   ) {
     if (!file) {
       throw new BadRequestException('No file uploaded');
@@ -46,7 +47,8 @@ export class OtaPublishController {
       );
     }
 
-    this.logger.log(`CLI Upload by ${req.customer.email} for app: ${appName}`);
+    const rolloutNum = rollout !== undefined ? parseInt(rollout, 10) : 100;
+    this.logger.log(`CLI Upload by ${req.customer.email} for app: ${appName} (channel: ${channelName}, rollout: ${rolloutNum}%)`);
     
     // We pass the customerId to validate app ownership and create if necessary
     const updateId = await this.adminService.processUpdateZip(
@@ -56,12 +58,35 @@ export class OtaPublishController {
       req.customer.id, 
       runtimeVersion,
       appVersion,
+      rolloutNum,
     );
 
     return {
       success: true,
       message: 'Update processed successfully',
       updateId,
+      rolloutPercentage: rolloutNum,
     };
+  }
+
+  @Post('rollback')
+  @UseGuards(ApiKeyGuard)
+  async rollbackUpdate(
+    @Req() req: ApiKeyAuthenticatedRequest,
+    @Body('app') appName: string,
+    @Body('channel') channelName: string,
+  ) {
+    if (!appName || !channelName) {
+      throw new BadRequestException('appName and channelName are required for rollback');
+    }
+
+    this.logger.log(`CLI Rollback by ${req.customer.email} on ${appName}/${channelName}`);
+    const result = await this.adminService.rollbackChannel(
+      appName,
+      channelName,
+      req.customer.id,
+    );
+
+    return result;
   }
 }

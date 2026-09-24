@@ -1,10 +1,10 @@
 "use client";
 
-import { Smartphone, DownloadCloud, Trash2, Loader2, ArrowUp, ArrowDown, ArrowUpDown } from "lucide-react";
+import { Smartphone, DownloadCloud, Trash2, Loader2, ArrowUp, ArrowDown, ArrowUpDown, RotateCcw, Users } from "lucide-react";
 import { Icon } from "@iconify/react";
 import { Update } from "@/services/updates.service";
 
-export type SortField = "app" | "channel" | "runtimeVersion" | "platform" | "downloadCount" | "createdAt" | "status";
+export type SortField = "app" | "channel" | "runtimeVersion" | "platform" | "downloadCount" | "rolloutPercentage" | "createdAt" | "status";
 export type SortOrder = "asc" | "desc";
 
 interface DeploymentTableProps {
@@ -12,6 +12,8 @@ interface DeploymentTableProps {
   updates: Update[];
   deletingId: string | null;
   onDeleteItem: (id: string, type: 'update') => void;
+  rollingBackId?: string | null;
+  onRollbackItem?: (update: Update) => void;
   isActive: (u: Update) => boolean;
   sortField: SortField;
   sortOrder: SortOrder;
@@ -30,6 +32,8 @@ export function DeploymentTable({
   updates,
   deletingId,
   onDeleteItem,
+  rollingBackId,
+  onRollbackItem,
   isActive,
   sortField,
   sortOrder,
@@ -74,6 +78,7 @@ export function DeploymentTable({
               {renderSortHeader("Channel", "channel", "hidden sm:table-cell")}
               {renderSortHeader("Runtime", "runtimeVersion")}
               {renderSortHeader("Platform", "platform", "hidden lg:table-cell")}
+              {renderSortHeader("Rollout", "rolloutPercentage")}
               {renderSortHeader("Stats", "downloadCount", "text-center flex justify-center")}
               {renderSortHeader("Date", "createdAt", "hidden md:table-cell")}
               {renderSortHeader("Status", "status")}
@@ -84,14 +89,18 @@ export function DeploymentTable({
             {isLoading ? (
               Array.from({ length: 5 }).map((_, i) => (
                 <tr key={i} className="animate-pulse">
-                  <td colSpan={8} className="px-6 py-5"><div className="h-3 w-full bg-white/5 rounded" /></td>
+                  <td colSpan={9} className="px-6 py-5"><div className="h-3 w-full bg-white/5 rounded" /></td>
                 </tr>
               ))
             ) : updates.length === 0 ? (
               <tr>
-                <td colSpan={8} className="px-6 py-20 text-center text-white/20 font-medium">No updates found.</td>
+                <td colSpan={9} className="px-6 py-20 text-center text-white/20 font-medium">No updates found.</td>
               </tr>
-            ) : updates.map((update: Update) => (
+            ) : updates.map((update: Update) => {
+              const rollout = update.rolloutPercentage ?? 100;
+              const isCanary = rollout < 100 && !update.isRollback;
+
+              return (
               <tr key={update.id} className="group hover:bg-white/[0.02] transition-colors">
                 <td className="px-6 py-5">
                   <div className="font-bold tracking-tight">{update.channel.app.name}</div>
@@ -113,15 +122,44 @@ export function DeploymentTable({
                     <span className="font-medium capitalize">{update.platform}</span>
                   </div>
                 </td>
+                <td className="px-6 py-5">
+                  {update.isRollback ? (
+                    <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded bg-red-500/10 border border-red-500/20 text-red-400 text-[11px] font-bold">
+                      <RotateCcw className="h-3 w-3" />
+                      Rolled Back
+                    </span>
+                  ) : isCanary ? (
+                    <div className="space-y-1">
+                      <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 text-[11px] font-bold">
+                        <span className="h-1.5 w-1.5 rounded-full bg-cyan-400 animate-pulse" />
+                        Canary {rollout}%
+                      </span>
+                      <div className="w-16 h-1 bg-white/10 rounded-full overflow-hidden">
+                        <div className="h-full bg-cyan-400 rounded-full" style={{ width: `${rollout}%` }} />
+                      </div>
+                    </div>
+                  ) : (
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-white/5 border border-white/10 text-white/70 text-[11px] font-bold">
+                      100% Full
+                    </span>
+                  )}
+                </td>
                 <td className="px-6 py-5 text-center">
-                  <div className="inline-flex flex-col items-center gap-1">
-                    <DownloadCloud className="h-3.5 w-3.5 text-white/20" />
-                    <span className="font-mono text-[11px] font-bold">{update.downloadCount || 0}</span>
+                  <div className="inline-flex flex-col items-center gap-0.5">
+                    <span className="inline-flex items-center gap-1 text-cyan-400 font-mono text-[11px] font-bold">
+                      <Users className="h-3 w-3" />
+                      {update.installationsCount ?? 0}
+                    </span>
+                    <span className="text-[10px] text-white/30 font-mono">
+                      {update.downloadCount || 0} hits
+                    </span>
                   </div>
                 </td>
                 <td className="hidden md:table-cell px-6 py-5 text-white/30">{new Date(update.createdAt).toLocaleDateString()}</td>
                 <td className="px-6 py-5">
-                  {isActive(update) ? (
+                  {update.isRollback ? (
+                    <span className="text-red-400/60 text-[10px] font-bold uppercase tracking-widest hidden sm:inline">Reverted</span>
+                  ) : isActive(update) ? (
                     <div className="flex items-center gap-2 text-white">
                       <div className="h-1.5 w-1.5 rounded-full bg-white shadow-[0_0_8px_white]" />
                       <span className="text-[10px] font-bold uppercase tracking-widest hidden sm:inline">Active</span>
@@ -130,7 +168,9 @@ export function DeploymentTable({
                     <span className="text-white/20 text-[10px] font-bold uppercase tracking-widest hidden sm:inline">Archived</span>
                   )}
                   <div className="sm:hidden flex items-center gap-2">
-                    {isActive(update) ? (
+                    {update.isRollback ? (
+                      <div className="h-1.5 w-1.5 rounded-full bg-red-400" />
+                    ) : isActive(update) ? (
                       <div className="h-1.5 w-1.5 rounded-full bg-white" />
                     ) : (
                       <div className="h-1.5 w-1.5 rounded-full bg-white/10" />
@@ -138,16 +178,42 @@ export function DeploymentTable({
                   </div>
                 </td>
                 <td className="px-6 py-5 text-right">
-                  <button 
-                    onClick={() => onDeleteItem(update.id, 'update')} 
-                    disabled={deletingId === update.id}
-                    className="p-2 rounded border border-white/10 text-white/20 hover:text-white hover:border-white/30 transition-all disabled:opacity-30"
-                  >
-                    {deletingId === update.id ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Trash2 className="h-3.5 w-3.5" />}
-                  </button>
+                  <div className="flex items-center justify-end gap-2">
+                    {onRollbackItem && (
+                      <button
+                        onClick={() => onRollbackItem(update)}
+                        disabled={rollingBackId === update.id}
+                        title={update.isRollback ? "Restaurer cette version" : "Rollback cette version"}
+                        className={`py-1.5 px-2.5 rounded border transition-all flex items-center gap-1.5 ${
+                          update.isRollback
+                            ? "border-emerald-500/30 text-emerald-400 bg-emerald-500/10 hover:bg-emerald-500/20 hover:border-emerald-500/50"
+                            : "border-amber-500/20 text-amber-400/80 bg-amber-500/5 hover:text-amber-300 hover:border-amber-500/40 hover:bg-amber-500/10"
+                        } disabled:opacity-30`}
+                      >
+                        {rollingBackId === update.id ? (
+                          <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                        ) : (
+                          <RotateCcw className="h-3.5 w-3.5" />
+                        )}
+                        <span className="hidden xl:inline text-[11px] font-bold">
+                          {update.isRollback ? "Restaurer" : "Rollback"}
+                        </span>
+                      </button>
+                    )}
+
+                    <button 
+                      onClick={() => onDeleteItem(update.id, 'update')} 
+                      disabled={deletingId === update.id}
+                      title="Supprimer la mise à jour"
+                      className="p-1.5 rounded border border-white/10 text-white/30 hover:text-red-400 hover:border-red-500/30 hover:bg-red-500/10 transition-all disabled:opacity-30"
+                    >
+                      {deletingId === update.id ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Trash2 className="h-3.5 w-3.5" />}
+                    </button>
+                  </div>
                 </td>
               </tr>
-            ))}
+            );
+          })}
           </tbody>
         </table>
       </div>

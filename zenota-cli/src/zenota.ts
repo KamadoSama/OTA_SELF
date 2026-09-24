@@ -67,6 +67,7 @@ program
   .description('Export and publish your Expo app to ZenOTA')
   .option('-c, --channel <channel>', 'Update channel to publish to', 'production')
   .option('-p, --platform <platform>', 'Platform to export (android, ios, all)')
+  .option('-r, --rollout <percentage>', 'Progressive rollout percentage (0-100)', '100')
   .action(async (options) => {
     if (!fs.existsSync(CONFIG_PATH)) {
       console.log(chalk.red('Not logged in. Please run `zenota login` first.'));
@@ -178,6 +179,9 @@ program
         const av = typeof appVersion === 'object' ? JSON.stringify(appVersion) : String(appVersion);
         form.append('appVersion', av);
       }
+      if (options.rollout) {
+        form.append('rollout', String(options.rollout));
+      }
       form.append('file', zipBuffer, {
         filename: 'update.zip',
         contentType: 'application/zip',
@@ -193,7 +197,8 @@ program
         timeout: 0 // Wait indefinitely
       });
 
-      uploadSpinner.succeed(chalk.green(`Update published! ID: ${response.data.updateId}`));
+      const rolloutInfo = options.rollout && Number(options.rollout) < 100 ? ` [Rollout: ${options.rollout}%]` : '';
+      uploadSpinner.succeed(chalk.green(`Update published! ID: ${response.data.updateId}${rolloutInfo}`));
     } catch (error: any) {
       uploadSpinner.fail('Upload failed.');
       if (error.response?.data?.message) {
@@ -204,4 +209,59 @@ program
     }
   });
 
+program
+  .command('rollback')
+  .description('Instantly rollback the active update on a channel to previous stable version')
+  .option('-c, --channel <channel>', 'Update channel to rollback', 'production')
+  .action(async (options) => {
+    if (!fs.existsSync(CONFIG_PATH)) {
+      console.log(chalk.red('Not logged in. Please run `zenota login` first.'));
+      process.exit(1);
+    }
+    
+    const config = JSON.parse(fs.readFileSync(CONFIG_PATH, 'utf-8'));
+    const apiKey = config.apiKey;
+
+    const appJsonPath = path.join(process.cwd(), 'app.json');
+    if (!fs.existsSync(appJsonPath)) {
+      console.log(chalk.red('Error: app.json not found in current directory.'));
+      process.exit(1);
+    }
+
+    const appJsonContent = fs.readFileSync(appJsonPath, 'utf-8');
+    const cleanAppJson = appJsonContent.replace(/(^|[^:])\/\/.*$/gm, '$1');
+    let appJson;
+    try {
+      appJson = JSON.parse(cleanAppJson);
+    } catch (e: any) {
+      console.log(chalk.red(`Error: app.json is not valid JSON. ${e.message}`));
+      process.exit(1);
+    }
+
+    const appName = appJson?.expo?.slug || appJson?.expo?.name;
+    const channelName = options.channel;
+
+    const rollbackSpinner = ora(`Rolling back channel "${channelName}" for "${appName}"...`).start();
+    try {
+      const response = await axios.post(`${getApiUrl()}/cli/publish/rollback`, {
+        app: appName,
+        channel: channelName,
+      }, {
+        headers: {
+          Authorization: `Bearer ${apiKey}`,
+        },
+      });
+
+      rollbackSpinner.succeed(chalk.green(`✨ Rollback successful! Rolled back ${response.data.rolledBackUpdateId}. Active update is now: ${response.data.nowActiveUpdateId || 'initial bundle'}`));
+    } catch (error: any) {
+      rollbackSpinner.fail('Rollback failed.');
+      if (error.response?.data?.message) {
+         console.error(chalk.red(`Server Error: ${error.response.data.message}`));
+      } else {
+         console.error(chalk.red(error.message));
+      }
+    }
+  });
+
 program.parse();
+

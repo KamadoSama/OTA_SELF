@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { AdminApiController } from './admin-api.controller';
+import { AppsController } from './apps.controller';
 import { AdminApiService } from './admin-api.service';
 import { StorageModule } from '../storage/storage.module';
 
@@ -8,7 +9,7 @@ import { AuthGuard } from '../auth/auth.guard';
 
 @Module({
   imports: [StorageModule, AuthModule],
-  controllers: [AdminApiController],
+  controllers: [AdminApiController, AppsController],
   providers: [AdminApiService, AuthGuard],
   exports: [AdminApiService],
 })

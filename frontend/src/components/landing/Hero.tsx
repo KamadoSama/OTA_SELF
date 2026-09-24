@@ -5,6 +5,7 @@ import { ArrowRight, ExternalLink, Code, CloudLightning, Shield, Zap } from 'luc
 import { Logo } from '@/components/ui/Logo';
 import { Link } from '@/i18n/routing';
 import { useTranslations } from 'next-intl';
+import { CodeDemo } from './CodeDemo';
 
 export function Hero() {
   const t = useTranslations();
@@ -71,13 +72,27 @@ export function Hero() {
               </Link>
             </div>
 
-            <div className="h-14 px-8 rounded-full glass flex items-center gap-4 text-white/40 font-mono text-sm group cursor-pointer hover:border-white/20 transition-all">
-              <span className="text-white/20 select-none">$</span>
-              <span>npm i -g zenota-cli</span>
-              <div className="w-6 h-6 rounded-md bg-white/5 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                <Code className="h-3 w-3 text-white" />
+            <div className="flex flex-wrap items-center justify-center gap-3 text-xs font-mono">
+              <div className="h-11 px-5 rounded-full glass flex items-center gap-3 text-white/50 group cursor-pointer hover:border-white/30 transition-all">
+                <span className="text-emerald-400 font-bold">$</span>
+                <span className="text-white/80">npm i -g zenota-cli</span>
+              </div>
+              <span className="text-white/20">or</span>
+              <div className="h-11 px-5 rounded-full glass flex items-center gap-3 text-white/50 group cursor-pointer hover:border-white/30 transition-all">
+                <span className="text-blue-400 font-bold">$</span>
+                <span className="text-white/80">curl -fsSL get-zenota.diesestudio.com | sh</span>
               </div>
             </div>
+
+            {/* Interactive Terminal Demo */}
+            <motion.div 
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.4, ease: "easeOut" }}
+              className="w-full mt-6 flex justify-center"
+            >
+              <CodeDemo />
+            </motion.div>
           </motion.div>
         </div>
       </section>
