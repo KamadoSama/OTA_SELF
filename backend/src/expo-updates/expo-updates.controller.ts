@@ -29,6 +29,8 @@ export class ExpoUpdatesController {
     @Headers('expo-project-id') expoProjectId: string,
     @Headers('expo-current-update-id') currentUpdateId: string,
     @Headers('expo-embedded-update-id') embeddedUpdateId: string,
+    @Headers('expo-client-id') expoClientId?: string,
+    @Headers('expo-device-id') expoDeviceId?: string,
   ) {
     try {
       this.logger.log(
@@ -59,12 +61,15 @@ export class ExpoUpdatesController {
       const host = req.get('host');
       const baseUrl = host ? `${protocol}://${host}` : undefined;
 
+      const clientIdentifier = expoClientId || expoDeviceId || (req.ip as string) || 'anon-client';
+
       const manifestResponse = await this.expoService.getLatestManifest(
         expoRuntimeVersion,
         expoPlatform,
         resolvedChannel,
         targetAppId,
         baseUrl,
+        clientIdentifier,
       );
 
       if (!manifestResponse) {
@@ -81,11 +86,13 @@ export class ExpoUpdatesController {
       // Protocol 1: If the client already has this update, return 204 No Content
       if (currentUpdateId === manifest.id || embeddedUpdateId === manifest.id) {
         this.logger.log(`Client already up-to-date: ${manifest.id} app name ${appId}`);
+        void this.expoService.recordDeviceInstallation(manifest.id, clientIdentifier, expoPlatform);
         return res.status(204).send();
       }
 
-      // Increment download count only when we actually serve a new manifest
+      // Increment download count and record unique device installation
       await this.expoService.incrementDownloadCount(manifest.id);
+      void this.expoService.recordDeviceInstallation(manifest.id, clientIdentifier, expoPlatform);
 
       // Création de la boundary sans caractères spéciaux problématiques
       const boundary = `ExpoManifestBoundary${Math.random().toString(36).slice(2)}`;

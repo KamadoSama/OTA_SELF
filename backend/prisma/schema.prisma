@@ -38,11 +38,28 @@ model Update {
   downloadCount  Int      @default(0)
   createdAt      DateTime @default(now())
   metadata       Json?    // Optional extra metadata
+  rolloutPercentage Int   @default(100)
+  isRollback     Boolean  @default(false)
 
   channel        Channel  @relation(fields: [channelId], references: [id], onDelete: Cascade)
   assets         Asset[]
+  installations  DeviceInstallation[]
 
   @@index([channelId, runtimeVersion, platform])
+}
+
+model DeviceInstallation {
+  id          String   @id @default(uuid())
+  deviceId    String   // SHA-256 anonymized device/client identifier
+  updateId    String
+  platform    String   // "ios" | "android"
+  installedAt DateTime @default(now())
+  lastSeenAt  DateTime @default(now())
+
+  update      Update   @relation(fields: [updateId], references: [id], onDelete: Cascade)
+
+  @@unique([deviceId, updateId])
+  @@index([updateId, installedAt])
 }
 
 model Asset {

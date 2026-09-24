@@ -9,6 +9,7 @@ import { Header } from '@/components/landing/Header';
 import { Hero } from '@/components/landing/Hero';
 import { Problem } from '@/components/landing/Problem';
 import { Workflow } from '@/components/landing/Workflow';
+import { CostCalculator } from '@/components/landing/CostCalculator';
 import { Features } from '@/components/landing/Features';
 import { Pricing } from '@/components/landing/Pricing';
 import { FAQ } from '@/components/landing/FAQ';
@@ -19,14 +20,6 @@ export default function LandingPage() {
   const router = useRouter();
   const [mounted, setMounted] = useState(false);
   const [loading, setLoading] = useState(true);
-
-  const isSelfHosted = process.env.NEXT_PUBLIC_SELF_HOSTED === 'true';
-
-  useEffect(() => {
-    if (isSelfHosted) {
-      router.replace('/dashboard');
-    }
-  }, [isSelfHosted, router]);
 
   useEffect(() => {
     setMounted(true);
@@ -68,6 +61,7 @@ export default function LandingPage() {
           <Hero />
           <Problem />
           <Workflow />
+          <CostCalculator />
           <Features />
           <FAQ />
           <Pricing />

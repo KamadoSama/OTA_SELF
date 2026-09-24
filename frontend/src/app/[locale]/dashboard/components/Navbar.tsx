@@ -1,22 +1,31 @@
 "use client";
 
-import { CloudLightning, RefreshCw, LogOut, Loader2, Menu, X } from "lucide-react";
+import { CloudLightning, RefreshCw, LogOut, Loader2, Menu, X, BookOpen } from "lucide-react";
 import { useState } from "react";
-import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { Link, usePathname } from "@/i18n/routing";
+import { ProjectSelector } from "./ProjectSelector";
+import { AppSummary } from "@/services/apps.service";
 
 interface NavbarProps {
   isLoading?: boolean;
   isLoggingOut?: boolean;
   onRefresh?: () => void;
   onLogout?: () => void;
+  apps?: AppSummary[];
+  selectedApp?: string | null;
+  onSelectApp?: (appName: string | null) => void;
+  onNewProject?: () => void;
 }
 
 export function Navbar({
   isLoading = false,
   isLoggingOut = false,
   onRefresh,
-  onLogout
+  onLogout,
+  apps = [],
+  selectedApp = null,
+  onSelectApp,
+  onNewProject,
 }: NavbarProps) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const pathname = usePathname();
@@ -28,6 +37,7 @@ export function Navbar({
     !isSelfHosted && { id: 'subscription', label: 'Subscription', href: '/dashboard/subscription' },
     !isSelfHosted && { id: 'billing', label: 'Billing', href: '/dashboard/billing' },
     { id: 'settings', label: 'Settings', href: '/dashboard/settings' },
+    { id: 'docs', label: 'Documentation', href: '/docs' },
   ].filter(Boolean) as { id: string; label: string; href: string }[]);
 
   const isActive = (href: string) => {
@@ -38,13 +48,24 @@ export function Navbar({
   return (
     <header className="sticky top-0 z-40 h-14 border-b border-white/[0.06] bg-black/80 backdrop-blur-md">
       <div className="flex h-full items-center justify-between px-6">
-        <div className="flex items-center gap-6">
-          <Link href="/dashboard" className="flex items-center gap-2.5">
+        <div className="flex items-center gap-4 sm:gap-5">
+          <Link href="/dashboard" onClick={() => onSelectApp?.(null)} className="flex items-center gap-2.5">
             <div className="w-6 h-6 rounded bg-white flex items-center justify-center">
               <CloudLightning className="h-3.5 w-3.5 text-black fill-black" />
             </div>
-            <span className="text-sm font-bold tracking-tight">ZenOTA</span>
+            <span className="text-sm font-bold tracking-tight hidden sm:inline">ZenOTA</span>
           </Link>
+
+          <span className="text-white/20 text-xs">/</span>
+
+          {onSelectApp && onNewProject && (
+            <ProjectSelector
+              apps={apps}
+              selectedApp={selectedApp}
+              onSelectApp={onSelectApp}
+              onNewProject={onNewProject}
+            />
+          )}
           
           <div className="hidden h-4 w-px bg-white/10 md:block" />
           
@@ -63,6 +84,15 @@ export function Navbar({
         </div>
 
         <div className="flex items-center gap-4">
+          <Link
+            href="/docs"
+            className="hidden sm:flex items-center gap-1.5 text-xs font-semibold text-white/50 hover:text-white transition-colors py-1.5 px-2.5 rounded-md hover:bg-white/[0.06] border border-white/5 hover:border-white/10"
+            title="Documentation"
+          >
+            <BookOpen className="h-3.5 w-3.5" />
+            <span>Docs</span>
+          </Link>
+
           <div className="hidden lg:flex items-center gap-2 text-[11px] font-bold uppercase tracking-widest text-white/30">
             <div className="h-1.5 w-1.5 rounded-full bg-white animate-pulse" />
             System Live

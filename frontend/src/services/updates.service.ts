@@ -25,9 +25,24 @@ export interface Update {
   runtimeVersion: string;
   platform: string;
   downloadCount: number;
+  rolloutPercentage?: number;
+  isRollback?: boolean;
+  installationsCount?: number;
   createdAt: string;
   channel: Channel;
   assets: UpdateAsset[];
+}
+
+export interface AnalyticsHistoryPoint {
+  date: string;
+  total: number;
+  ios: number;
+  android: number;
+}
+
+export interface AnalyticsResponse {
+  history: AnalyticsHistoryPoint[];
+  totalUniqueDevices: number;
 }
 
 export interface Invoice {
@@ -75,9 +90,10 @@ export const updatesService = {
     search?: string,
     sortBy?: string,
     sortOrder?: 'asc' | 'desc',
+    app?: string,
   ): Promise<PaginatedResponse<Update>> {
     const { data } = await apiClient.get<PaginatedResponse<Update>>('/api/admin/updates', {
-      params: { page, limit, search, sortBy, sortOrder },
+      params: { page, limit, search, sortBy, sortOrder, app },
     });
     return data;
   },
@@ -138,5 +154,12 @@ export const updatesService = {
     link.click();
     link.remove();
     window.URL.revokeObjectURL(url);
+  },
+
+  async fetchAnalytics(days = 14, app?: string): Promise<AnalyticsResponse> {
+    const { data } = await apiClient.get<AnalyticsResponse>('/api/admin/updates/analytics/history', {
+      params: { days, app },
+    });
+    return data;
   },
 };

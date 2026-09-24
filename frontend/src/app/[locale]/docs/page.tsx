@@ -75,6 +75,20 @@ export default function DocsPage() {
         { id: "manifest", label: t("sections.platform.manifest") },
       ],
     },
+    {
+      title: t("sections.selfHosting.title"),
+      items: [
+        { id: "selfhost-quickstart", label: t("sections.selfHosting.quickstart") },
+        { id: "selfhost-docker", label: t("sections.selfHosting.docker") },
+      ],
+    },
+    {
+      title: t("sections.releaseOps.title"),
+      items: [
+        { id: "rollouts", label: t("sections.releaseOps.rollouts") },
+        { id: "rollback", label: t("sections.releaseOps.rollback") },
+      ],
+    },
   ], [t]);
 
   const handleNavClick = (id: string) => {
@@ -138,7 +152,7 @@ export default function DocsPage() {
 
         {/* Main Content */}
         <main
-          className="flex-1 min-w-0 md:pl-14 py-10 md:py-20 flex flex-col gap-28 max-w-4xl"
+          className="flex-1 min-w-0 md:pl-14 px-10 py-10 md:py-20 flex flex-col gap-28 max-w-4xl"
         >
           {/* ── Introduction ── */}
           <section id="introduction" className="flex flex-col gap-6">
@@ -448,6 +462,194 @@ export default function DocsPage() {
               style={{ borderColor: "rgba(255,255,255,0.07)", backgroundColor: "rgba(255,255,255,0.02)", color: "rgba(255,255,255,0.4)" }}
             >
               {t.rich('manifest.proTip', { codeTag, bold })}
+            </div>
+          </section>
+
+          {/* ── Self-Hosting: Quickstart ── */}
+          <section id="selfhost-quickstart" className="flex mt-8 flex-col gap-6">
+            <div className="flex flex-col gap-2">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full glass text-[10px] font-bold uppercase tracking-[0.2em] text-blue-400 self-start border border-blue-500/20">
+                Self-Host Community
+              </div>
+              <h2 className="text-2xl md:text-3xl font-bold tracking-tight text-white/90">
+                Installation 1-Ligne sur votre VPS
+              </h2>
+              <p style={{ color: "rgba(255,255,255,0.45)" }}>
+                Déployez ZenOTA en moins de 2 minutes sur n'importe quel serveur Ubuntu / Debian / macOS.
+              </p>
+            </div>
+
+            <p className="text-[14px] leading-relaxed" style={{ color: "rgba(255,255,255,0.5)" }}>
+              Exécutez notre script d'installation officiel avec les privilèges root. Il télécharge le binaire CLI serveur et vérifie vos prérequis Docker :
+            </p>
+
+            <CodeBlock
+              id="selfhost-curl"
+              label="terminal (sur votre vps)"
+              code="curl -fsSL https://get-zenota.diesestudio.com | sh"
+            />
+
+            <div className="space-y-4">
+              <h3 className="text-sm font-bold uppercase tracking-wider text-white/70">
+                Initialisation et Commandes de Gestion
+              </h3>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="p-5 rounded-xl border border-white/5 bg-white/[0.02] space-y-2">
+                  <div className="text-xs font-mono font-bold text-emerald-400">zenota init</div>
+                  <p className="text-xs text-white/40 leading-relaxed">
+                    Assistant interactif : détecte Docker, génère les secrets sécurisés et démarre la stack complète.
+                  </p>
+                </div>
+                <div className="p-5 rounded-xl border border-white/5 bg-white/[0.02] space-y-2">
+                  <div className="text-xs font-mono font-bold text-blue-400">zenota status</div>
+                  <p className="text-xs text-white/40 leading-relaxed">
+                    Vérifie l'état de santé de vos conteneurs (Postgres, MinIO, Backend, Frontend).
+                  </p>
+                </div>
+                <div className="p-5 rounded-xl border border-white/5 bg-white/[0.02] space-y-2">
+                  <div className="text-xs font-mono font-bold text-purple-400">zenota logs</div>
+                  <p className="text-xs text-white/40 leading-relaxed">
+                    Affiche en direct les journaux du serveur pour surveiller les téléchargements d'OTA.
+                  </p>
+                </div>
+                <div className="p-5 rounded-xl border border-white/5 bg-white/[0.02] space-y-2">
+                  <div className="text-xs font-mono font-bold text-amber-400">zenota restart</div>
+                  <p className="text-xs text-white/40 leading-relaxed">
+                    Redémarre l'ensemble des services en cas de mise à jour système.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          {/* ── Self-Hosting: Docker Compose ── */}
+          <section id="selfhost-docker" className="flex mt-8 flex-col gap-6">
+            <div className="flex flex-col gap-2">
+              <h2 className="text-2xl md:text-3xl font-bold tracking-tight text-white/90">
+                Architecture Docker & MinIO
+              </h2>
+              <p style={{ color: "rgba(255,255,255,0.45)" }}>
+                La stack complète ZenOTA est orchestrée via Docker Compose sans usine à gaz.
+              </p>
+            </div>
+
+            <p className="text-[14px] leading-relaxed" style={{ color: "rgba(255,255,255,0.5)" }}>
+              Contrairement à d'autres solutions qui imposent des clusters lourds comme ClickHouse ou Kafka, ZenOTA s'appuie sur une pile ultra-légère et robuste :
+            </p>
+
+            <ul className="space-y-3 text-xs text-white/60">
+              <li className="flex items-center gap-2">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+                <strong className="text-white">PostgreSQL 16</strong> : Stocke les métadonnées de déploiement, canaux et applications.
+              </li>
+              <li className="flex items-center gap-2">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+                <strong className="text-white">MinIO (S3 compatible)</strong> : Stocke les bundles JS et les assets avec des URLs pré-signées ou publiques.
+              </li>
+              <li className="flex items-center gap-2">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+                <strong className="text-white">NestJS API & Next.js UI</strong> : Moteur de distribution d'updates et tableau de bord.
+              </li>
+            </ul>
+
+            <CodeBlock
+              id="docker-compose-snippet"
+              label="docker-compose.yml"
+              code={`version: '3.8'
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: zenota
+      POSTGRES_USER: zenota
+      POSTGRES_PASSWORD: \${POSTGRES_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  minio:
+    image: minio/minio:latest
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: \${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: \${MINIO_ROOT_PASSWORD}
+    volumes:
+      - minio_data:/data
+
+  backend:
+    image: ghcr.io/kamadosama/zenota-backend:latest
+    ports:
+      - "3000:3000"
+    environment:
+      DATABASE_URL: "postgresql://zenota:\${POSTGRES_PASSWORD}@postgres:5432/zenota"
+      STORAGE_DRIVER: "s3"
+      S3_ENDPOINT: "http://minio:9000"`}
+            />
+          </section>
+
+          {/* ── Progressive Rollouts ── */}
+          <section id="rollouts" className="flex mt-8 flex-col gap-6">
+            <div className="flex flex-col gap-2">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full glass text-[10px] font-bold uppercase tracking-[0.2em] text-emerald-400 self-start border border-emerald-500/20">
+                Canary Releases
+              </div>
+              <h2 className="text-2xl md:text-3xl font-bold tracking-tight text-white/90">
+                Déploiements Progressifs (%)
+              </h2>
+              <p style={{ color: "rgba(255,255,255,0.45)" }}>
+                Diffusez en toute sécurité vos mises à jour à un pourcentage déterminé de vos utilisateurs.
+              </p>
+            </div>
+
+            <p className="text-[14px] leading-relaxed" style={{ color: "rgba(255,255,255,0.5)" }}>
+              ZenOTA utilise un algorithme de hachage déterministe basé sur l'identifiant unique de l'appareil (<code className="text-emerald-300 font-mono">Expo-Client-Id</code>).
+              Un utilisateur assigné à la nouvelle version y restera de manière stable.
+            </p>
+
+            <CodeBlock
+              id="cli-rollout-snippet"
+              label="terminal"
+              code="# Déployer d'abord à 25% des appareils
+npx zenota publish --channel production --rollout 25
+
+# Puis augmenter à 50%
+npx zenota publish --channel production --rollout 50
+
+# Et enfin basculer à 100% pour l'ensemble du parc
+npx zenota publish --channel production --rollout 100"
+            />
+          </section>
+
+          {/* ── Instant Rollback ── */}
+          <section id="rollback" className="flex mt-8 flex-col gap-6">
+            <div className="flex flex-col gap-2">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full glass text-[10px] font-bold uppercase tracking-[0.2em] text-amber-400 self-start border border-amber-500/20">
+                Zero-Downtime Rollback
+              </div>
+              <h2 className="text-2xl md:text-3xl font-bold tracking-tight text-white/90">
+                Instant Rollback (Annulation en 1 Clic)
+              </h2>
+              <p style={{ color: "rgba(255,255,255,0.45)" }}>
+                Annulez immédiatement une version défectueuse en moins de 200ms sans reconstruire de bundle.
+              </p>
+            </div>
+
+            <p className="text-[14px] leading-relaxed" style={{ color: "rgba(255,255,255,0.5)" }}>
+              En cas de régression inattendue en production, lancez simplement la commande rollback. ZenOTA révoque immédiatement l'update défectueuse et réassigne le channel vers la version stable précédente :
+            </p>
+
+            <CodeBlock
+              id="cli-rollback-snippet"
+              label="terminal"
+              code="npx zenota rollback --channel production"
+            />
+
+            <div
+              className="rounded-xl px-6 py-5 border text-[13px] leading-relaxed"
+              style={{ borderColor: "rgba(245,158,11,0.2)", backgroundColor: "rgba(245,158,11,0.03)", color: "rgba(255,255,255,0.6)" }}
+            >
+              <strong className="text-amber-300">Restauration sans recompilation :</strong> Les appareils qui ont téléchargé la mauvaise version téléchargeront automatiquement la version saine lors de leur prochain check-in.
             </div>
           </section>
 

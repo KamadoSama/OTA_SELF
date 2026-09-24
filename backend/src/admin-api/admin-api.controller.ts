@@ -25,6 +25,16 @@ export class AdminApiController {
 
   constructor(private readonly adminService: AdminApiService) {}
 
+  @Get('analytics/history')
+  async getAnalyticsHistory(
+    @Req() req: AuthenticatedRequest,
+    @Query('days') days?: string,
+    @Query('app') appName?: string,
+  ) {
+    const d = days ? parseInt(days, 10) : 14;
+    return this.adminService.getAnalyticsHistory(req.user.id, d, appName);
+  }
+
   @Get()
   async listUpdates(
     @Req() req: AuthenticatedRequest,
@@ -33,10 +43,11 @@ export class AdminApiController {
     @Query('search') search?: string,
     @Query('sortBy') sortBy?: string,
     @Query('sortOrder') sortOrder?: 'asc' | 'desc',
+    @Query('app') appName?: string,
   ) {
     const p = page ? parseInt(page, 10) : 1;
     const l = limit ? parseInt(limit, 10) : 10;
-    return this.adminService.listUpdates(req.user.id, p, l, search, sortBy, sortOrder);
+    return this.adminService.listUpdates(req.user.id, p, l, search, sortBy, sortOrder, appName);
   }
 
   @Post('upload')

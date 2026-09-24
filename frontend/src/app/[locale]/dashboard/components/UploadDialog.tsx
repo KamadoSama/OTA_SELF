@@ -1,19 +1,26 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Upload, X, Loader2 } from "lucide-react";
 import { useUploadUpdate } from "@/hooks/useUpdates";
 
 interface UploadDialogProps {
   isOpen: boolean;
   onClose: () => void;
+  defaultAppName?: string;
 }
 
-export function UploadDialog({ isOpen, onClose }: UploadDialogProps) {
-  const [appName, setAppName] = useState("my-app");
+export function UploadDialog({ isOpen, onClose, defaultAppName = "my-app" }: UploadDialogProps) {
+  const [appName, setAppName] = useState(defaultAppName);
   const [channelName, setChannelName] = useState("production");
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const { mutate: uploadUpdate, isPending: isUploading } = useUploadUpdate();
+
+  useEffect(() => {
+    if (defaultAppName) {
+      setAppName(defaultAppName);
+    }
+  }, [defaultAppName, isOpen]);
 
   const handleUpload = (e: React.FormEvent) => {
     e.preventDefault();

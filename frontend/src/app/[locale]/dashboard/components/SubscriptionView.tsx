@@ -4,7 +4,6 @@ import { CreditCard, Zap, Clock, Loader2, ArrowRight, ShieldCheck, ChevronRight,
 import { useSubscription, useUpgradePlan, useDowngradePlan } from "@/hooks/useUpdates";
 import { useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
-import Link from "next/link";
 
 export function SubscriptionView() {
   const { data: stats, isLoading } = useSubscription();

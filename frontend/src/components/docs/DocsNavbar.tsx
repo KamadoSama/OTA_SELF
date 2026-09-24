@@ -1,10 +1,11 @@
 "use client";
 
-import { ArrowLeft, CloudLightning, Menu, X } from "lucide-react";
+import { ArrowLeft, CloudLightning, Menu, X, LayoutDashboard } from "lucide-react";
 import { Logo } from "../ui/Logo";
-import Link from "next/link";
+import { Link } from "@/i18n/routing";
 import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
+import { useSession } from "next-auth/react";
 
 export interface NavSection {
   title: string;
@@ -26,6 +27,11 @@ export function DocsNavbar({
 }: DocsNavbarProps) {
   const [isOpen, setIsOpen] = useState(false);
   const t = useTranslations("Docs.navbar");
+  const { data: session } = useSession();
+  const isSelfHosted = process.env.NEXT_PUBLIC_SELF_HOSTED === 'true';
+  const isLoggedIn = Boolean(session?.user) || isSelfHosted;
+  const backHref = isLoggedIn ? '/dashboard' : '/';
+  const backLabel = isLoggedIn ? 'Dashboard' : t('home');
 
   // Fermer le menu en appuyant sur Échap
   useEffect(() => {
@@ -127,12 +133,16 @@ export function DocsNavbar({
         {/* Right: Back link + Version */}
         <div className="flex items-center gap-4">
           <Link
-            href="/"
+            href={backHref}
             className="flex items-center gap-1.5 text-sm transition-colors group"
             style={{ color: "rgba(255,255,255,0.4)" }}
           >
-            <ArrowLeft className="h-3.5 w-3.5 transition-transform group-hover:-translate-x-0.5" />
-            <span className="hidden sm:inline group-hover:text-white transition-colors">{t('home')}</span>
+            {isLoggedIn ? (
+              <LayoutDashboard className="h-3.5 w-3.5 transition-transform group-hover:scale-105" />
+            ) : (
+              <ArrowLeft className="h-3.5 w-3.5 transition-transform group-hover:-translate-x-0.5" />
+            )}
+            <span className="hidden sm:inline group-hover:text-white transition-colors">{backLabel}</span>
           </Link>
           <span
             className="hidden sm:inline text-[11px] font-mono font-bold uppercase tracking-widest px-2 py-0.5 rounded border"
@@ -193,12 +203,18 @@ export function DocsNavbar({
           style={{ borderColor: "rgba(255,255,255,0.06)" }}
         >
           <Link
-            href="/"
+            href={backHref}
             className="flex items-center gap-2 text-sm transition-colors group"
             style={{ color: "rgba(255,255,255,0.35)" }}
           >
-            <ArrowLeft className="h-4 w-4 transition-transform group-hover:-translate-x-0.5" />
-            <span className="group-hover:text-white transition-colors">{t('backHome')}</span>
+            {isLoggedIn ? (
+              <LayoutDashboard className="h-4 w-4 transition-transform group-hover:scale-105" />
+            ) : (
+              <ArrowLeft className="h-4 w-4 transition-transform group-hover:-translate-x-0.5" />
+            )}
+            <span className="group-hover:text-white transition-colors">
+              {isLoggedIn ? 'Dashboard' : t('backHome')}
+            </span>
           </Link>
         </div>
       </aside>

@@ -9,10 +9,11 @@ export function useUpdates(
   search?: string,
   sortBy?: string,
   sortOrder?: 'asc' | 'desc',
+  app?: string,
 ) {
   return useQuery({
-    queryKey: ["updates", page, limit, search, sortBy, sortOrder],
-    queryFn: () => updatesService.fetchUpdates(page, limit, search, sortBy, sortOrder),
+    queryKey: ["updates", page, limit, search, sortBy, sortOrder, app],
+    queryFn: () => updatesService.fetchUpdates(page, limit, search, sortBy, sortOrder, app),
   });
 }
 
@@ -111,5 +112,13 @@ export function useDeleteAccount() {
 export function useDownloadInvoice() {
   return useMutation({
     mutationFn: (id: string) => updatesService.downloadInvoicePdf(id),
+  });
+}
+
+export function useAnalytics(days = 14, app?: string) {
+  return useQuery({
+    queryKey: ["analytics", days, app],
+    queryFn: () => updatesService.fetchAnalytics(days, app),
+    refetchInterval: 30000, // Refresh every 30s
   });
 }

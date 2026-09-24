@@ -6,7 +6,7 @@ import { Icon } from "@iconify/react";
 import { useRegister } from "@/hooks/useAuth";
 import axios from "axios";
 import { useRouter, useSearchParams } from "next/navigation";
-import Link from "next/link";
+import { Link } from "@/i18n/routing";
 import { signIn } from "next-auth/react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
