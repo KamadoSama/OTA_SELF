@@ -70,9 +70,40 @@ export class ExpoUpdatesController {
         targetAppId,
         baseUrl,
         clientIdentifier,
+        currentUpdateId,
       );
 
       if (!manifestResponse) {
+        if (currentUpdateId && (await this.expoService.isUpdateRolledBack(currentUpdateId))) {
+          this.logger.log(
+            `Client running rolled back update ${currentUpdateId} and no other OTA release is active. Sending rollBackToEmbedded directive.`,
+          );
+          const boundary = `ExpoManifestBoundary${Math.random().toString(36).slice(2)}`;
+          const directive = {
+            type: 'rollBackToEmbedded',
+            parameters: {
+              commitTime: new Date().toISOString(),
+            },
+          };
+
+          const multipartBody =
+            `--${boundary}\r\n` +
+            `Content-Disposition: form-data; name="directive"\r\n` +
+            `Content-Type: application/json; charset=utf-8\r\n\r\n` +
+            JSON.stringify(directive) +
+            `\r\n` +
+            `--${boundary}--\r\n`;
+
+          const bodyBuffer = Buffer.from(multipartBody, 'utf8');
+
+          res.setHeader('expo-protocol-version', '1');
+          res.setHeader('expo-sfv-version', '0');
+          res.setHeader('cache-control', 'private, no-cache, no-store');
+          res.setHeader('Content-Type', `multipart/mixed; boundary=${boundary}`);
+          res.setHeader('Content-Length', bodyBuffer.length.toString());
+          return res.status(200).end(bodyBuffer);
+        }
+
         this.logger.warn(
           `No update found — appId: ${targetAppId}, runtime: ${expoRuntimeVersion}, platform: ${expoPlatform}, channel: ${resolvedChannel}`,
         );

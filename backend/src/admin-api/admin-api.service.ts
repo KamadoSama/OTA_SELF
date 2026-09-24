@@ -630,26 +630,94 @@ export class AdminApiService {
       data: { isRollback: true },
     });
 
+    // Re-publish previous update with a fresh timestamp and new UUID so mobile Expo clients
+    // recognize it as a newer update than the rolled-back version and apply it immediately.
+    const rePublished = await this.republishPreviousUpdateAsRollback(activeUpdate);
+
     // Invalidate manifest cache
     await (this.cacheManager as any).reset?.();
 
-    // Find the previous update that is now active
-    const previousUpdate = await this.prisma.update.findFirst({
-      where: {
-        channelId: channel.id,
-        isRollback: false,
-      },
-      orderBy: { createdAt: 'desc' },
-    });
+    this.logger.log(
+      `Rollback completed on ${appName}/${channelName}. Rolled back ${activeUpdate.id}. Now active: ${rePublished?.id || 'embedded build'}`,
+    );
 
-    this.logger.log(`Rollback completed on ${appName}/${channelName}. Rolled back ${activeUpdate.id}. Now active: ${previousUpdate?.id || 'none'}`);
+    const rePublishedMessage = (rePublished?.metadata as any)?.message || 'previous release';
 
     return {
       success: true,
       rolledBackUpdateId: activeUpdate.id,
-      nowActiveUpdateId: previousUpdate?.id || null,
-      message: `Successfully rolled back update on channel '${channelName}'.`,
+      nowActiveUpdateId: rePublished?.id || null,
+      message: rePublished
+        ? `Successfully rolled back. Previous release '${rePublishedMessage}' re-published with fresh timestamp to update all mobile devices.`
+        : `Successfully rolled back. No previous release found; devices will revert to embedded build.`,
     };
+  }
+
+  private async republishPreviousUpdateAsRollback(
+    rolledBackUpdate: {
+      id: string;
+      channelId: string;
+      platform: string;
+      runtimeVersion: string;
+    },
+  ) {
+    // Find the latest healthy update for the same channel, platform, and runtimeVersion
+    const previousUpdate = await this.prisma.update.findFirst({
+      where: {
+        channelId: rolledBackUpdate.channelId,
+        platform: rolledBackUpdate.platform,
+        runtimeVersion: rolledBackUpdate.runtimeVersion,
+        isRollback: false,
+        id: { not: rolledBackUpdate.id },
+      },
+      orderBy: { createdAt: 'desc' },
+      include: { assets: true },
+    });
+
+    if (!previousUpdate || previousUpdate.assets.length === 0) {
+      this.logger.log(
+        `No previous healthy update found on channel ${rolledBackUpdate.channelId} for runtime ${rolledBackUpdate.runtimeVersion} and platform ${rolledBackUpdate.platform}. Devices will revert to embedded build.`,
+      );
+      return null;
+    }
+
+    const prevMeta = (previousUpdate.metadata as Record<string, any>) || {};
+    const commitInfo = prevMeta.gitCommit ? ` [commit ${prevMeta.gitCommit.slice(0, 7)}]` : '';
+    const originMsg = prevMeta.message ? ` ("${prevMeta.message}")` : '';
+    const rollbackMsg = `Rollback: reverted to previous release${commitInfo}${originMsg}`;
+
+    const newUpdate = await this.prisma.update.create({
+      data: {
+        channelId: previousUpdate.channelId,
+        platform: previousUpdate.platform,
+        runtimeVersion: previousUpdate.runtimeVersion,
+        rolloutPercentage: 100,
+        isRollback: false,
+        metadata: {
+          ...prevMeta,
+          message: rollbackMsg,
+          isRollbackRepublish: true,
+          rolledBackFromId: rolledBackUpdate.id,
+          republishedFromId: previousUpdate.id,
+        },
+        assets: {
+          create: previousUpdate.assets.map((asset) => ({
+            hash: asset.hash,
+            key: asset.key,
+            contentType: asset.contentType,
+            fileExtension: asset.fileExtension,
+            isLaunchAsset: asset.isLaunchAsset,
+          })),
+        },
+      },
+      include: { assets: true },
+    });
+
+    this.logger.log(
+      `Re-published update ${previousUpdate.id} as ${newUpdate.id} with timestamp ${newUpdate.createdAt.toISOString()} to force mobile Expo client downgrade.`,
+    );
+
+    return newUpdate;
   }
 
   async toggleUpdateRollback(updateId: string, customerId: string) {
@@ -677,6 +745,12 @@ export class AdminApiService {
       data: { isRollback: newRollbackState },
     });
 
+    let rePublishedUpdate: any = null;
+
+    if (newRollbackState === true) {
+      rePublishedUpdate = await this.republishPreviousUpdateAsRollback(update);
+    }
+
     // Invalidate manifest cache so Expo clients immediately get the updated active release
     await (this.cacheManager as any).reset?.();
 
@@ -684,14 +758,19 @@ export class AdminApiService {
       `Update ${updateId} rollback toggled to ${newRollbackState} on ${update.channel.app.name}/${update.channel.name} by customer ${customerId}`,
     );
 
+    const rePubMessage = (rePublishedUpdate?.metadata as any)?.message || 'reverting to previous stable build';
+
     return {
       success: true,
       updateId: updated.id,
       isRollback: updated.isRollback,
+      rePublishedUpdateId: rePublishedUpdate?.id || null,
       appName: update.channel.app.name,
       channelName: update.channel.name,
       message: updated.isRollback
-        ? `Rollback appliqué avec succès. Cette version ne sera plus délivrée aux appareils.`
+        ? rePublishedUpdate
+          ? `Rollback appliqué avec succès. La version précédente (${rePubMessage}) a été republiée immédiatement pour forcer la mise à jour des appareils.`
+          : `Rollback appliqué avec succès. Aucun déploiement antérieur : les appareils reviendront à la version native embarquée.`
         : `Version restaurée avec succès. Elle est de nouveau active.`,
     };
   }

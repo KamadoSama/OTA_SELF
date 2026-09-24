@@ -42,6 +42,15 @@ export class ExpoUpdatesService {
     return `OTA-HMAC-SHA256 ${expiresAtSeconds}-${signature}`;
   }
 
+  async isUpdateRolledBack(id?: string): Promise<boolean> {
+    if (!id) return false;
+    const u = await this.prisma.update.findUnique({
+      where: { id },
+      select: { isRollback: true },
+    });
+    return Boolean(u?.isRollback);
+  }
+
   async getLatestManifest(
     runtimeVersion: string,
     platform: string,
@@ -49,6 +58,7 @@ export class ExpoUpdatesService {
     appId: string,
     baseUrl?: string,
     clientIdentifier?: string,
+    currentUpdateId?: string,
   ) {
     // 1. Find the latest eligible (non-rollback) updates for this runtime & platform
     const eligibleUpdates = await this.prisma.update.findMany({
@@ -59,7 +69,10 @@ export class ExpoUpdatesService {
         channel: {
           name: channelName,
           app: {
-            name: appId, // appId from URL param → App.name in DB
+            OR: [
+              { name: appId },
+              { id: appId },
+            ],
           },
         },
       },
@@ -76,6 +89,58 @@ export class ExpoUpdatesService {
         },
       },
     });
+
+    if (currentUpdateId) {
+      const currentRunning = await this.prisma.update.findUnique({
+        where: { id: currentUpdateId },
+      });
+      if (currentRunning && currentRunning.isRollback) {
+        this.logger.log(`Client is running update ${currentUpdateId} which has been marked as rolled back!`);
+        // If the top eligible update was created BEFORE or AT the same time as currentRunning:
+        // Expo updates client will refuse to downgrade unless the manifest timestamp is newer!
+        if (eligibleUpdates.length > 0 && eligibleUpdates[0].createdAt <= currentRunning.createdAt) {
+          const sourceUpdate = eligibleUpdates[0];
+          this.logger.log(
+            `Active update ${sourceUpdate.id} has createdAt <= rolled-back update ${currentRunning.id}. Auto re-publishing to ensure device applies rollback.`,
+          );
+          const prevMeta = (sourceUpdate.metadata as Record<string, any>) || {};
+          const commitInfo = prevMeta.gitCommit ? ` [commit ${prevMeta.gitCommit.slice(0, 7)}]` : '';
+          const rollbackMsg = `Rollback: reverted to previous release${commitInfo}`;
+
+          const rePublished = await this.prisma.update.create({
+            data: {
+              channelId: sourceUpdate.channelId,
+              platform: sourceUpdate.platform,
+              runtimeVersion: sourceUpdate.runtimeVersion,
+              rolloutPercentage: 100,
+              isRollback: false,
+              metadata: {
+                ...prevMeta,
+                message: rollbackMsg,
+                isRollbackRepublish: true,
+                rolledBackFromId: currentRunning.id,
+                republishedFromId: sourceUpdate.id,
+              },
+              assets: {
+                create: sourceUpdate.assets.map((asset) => ({
+                  hash: asset.hash,
+                  key: asset.key,
+                  contentType: asset.contentType,
+                  fileExtension: asset.fileExtension,
+                  isLaunchAsset: asset.isLaunchAsset,
+                })),
+              },
+            },
+            include: {
+              assets: true,
+              channel: { include: { app: true } },
+            },
+          });
+          eligibleUpdates.unshift(rePublished);
+          await (this.cacheManager as any).reset?.();
+        }
+      }
+    }
 
     if (!eligibleUpdates || eligibleUpdates.length === 0) {
       return null;
