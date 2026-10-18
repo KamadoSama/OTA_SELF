@@ -127,7 +127,12 @@ export class ExpoUpdatesController {
       const { manifest, extensions } = manifestResponse;
 
       // Protocol 1: If the client already has this update, return 204 No Content
-      if (currentUpdateId === manifest.id || embeddedUpdateId === manifest.id) {
+      // iOS peut envoyer les UUID en majuscules : comparaison insensible à la casse
+      const latestId = manifest.id.toLowerCase();
+      if (
+        currentUpdateId?.toLowerCase() === latestId ||
+        embeddedUpdateId?.toLowerCase() === latestId
+      ) {
         this.logger.log(
           `Client already up-to-date: ${manifest.id} app name ${appId}`,
         );
@@ -138,6 +143,11 @@ export class ExpoUpdatesController {
         );
         return res.status(204).send();
       }
+
+      // Diagnostic bande passante : quel ID le téléphone dit-il exécuter quand on lui renvoie le manifest ?
+      this.logger.log(
+        `Serving manifest ${manifest.id} — app: ${targetAppId}, platform: ${expoPlatform}, current: ${currentUpdateId || 'none'}, embedded: ${embeddedUpdateId || 'none'}, client: ${easClientId || 'none'}`,
+      );
 
       // Increment download count and record unique device installation
       this.expoService.incrementDownloadCount(manifest.id);
