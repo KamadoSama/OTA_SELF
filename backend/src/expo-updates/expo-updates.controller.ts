@@ -149,7 +149,10 @@ export class ExpoUpdatesController {
       // les suivantes reçoivent 204 pour éviter des téléchargements parallèles des mêmes fichiers.
       if (
         easClientId &&
-        !(await this.expoService.claimManifestDelivery(easClientId, manifest.id))
+        !(await this.expoService.claimManifestDelivery(
+          easClientId,
+          manifest.id,
+        ))
       ) {
         this.logger.log(
           `Duplicate manifest request suppressed: ${manifest.id} — app: ${targetAppId}, client: ${easClientId}`,
