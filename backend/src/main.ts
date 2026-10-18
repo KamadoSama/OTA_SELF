@@ -1,8 +1,12 @@
 import { NestFactory } from '@nestjs/core';
+import type { NestExpressApplication } from '@nestjs/platform-express';
 import { AppModule } from './app.module';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create<NestExpressApplication>(AppModule);
+
+  // Derrière Caddy/Traefik : req.ip doit refléter l'IP réelle du client (X-Forwarded-For)
+  app.set('trust proxy', true);
 
   app.enableCors({
     origin: process.env.FRONTEND_URL
@@ -12,7 +16,7 @@ async function bootstrap() {
   });
 
   // console BD URL
-  console.log("DATABASE_URL: ",process.env.DATABASE_URL);
+  console.log('DATABASE_URL: ', process.env.DATABASE_URL);
 
   await app.listen(process.env.PORT ?? 3001);
 }

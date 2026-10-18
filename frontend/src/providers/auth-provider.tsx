@@ -1,6 +1,6 @@
 'use client';
 
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useEffect, useMemo, useCallback } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { useSession, signIn, signOut } from 'next-auth/react';
 import { AdminUser } from '@/services/auth.service';
@@ -21,15 +21,24 @@ const GUEST_ONLY_ROUTES = ['/login', '/register', '/en/login', '/fr/login', '/en
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const { data: session, status } = useSession();
-  const [user, setUser] = useState<AdminUser | null>(null);
   const router = useRouter();
   const pathname = usePathname();
 
   const loading = status === 'loading';
-
   const isSelfHosted = process.env.NEXT_PUBLIC_SELF_HOSTED === 'true';
 
-  const isPublicRoute = (path: string) => {
+  const user: AdminUser | null = useMemo(() => {
+    if (!session?.user) return null;
+    const sessionUser = session.user as { id?: string; email?: string | null; tier?: string };
+    return {
+      id: sessionUser.id || '',
+      email: sessionUser.email || '',
+      subscriptionTier: (sessionUser.tier as any) || 'free',
+      createdAt: '',
+    };
+  }, [session]);
+
+  const isPublicRoute = useCallback((path: string) => {
     if (isSelfHosted) {
       if (path === '/' || path === '/en' || path === '/fr') {
         return false;
@@ -41,31 +50,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       path === '/docs' ||
       /^\/[a-z]{2}\/docs(\/.*)?$/.test(path)
     );
-  };
+  }, [isSelfHosted]);
 
   useEffect(() => {
     if (session?.user) {
-      setUser({
-        id: (session.user as any).id,
-        email: session.user.email || '',
-        subscriptionTier: (session.user as any).tier || 'free',
-        createdAt: '', // Not available in session by default
-      });
-
       if (
         GUEST_ONLY_ROUTES.includes(pathname) ||
         (isSelfHosted && (pathname === '/' || pathname === '/en' || pathname === '/fr'))
       ) {
         router.push('/dashboard');
       }
-
     } else {
-      setUser(null);
       if (!loading && !isPublicRoute(pathname)) {
         router.push('/login');
       }
     }
-  }, [session, loading, pathname, router, isSelfHosted]);
+  }, [session, loading, pathname, router, isSelfHosted, isPublicRoute]);
 
   const login = async (email: string, pass: string) => {
     const result = await signIn('credentials', {
@@ -104,7 +104,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const logout = async () => {
     await signOut({ redirect: false });
-    setUser(null);
     if (isSelfHosted) {
       router.push('/login');
     } else {

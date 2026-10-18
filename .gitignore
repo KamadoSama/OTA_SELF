@@ -1,10 +1,16 @@
 .env
+.env*.local
 .agents
 
 node_modules
+dist
+.next
 
 .DS_Store
 temp_pdf_gen
+zenota-server/dist
 zenota-server/zenota
 zenota-server/*.blob
+zenota-cli/dist
 docs/
+

@@ -10,7 +10,10 @@ export class InvoiceService {
 
   async generateInvoicePdf(invoice: any, customer: any): Promise<Buffer> {
     try {
-      const templatePath = path.join(process.cwd(), 'src/invoice/templates/invoice.hbs');
+      const templatePath = path.join(
+        process.cwd(),
+        'src/invoice/templates/invoice.hbs',
+      );
       const templateHtml = fs.readFileSync(templatePath, 'utf8');
       const template = handlebars.compile(templateHtml);
 
@@ -22,10 +25,13 @@ export class InvoiceService {
         isTrial: invoice.amount === 0,
         items: [
           {
-            description: invoice.amount === 0 ? 'ZenOTA Professional Plan — 1 Month Trial' : 'ZenOTA Professional Plan — 1 Month',
+            description:
+              invoice.amount === 0
+                ? 'ZenOTA Professional Plan — 1 Month Trial'
+                : 'ZenOTA Professional Plan — 1 Month',
             price: invoice.amount.toFixed(2),
-          }
-        ]
+          },
+        ],
       };
 
       const html = template(data);

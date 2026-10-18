@@ -47,7 +47,15 @@ export class AdminApiController {
   ) {
     const p = page ? parseInt(page, 10) : 1;
     const l = limit ? parseInt(limit, 10) : 10;
-    return this.adminService.listUpdates(req.user.id, p, l, search, sortBy, sortOrder, appName);
+    return this.adminService.listUpdates(
+      req.user.id,
+      p,
+      l,
+      search,
+      sortBy,
+      sortOrder,
+      appName,
+    );
   }
 
   @Post('upload')
@@ -69,7 +77,9 @@ export class AdminApiController {
       );
     }
 
-    this.logger.log(`Dashboard upload by ${req.user.email} for ${file.originalname}`);
+    this.logger.log(
+      `Dashboard upload by ${req.user.email} for ${file.originalname}`,
+    );
     const updateId = await this.adminService.processUpdateZip(
       file.buffer,
       appName || 'MyExpoApp',
@@ -85,7 +95,10 @@ export class AdminApiController {
   }
 
   @Delete(':id')
-  async deleteUpdate(@Req() req: AuthenticatedRequest, @Param('id') id: string) {
+  async deleteUpdate(
+    @Req() req: AuthenticatedRequest,
+    @Param('id') id: string,
+  ) {
     const deleted = await this.adminService.deleteUpdate(id, req.user.id);
     if (!deleted) {
       throw new NotFoundException(`Update ${id} not found or access denied`);

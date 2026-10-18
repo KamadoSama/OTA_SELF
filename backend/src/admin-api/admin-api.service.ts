@@ -1,4 +1,10 @@
-import { Injectable, Logger, BadRequestException, NotFoundException, Inject } from '@nestjs/common';
+import {
+  Injectable,
+  Logger,
+  BadRequestException,
+  NotFoundException,
+  Inject,
+} from '@nestjs/common';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Cache } from 'cache-manager';
 import AdmZip from 'adm-zip';
@@ -26,6 +32,10 @@ type ExpoExportMetadata = {
 };
 
 import { SubscriptionService } from '../subscription/subscription.service';
+
+// Les clés d'objets OTA contiennent le hash du contenu (bundle index-<hash>.hbc, assets/<md5>) :
+// elles ne changent jamais, un CDN ou proxy peut donc les garder en cache indéfiniment.
+const IMMUTABLE_CACHE_CONTROL = 'public, max-age=31536000, immutable';
 
 @Injectable()
 export class AdminApiService {
@@ -164,7 +174,10 @@ export class AdminApiService {
         totalUpdates += channel._count.updates;
         const channelLatest = channel.updates[0];
         if (channelLatest) {
-          if (!latestUpdate || new Date(channelLatest.createdAt) > new Date(latestUpdate.createdAt)) {
+          if (
+            !latestUpdate ||
+            new Date(channelLatest.createdAt) > new Date(latestUpdate.createdAt)
+          ) {
             latestUpdate = channelLatest;
           }
         }
@@ -178,24 +191,30 @@ export class AdminApiService {
         channelsCount: app.channels.length,
         channels: channelNames,
         updatesCount: totalUpdates,
-        latestUpdate: latestUpdate ? {
-          id: latestUpdate.id,
-          runtimeVersion: latestUpdate.runtimeVersion,
-          platform: latestUpdate.platform,
-          rolloutPercentage: latestUpdate.rolloutPercentage,
-          isRollback: latestUpdate.isRollback,
-          createdAt: latestUpdate.createdAt,
-          installationsCount: latestUpdate._count?.installations ?? 0,
-        } : null,
+        latestUpdate: latestUpdate
+          ? {
+              id: latestUpdate.id,
+              runtimeVersion: latestUpdate.runtimeVersion,
+              platform: latestUpdate.platform,
+              rolloutPercentage: latestUpdate.rolloutPercentage,
+              isRollback: latestUpdate.isRollback,
+              createdAt: latestUpdate.createdAt,
+              installationsCount: latestUpdate._count?.installations ?? 0,
+            }
+          : null,
       };
     });
   }
 
   async createApp(name: string, customerId: string, scheme?: string) {
     const trimmed = name.trim();
-    const existing = await this.prisma.app.findUnique({ where: { name: trimmed } });
+    const existing = await this.prisma.app.findUnique({
+      where: { name: trimmed },
+    });
     if (existing) {
-      throw new BadRequestException(`An application named '${trimmed}' already exists.`);
+      throw new BadRequestException(
+        `An application named '${trimmed}' already exists.`,
+      );
     }
 
     await this.subscriptionService.checkCanCreateApp(customerId);
@@ -206,10 +225,7 @@ export class AdminApiService {
         scheme,
         customerId,
         channels: {
-          create: [
-            { name: 'production' },
-            { name: 'staging' },
-          ],
+          create: [{ name: 'production' }, { name: 'staging' }],
         },
       },
       include: {
@@ -255,7 +271,11 @@ export class AdminApiService {
               { runtimeVersion: { contains: term, mode: 'insensitive' } },
               { platform: { contains: term, mode: 'insensitive' } },
               { channel: { name: { contains: term, mode: 'insensitive' } } },
-              { channel: { app: { name: { contains: term, mode: 'insensitive' } } } },
+              {
+                channel: {
+                  app: { name: { contains: term, mode: 'insensitive' } },
+                },
+              },
             ],
           },
         ],
@@ -328,7 +348,9 @@ export class AdminApiService {
         channel: {
           app: {
             customerId,
-            ...(appName && appName.trim() !== '' ? { name: appName.trim() } : {}),
+            ...(appName && appName.trim() !== ''
+              ? { name: appName.trim() }
+              : {}),
           },
         },
       };
@@ -352,7 +374,10 @@ export class AdminApiService {
     });
 
     // Group by date (YYYY-MM-DD)
-    const map = new Map<string, { date: string; total: number; ios: number; android: number }>();
+    const map = new Map<
+      string,
+      { date: string; total: number; ios: number; android: number }
+    >();
 
     for (let i = days - 1; i >= 0; i--) {
       const d = new Date();
@@ -382,14 +407,16 @@ export class AdminApiService {
               channel: {
                 app: {
                   customerId,
-                  ...(appName && appName.trim() !== '' ? { name: appName.trim() } : {}),
+                  ...(appName && appName.trim() !== ''
+                    ? { name: appName.trim() }
+                    : {}),
                 },
               },
             },
           }
         : appName && appName.trim() !== ''
-        ? { update: { channel: { app: { name: appName.trim() } } } }
-        : {},
+          ? { update: { channel: { app: { name: appName.trim() } } } }
+          : {},
     });
 
     return {
@@ -451,7 +478,9 @@ export class AdminApiService {
       let app = await this.prisma.app.findUnique({ where: { name: appName } });
       if (app) {
         if (customerId && app.customerId !== customerId) {
-          throw new BadRequestException(`App name '${appName}' is already taken.`);
+          throw new BadRequestException(
+            `App name '${appName}' is already taken.`,
+          );
         }
       } else {
         if (!customerId) {
@@ -472,21 +501,23 @@ export class AdminApiService {
         create: { appId: app.id, name: channelName },
       });
 
-      const runtimeVersion = metadata.runtimeVersion ?? overrideRuntimeVersion ?? '1.0.0';
+      const runtimeVersion =
+        metadata.runtimeVersion ?? overrideRuntimeVersion ?? '1.0.0';
       const platforms = Object.keys(metadata.fileMetadata);
 
       for (const platform of platforms) {
         const platformData = metadata.fileMetadata[platform];
         const bundleRelPath = platformData.bundle;
-        
+
         const updateMetadata = { ...metadata };
         if (appVersion) {
-            (updateMetadata as any).version = appVersion; // Inject appVersion here so service can read it
+          (updateMetadata as any).version = appVersion; // Inject appVersion here so service can read it
         }
 
-        const safeRollout = rolloutPercentage !== undefined && !isNaN(Number(rolloutPercentage)) 
-          ? Math.max(0, Math.min(100, Math.round(Number(rolloutPercentage)))) 
-          : 100;
+        const safeRollout =
+          rolloutPercentage !== undefined && !isNaN(Number(rolloutPercentage))
+            ? Math.max(0, Math.min(100, Math.round(Number(rolloutPercentage))))
+            : 100;
 
         const update = await this.prisma.update.create({
           data: {
@@ -512,7 +543,9 @@ export class AdminApiService {
 
         for (const oldUpdate of oldUpdates) {
           await this.prisma.update.delete({ where: { id: oldUpdate.id } });
-          this.logger.log(`Suppression de l'ancienne mise à jour ${oldUpdate.id} pour ne garder que les 3 plus récentes.`);
+          this.logger.log(
+            `Suppression de l'ancienne mise à jour ${oldUpdate.id} pour ne garder que les 3 plus récentes.`,
+          );
         }
 
         const bundlePath = path.join(tempDir, bundleRelPath);
@@ -522,6 +555,7 @@ export class AdminApiService {
           bundlePath,
           bundleRelPath,
           'application/javascript',
+          IMMUTABLE_CACHE_CONTROL,
         );
 
         await this.prisma.asset.create({
@@ -537,40 +571,44 @@ export class AdminApiService {
 
         // 3. Upload assets in parallel for better performance
         if (platformData.assets && platformData.assets.length > 0) {
-          await Promise.all(platformData.assets.map(async (asset) => {
-            const assetPath = path.join(tempDir, asset.path);
-            if (!fs.existsSync(assetPath)) return;
+          await Promise.all(
+            platformData.assets.map(async (asset) => {
+              const assetPath = path.join(tempDir, asset.path);
+              if (!fs.existsSync(assetPath)) return;
 
-            const assetHash = this.calculateHash(assetPath);
+              const assetHash = this.calculateHash(assetPath);
 
-            await this.storage.uploadFile(
-              assetPath,
-              asset.path,
-              'application/octet-stream',
-            );
+              await this.storage.uploadFile(
+                assetPath,
+                asset.path,
+                'application/octet-stream',
+                IMMUTABLE_CACHE_CONTROL,
+              );
 
-            const existingAsset = await this.prisma.asset.findFirst({
-              where: { updateId: update.id, hash: assetHash },
-            });
-
-            if (!existingAsset) {
-              await this.prisma.asset.create({
-                data: {
-                  updateId: update.id,
-                  hash: assetHash,
-                  key: asset.path,
-                  contentType: 'application/octet-stream',
-                  fileExtension: asset.ext ? `.${asset.ext}` : null,
-                  isLaunchAsset: false,
-                },
+              const existingAsset = await this.prisma.asset.findFirst({
+                where: { updateId: update.id, hash: assetHash },
               });
-            }
-          }));
+
+              if (!existingAsset) {
+                await this.prisma.asset.create({
+                  data: {
+                    updateId: update.id,
+                    hash: assetHash,
+                    key: asset.path,
+                    contentType: 'application/octet-stream',
+                    fileExtension: asset.ext ? `.${asset.ext}` : null,
+                    isLaunchAsset: false,
+                  },
+                });
+              }
+            }),
+          );
         }
       }
 
       // Invalidate manifest cache for all affected platforms
-      const runtimeVersionForCache = metadata.runtimeVersion ?? overrideRuntimeVersion ?? '1.0.0';
+      const runtimeVersionForCache =
+        metadata.runtimeVersion ?? overrideRuntimeVersion ?? '1.0.0';
       for (const platform of platforms) {
         const cacheKey = `manifest:${appName}:${runtimeVersionForCache}:${platform}:${channelName}`;
         await (this.cacheManager as any).del(cacheKey);
@@ -588,7 +626,11 @@ export class AdminApiService {
     }
   }
 
-  async rollbackChannel(appName: string, channelName: string, customerId?: string) {
+  async rollbackChannel(
+    appName: string,
+    channelName: string,
+    customerId?: string,
+  ) {
     const app = await this.prisma.app.findUnique({
       where: { name: appName },
       include: {
@@ -608,7 +650,9 @@ export class AdminApiService {
 
     const channel = app.channels[0];
     if (!channel) {
-      throw new NotFoundException(`Channel '${channelName}' not found for app '${appName}'.`);
+      throw new NotFoundException(
+        `Channel '${channelName}' not found for app '${appName}'.`,
+      );
     }
 
     // Find the latest active (non-rollback) update
@@ -621,7 +665,9 @@ export class AdminApiService {
     });
 
     if (!activeUpdate) {
-      throw new BadRequestException(`No active update to rollback on channel '${channelName}'.`);
+      throw new BadRequestException(
+        `No active update to rollback on channel '${channelName}'.`,
+      );
     }
 
     // Mark it as rolled back
@@ -632,7 +678,8 @@ export class AdminApiService {
 
     // Re-publish previous update with a fresh timestamp and new UUID so mobile Expo clients
     // recognize it as a newer update than the rolled-back version and apply it immediately.
-    const rePublished = await this.republishPreviousUpdateAsRollback(activeUpdate);
+    const rePublished =
+      await this.republishPreviousUpdateAsRollback(activeUpdate);
 
     // Invalidate manifest cache
     await (this.cacheManager as any).reset?.();
@@ -641,7 +688,8 @@ export class AdminApiService {
       `Rollback completed on ${appName}/${channelName}. Rolled back ${activeUpdate.id}. Now active: ${rePublished?.id || 'embedded build'}`,
     );
 
-    const rePublishedMessage = (rePublished?.metadata as any)?.message || 'previous release';
+    const rePublishedMessage =
+      (rePublished?.metadata as any)?.message || 'previous release';
 
     return {
       success: true,
@@ -653,14 +701,12 @@ export class AdminApiService {
     };
   }
 
-  private async republishPreviousUpdateAsRollback(
-    rolledBackUpdate: {
-      id: string;
-      channelId: string;
-      platform: string;
-      runtimeVersion: string;
-    },
-  ) {
+  private async republishPreviousUpdateAsRollback(rolledBackUpdate: {
+    id: string;
+    channelId: string;
+    platform: string;
+    runtimeVersion: string;
+  }) {
     // Find the latest healthy update for the same channel, platform, and runtimeVersion
     const previousUpdate = await this.prisma.update.findFirst({
       where: {
@@ -682,7 +728,9 @@ export class AdminApiService {
     }
 
     const prevMeta = (previousUpdate.metadata as Record<string, any>) || {};
-    const commitInfo = prevMeta.gitCommit ? ` [commit ${prevMeta.gitCommit.slice(0, 7)}]` : '';
+    const commitInfo = prevMeta.gitCommit
+      ? ` [commit ${prevMeta.gitCommit.slice(0, 7)}]`
+      : '';
     const originMsg = prevMeta.message ? ` ("${prevMeta.message}")` : '';
     const rollbackMsg = `Rollback: reverted to previous release${commitInfo}${originMsg}`;
 
@@ -758,7 +806,9 @@ export class AdminApiService {
       `Update ${updateId} rollback toggled to ${newRollbackState} on ${update.channel.app.name}/${update.channel.name} by customer ${customerId}`,
     );
 
-    const rePubMessage = (rePublishedUpdate?.metadata as any)?.message || 'reverting to previous stable build';
+    const rePubMessage =
+      rePublishedUpdate?.metadata?.message ||
+      'reverting to previous stable build';
 
     return {
       success: true,
@@ -775,4 +825,3 @@ export class AdminApiService {
     };
   }
 }
-

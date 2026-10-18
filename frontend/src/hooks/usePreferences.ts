@@ -2,14 +2,12 @@
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
-import { useCurrentUser } from "./useAuth";
 
 export function useUpdatePreferences() {
   const queryClient = useQueryClient();
-  const { data: user } = useCurrentUser();
 
   return useMutation({
-    mutationFn: async (preferences: any) => {
+    mutationFn: async (preferences: Record<string, unknown>) => {
       const res = await axios.post("/api/auth/preferences", preferences);
       return res.data;
     },

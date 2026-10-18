@@ -1,0 +1,6 @@
+node_modules
+dist
+zenota
+*.blob
+*.log
+.DS_Store

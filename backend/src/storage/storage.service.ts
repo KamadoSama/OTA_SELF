@@ -10,7 +10,10 @@ export class StorageService implements OnModuleInit {
 
   constructor() {
     console.log('User:', process.env.MINIO_ROOT_USER);
-    console.log('MINIO_PUBLIC_URL:', JSON.stringify(process.env.MINIO_PUBLIC_URL));
+    console.log(
+      'MINIO_PUBLIC_URL:',
+      JSON.stringify(process.env.MINIO_PUBLIC_URL),
+    );
     this.minioClient = new Minio.Client({
       endPoint: process.env.MINIO_ENDPOINT || 'localhost',
       port: Number(process.env.MINIO_PORT) || 9000,
@@ -57,10 +60,14 @@ export class StorageService implements OnModuleInit {
     filePath: string,
     destFileName: string,
     contentType: string,
+    cacheControl?: string,
   ): Promise<string> {
-    const metaData = {
+    const metaData: Record<string, string> = {
       'Content-Type': contentType,
     };
+    if (cacheControl) {
+      metaData['Cache-Control'] = cacheControl;
+    }
 
     await this.minioClient.fPutObject(
       this.bucketName,
