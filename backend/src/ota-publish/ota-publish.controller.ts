@@ -42,20 +42,20 @@ export class OtaPublishController {
     }
 
     if (!appName || !channelName) {
-      throw new BadRequestException(
-        'appName and channelName are required',
-      );
+      throw new BadRequestException('appName and channelName are required');
     }
 
     const rolloutNum = rollout !== undefined ? parseInt(rollout, 10) : 100;
-    this.logger.log(`CLI Upload by ${req.customer.email} for app: ${appName} (channel: ${channelName}, rollout: ${rolloutNum}%)`);
-    
+    this.logger.log(
+      `CLI Upload by ${req.customer.email} for app: ${appName} (channel: ${channelName}, rollout: ${rolloutNum}%)`,
+    );
+
     // We pass the customerId to validate app ownership and create if necessary
     const updateId = await this.adminService.processUpdateZip(
       file.buffer,
       appName,
       channelName,
-      req.customer.id, 
+      req.customer.id,
       runtimeVersion,
       appVersion,
       rolloutNum,
@@ -77,10 +77,14 @@ export class OtaPublishController {
     @Body('channel') channelName: string,
   ) {
     if (!appName || !channelName) {
-      throw new BadRequestException('appName and channelName are required for rollback');
+      throw new BadRequestException(
+        'appName and channelName are required for rollback',
+      );
     }
 
-    this.logger.log(`CLI Rollback by ${req.customer.email} on ${appName}/${channelName}`);
+    this.logger.log(
+      `CLI Rollback by ${req.customer.email} on ${appName}/${channelName}`,
+    );
     const result = await this.adminService.rollbackChannel(
       appName,
       channelName,

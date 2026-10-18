@@ -1,4 +1,15 @@
-import { Controller, Get, Post, Delete, UseGuards, Req, Param, Res, Body, NotFoundException } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Delete,
+  UseGuards,
+  Req,
+  Param,
+  Res,
+  Body,
+  NotFoundException,
+} from '@nestjs/common';
 import { SubscriptionService } from './subscription.service';
 import { AuthGuard, AuthenticatedRequest } from '../auth/auth.guard';
 import { Response } from 'express';
@@ -47,21 +58,24 @@ export class SubscriptionController {
   ) {
     const invoice = await this.prisma.invoice.findUnique({
       where: { id },
-      include: { customer: true }
+      include: { customer: true },
     });
 
     if (!invoice || invoice.customerId !== req.user.id) {
       throw new NotFoundException('Invoice not found');
     }
 
-    const pdfBuffer = await this.invoiceService.generateInvoicePdf(invoice, invoice.customer);
+    const pdfBuffer = await this.invoiceService.generateInvoicePdf(
+      invoice,
+      invoice.customer,
+    );
 
     res.set({
       'Content-Type': 'application/pdf',
       'Content-Disposition': `attachment; filename="invoice-${id}.pdf"`,
       'Content-Length': pdfBuffer.length,
     });
-    
+
     res.end(pdfBuffer);
   }
 }

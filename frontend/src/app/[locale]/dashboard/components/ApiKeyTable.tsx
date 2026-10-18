@@ -1,6 +1,7 @@
 "use client";
 
 import { Key, Trash2, Loader2 } from "lucide-react";
+import { Link } from "@/i18n/routing";
 
 interface ApiKeyTableProps {
   isLoading: boolean;
@@ -43,7 +44,7 @@ export function ApiKeyTable({
               You've reached your API key limit ({activeKeysCount}/{keysLimit}). Upgrade to PRO for unlimited keys.
             </p>
           </div>
-          <a href="/dashboard/subscription" className="text-[11px] font-bold text-orange-500 hover:underline">Upgrade Now</a>
+          <Link href="/dashboard/subscription" className="text-[11px] font-bold text-orange-500 hover:underline">Upgrade Now</Link>
         </div>
       )}
 

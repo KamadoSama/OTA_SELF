@@ -19,7 +19,7 @@ export function Features() {
           className="flex flex-col mb-20"
         >
           <h2 className="text-sm font-bold uppercase tracking-[0.4em] text-white/20 mb-4">{t('Features.infra')}</h2>
-          <p className="text-4xl font-bold tracking-tight text-white">{t.rich('Features.title', { lb: (chunks) => <br /> })}</p>
+          <p className="text-4xl font-bold tracking-tight text-white">{t.rich('Features.title', { lb: () => <br /> })}</p>
         </motion.div>
 
         <motion.div 
@@ -126,7 +126,7 @@ export function Features() {
             </div>
             <h3 className="text-xl font-bold mb-3 text-white">Canary Rollouts (%)</h3>
             <p className="text-white/40 text-sm leading-relaxed font-medium">
-              Déployez d'abord à 10% ou 25% de votre parc d'appareils de façon déterministe avant de basculer à 100%. Zéro risque de bloquer tous vos utilisateurs.
+              Déployez d&apos;abord à 10% ou 25% de votre parc d&apos;appareils de façon déterministe avant de basculer à 100%. Zéro risque de bloquer tous vos utilisateurs.
             </p>
             <div className="mt-auto pt-6 flex items-center gap-2">
               <span className="text-[11px] font-mono text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">--rollout 25</span>
@@ -141,7 +141,7 @@ export function Features() {
             </div>
             <h3 className="text-xl font-bold mb-3 text-white">Instant Rollback (200ms)</h3>
             <p className="text-white/40 text-sm leading-relaxed font-medium">
-              Un bug imprévu en production ? Restaurez instantanément la version stable précédente sans attendre un nouveau build d'Expo.
+              Un bug imprévu en production ? Restaurez instantanément la version stable précédente sans attendre un nouveau build d&apos;Expo.
             </p>
             <div className="mt-auto pt-6 flex items-center gap-2">
               <span className="text-[11px] font-mono text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/20">zenota rollback</span>

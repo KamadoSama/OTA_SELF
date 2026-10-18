@@ -16,7 +16,7 @@ import { ExpoUpdatesService } from './expo-updates.service';
 export class ExpoUpdatesController {
   private logger = new Logger(ExpoUpdatesController.name);
 
-  constructor(private readonly expoService: ExpoUpdatesService) { }
+  constructor(private readonly expoService: ExpoUpdatesService) {}
 
   @Get(':appId')
   async getManifest(
@@ -29,6 +29,7 @@ export class ExpoUpdatesController {
     @Headers('expo-project-id') expoProjectId: string,
     @Headers('expo-current-update-id') currentUpdateId: string,
     @Headers('expo-embedded-update-id') embeddedUpdateId: string,
+    @Headers('eas-client-id') easClientId?: string,
     @Headers('expo-client-id') expoClientId?: string,
     @Headers('expo-device-id') expoDeviceId?: string,
   ) {
@@ -61,7 +62,12 @@ export class ExpoUpdatesController {
       const host = req.get('host');
       const baseUrl = host ? `${protocol}://${host}` : undefined;
 
-      const clientIdentifier = expoClientId || expoDeviceId || (req.ip as string) || 'anon-client';
+      const clientIdentifier =
+        easClientId ||
+        expoClientId ||
+        expoDeviceId ||
+        (req.ip as string) ||
+        'anon-client';
 
       const manifestResponse = await this.expoService.getLatestManifest(
         expoRuntimeVersion,
@@ -74,7 +80,10 @@ export class ExpoUpdatesController {
       );
 
       if (!manifestResponse) {
-        if (currentUpdateId && (await this.expoService.isUpdateRolledBack(currentUpdateId))) {
+        if (
+          currentUpdateId &&
+          (await this.expoService.isUpdateRolledBack(currentUpdateId))
+        ) {
           this.logger.log(
             `Client running rolled back update ${currentUpdateId} and no other OTA release is active. Sending rollBackToEmbedded directive.`,
           );
@@ -99,7 +108,10 @@ export class ExpoUpdatesController {
           res.setHeader('expo-protocol-version', '1');
           res.setHeader('expo-sfv-version', '0');
           res.setHeader('cache-control', 'private, no-cache, no-store');
-          res.setHeader('Content-Type', `multipart/mixed; boundary=${boundary}`);
+          res.setHeader(
+            'Content-Type',
+            `multipart/mixed; boundary=${boundary}`,
+          );
           res.setHeader('Content-Length', bodyBuffer.length.toString());
           return res.status(200).end(bodyBuffer);
         }
@@ -115,15 +127,51 @@ export class ExpoUpdatesController {
       const { manifest, extensions } = manifestResponse;
 
       // Protocol 1: If the client already has this update, return 204 No Content
-      if (currentUpdateId === manifest.id || embeddedUpdateId === manifest.id) {
-        this.logger.log(`Client already up-to-date: ${manifest.id} app name ${appId}`);
-        void this.expoService.recordDeviceInstallation(manifest.id, clientIdentifier, expoPlatform);
+      // iOS peut envoyer les UUID en majuscules : comparaison insensible à la casse
+      const latestId = manifest.id.toLowerCase();
+      if (
+        currentUpdateId?.toLowerCase() === latestId ||
+        embeddedUpdateId?.toLowerCase() === latestId
+      ) {
+        this.logger.log(
+          `Client already up-to-date: ${manifest.id} app name ${appId}`,
+        );
+        void this.expoService.recordDeviceInstallation(
+          manifest.id,
+          clientIdentifier,
+          expoPlatform,
+        );
         return res.status(204).send();
       }
 
+      // Anti-doublon : l'app peut demander la même mise à jour plusieurs fois au lancement
+      // (checkAutomatically + fetchUpdateAsync()). Seule la première requête reçoit le manifest,
+      // les suivantes reçoivent 204 pour éviter des téléchargements parallèles des mêmes fichiers.
+      if (
+        easClientId &&
+        !(await this.expoService.claimManifestDelivery(
+          easClientId,
+          manifest.id,
+        ))
+      ) {
+        this.logger.log(
+          `Duplicate manifest request suppressed: ${manifest.id} — app: ${targetAppId}, client: ${easClientId}`,
+        );
+        return res.status(204).send();
+      }
+
+      // Diagnostic bande passante : quel ID le téléphone dit-il exécuter quand on lui renvoie le manifest ?
+      this.logger.log(
+        `Serving manifest ${manifest.id} — app: ${targetAppId}, platform: ${expoPlatform}, current: ${currentUpdateId || 'none'}, embedded: ${embeddedUpdateId || 'none'}, client: ${easClientId || 'none'}`,
+      );
+
       // Increment download count and record unique device installation
-      await this.expoService.incrementDownloadCount(manifest.id);
-      void this.expoService.recordDeviceInstallation(manifest.id, clientIdentifier, expoPlatform);
+      this.expoService.incrementDownloadCount(manifest.id);
+      void this.expoService.recordDeviceInstallation(
+        manifest.id,
+        clientIdentifier,
+        expoPlatform,
+      );
 
       // Création de la boundary sans caractères spéciaux problématiques
       const boundary = `ExpoManifestBoundary${Math.random().toString(36).slice(2)}`;
@@ -161,7 +209,6 @@ export class ExpoUpdatesController {
 
       // 5. Retour vide pour empêcher NestJS de modifier la réponse Express
       return;
-
     } catch (error) {
       if (error instanceof NotFoundException) {
         return res.status(404).json({ error: error.message });

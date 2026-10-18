@@ -3,6 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
+    "sync:installer": "test -f ../zenota-server/install.sh && cp ../zenota-server/install.sh public/install.sh || true",
+    "predev": "npm run sync:installer",
+    "prebuild": "npm run sync:installer",
     "dev": "next dev",
     "build": "next build",
     "start": "next start",

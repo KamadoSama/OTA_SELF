@@ -1,6 +1,12 @@
-import { Injectable, UnauthorizedException, Logger, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  UnauthorizedException,
+  Logger,
+  BadRequestException,
+} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
+import * as crypto from 'crypto';
 import { PrismaService } from '../prisma.service';
 
 @Injectable()
@@ -21,7 +27,9 @@ export class AuthService {
     if (!email || !password) {
       throw new BadRequestException('Email and password are required');
     }
-    const customer = await this.prisma.customer.findUnique({ where: { email } });
+    const customer = await this.prisma.customer.findUnique({
+      where: { email },
+    });
     if (!customer) {
       throw new UnauthorizedException('Invalid email or password');
     }
@@ -44,17 +52,24 @@ export class AuthService {
     };
   }
 
-  async register(email: string, password: string, tier: 'FREE' | 'PRO' = 'FREE') {
+  async register(
+    email: string,
+    password: string,
+    tier: 'FREE' | 'PRO' = 'FREE',
+  ) {
     if (!email || !password) {
       throw new BadRequestException('Email and password are required');
     }
-    const existing = await this.prisma.customer.findUnique({ where: { email } });
+    const existing = await this.prisma.customer.findUnique({
+      where: { email },
+    });
     if (existing) {
       throw new UnauthorizedException('Email already in use');
     }
     const passwordHash = await bcrypt.hash(password, 10);
-    
-    const trialEndsAt = tier === 'PRO' ? new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) : null;
+
+    const trialEndsAt =
+      tier === 'PRO' ? new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) : null;
 
     const customer = await this.prisma.customer.create({
       data: {
@@ -81,7 +96,13 @@ export class AuthService {
   async getMe(email: string) {
     const customer = await this.prisma.customer.findUnique({
       where: { email },
-      select: { id: true, email: true, subscriptionTier: true, createdAt: true, preferences: true },
+      select: {
+        id: true,
+        email: true,
+        subscriptionTier: true,
+        createdAt: true,
+        preferences: true,
+      },
     });
     return customer;
   }
@@ -93,11 +114,11 @@ export class AuthService {
     let customer = await this.prisma.customer.findUnique({ where: { email } });
 
     if (!customer) {
-      const crypto = require('crypto');
       const randomPassword = crypto.randomBytes(16).toString('hex');
       const passwordHash = await bcrypt.hash(randomPassword, 10);
-      
-      const trialEndsAt = tier === 'PRO' ? new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) : null;
+
+      const trialEndsAt =
+        tier === 'PRO' ? new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) : null;
 
       customer = await this.prisma.customer.create({
         data: {
@@ -108,7 +129,9 @@ export class AuthService {
           subscriptionStartDate: tier === 'PRO' ? new Date() : null,
         },
       });
-      this.logger.log(`New Google customer created: ${email} with tier ${tier}`);
+      this.logger.log(
+        `New Google customer created: ${email} with tier ${tier}`,
+      );
     }
 
     const payload = { sub: customer.id, email: customer.email };

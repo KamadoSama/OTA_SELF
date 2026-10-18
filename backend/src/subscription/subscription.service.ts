@@ -1,6 +1,15 @@
-import { Injectable, ForbiddenException, Logger, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  ForbiddenException,
+  Logger,
+  NotFoundException,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma.service';
-import { PLAN_LIMITS, TRIAL_DURATION_DAYS, PRO_PRICE } from './subscription.config';
+import {
+  PLAN_LIMITS,
+  TRIAL_DURATION_DAYS,
+  PRO_PRICE,
+} from './subscription.config';
 import { SubscriptionTier } from '@prisma/client';
 
 @Injectable()
@@ -16,9 +25,9 @@ export class SubscriptionService {
   async getCustomerData(customerId: string) {
     const customer = await this.prisma.customer.findUnique({
       where: { id: customerId },
-      select: { 
-        subscriptionTier: true, 
-        trialEndsAt: true, 
+      select: {
+        subscriptionTier: true,
+        trialEndsAt: true,
         cardLast4: true,
         subscriptionStartDate: true,
         cardBrand: true,
@@ -34,11 +43,14 @@ export class SubscriptionService {
     if (this.isSelfHosted()) return;
     const customer = await this.getCustomerData(customerId);
 
-    if (customer.subscriptionTier === SubscriptionTier.PRO && customer.trialEndsAt) {
+    if (
+      customer.subscriptionTier === SubscriptionTier.PRO &&
+      customer.trialEndsAt
+    ) {
       const now = new Date();
       if (customer.trialEndsAt < now && !customer.cardLast4) {
         throw new ForbiddenException(
-          'Your Pro trial has expired. Please add a payment method to continue using Pro features.'
+          'Your Pro trial has expired. Please add a payment method to continue using Pro features.',
         );
       }
     }
@@ -50,12 +62,14 @@ export class SubscriptionService {
     const customer = await this.getCustomerData(customerId);
     const tier = customer.subscriptionTier;
     const limit = PLAN_LIMITS[tier].maxApps;
-    
+
     if (limit === -1) return true;
 
     const count = await this.prisma.app.count({ where: { customerId } });
     if (count >= limit) {
-      throw new ForbiddenException(`You have reached the limit of ${limit} app(s) for the ${tier} tier. Upgrade to PRO for unlimited apps.`);
+      throw new ForbiddenException(
+        `You have reached the limit of ${limit} app(s) for the ${tier} tier. Upgrade to PRO for unlimited apps.`,
+      );
     }
     return true;
   }
@@ -80,7 +94,9 @@ export class SubscriptionService {
     });
 
     if (count >= limit) {
-      throw new ForbiddenException(`You have reached the limit of ${limit} deployment(s) per day for the ${tier} tier. Upgrade to PRO for unlimited deployments.`);
+      throw new ForbiddenException(
+        `You have reached the limit of ${limit} deployment(s) per day for the ${tier} tier. Upgrade to PRO for unlimited deployments.`,
+      );
     }
     return true;
   }
@@ -96,7 +112,9 @@ export class SubscriptionService {
 
     const count = await this.prisma.apiKey.count({ where: { customerId } });
     if (count >= limit) {
-      throw new ForbiddenException(`You have reached the limit of ${limit} API key(s) for the ${tier} tier. Upgrade to PRO for unlimited keys.`);
+      throw new ForbiddenException(
+        `You have reached the limit of ${limit} API key(s) for the ${tier} tier. Upgrade to PRO for unlimited keys.`,
+      );
     }
     return true;
   }
@@ -106,9 +124,9 @@ export class SubscriptionService {
       where: { id: customerId },
       include: {
         _count: {
-          select: { apps: true, apiKeys: true }
-        }
-      }
+          select: { apps: true, apiKeys: true },
+        },
+      },
     });
 
     if (!customer) throw new NotFoundException('Customer not found');
@@ -125,13 +143,23 @@ export class SubscriptionService {
 
     const updates = await this.prisma.update.findMany({
       where: { channel: { app: { customerId } } },
-      select: { downloadCount: true }
+      select: { downloadCount: true },
     });
-    
-    const totalDownloads = updates.reduce((acc, curr) => acc + curr.downloadCount, 0);
-    const tier = this.isSelfHosted() ? SubscriptionTier.PRO : customer.subscriptionTier;
-    const limits = this.isSelfHosted() 
-      ? { maxApps: -1, maxDeploymentsPerDay: -1, maxApiKeys: -1, maxDownloadsPerMonth: -1 }
+
+    const totalDownloads = updates.reduce(
+      (acc, curr) => acc + curr.downloadCount,
+      0,
+    );
+    const tier = this.isSelfHosted()
+      ? SubscriptionTier.PRO
+      : customer.subscriptionTier;
+    const limits = this.isSelfHosted()
+      ? {
+          maxApps: -1,
+          maxDeploymentsPerDay: -1,
+          maxApiKeys: -1,
+          maxDownloadsPerMonth: -1,
+        }
       : PLAN_LIMITS[tier];
 
     return {
@@ -141,12 +169,22 @@ export class SubscriptionService {
       activeApps: customer._count.apps,
       appsLimit: limits.maxApps === -1 ? 'Unlimited' : limits.maxApps,
       deploymentsToday,
-      deploymentsLimit: limits.maxDeploymentsPerDay === -1 ? 'Unlimited' : limits.maxDeploymentsPerDay,
+      deploymentsLimit:
+        limits.maxDeploymentsPerDay === -1
+          ? 'Unlimited'
+          : limits.maxDeploymentsPerDay,
       activeApiKeys: customer._count.apiKeys,
       apiKeysLimit: limits.maxApiKeys === -1 ? 'Unlimited' : limits.maxApiKeys,
-      storageUsed: "0.5 GB",
-      storageLimit: tier === 'PRO' ? "10 GB" : "1 GB",
-      nextBillingDate: customer.trialEndsAt || (customer.subscriptionStartDate ? new Date(customer.subscriptionStartDate.getTime() + 30 * 24 * 60 * 60 * 1000) : null),
+      storageUsed: '0.5 GB',
+      storageLimit: tier === 'PRO' ? '10 GB' : '1 GB',
+      nextBillingDate:
+        customer.trialEndsAt ||
+        (customer.subscriptionStartDate
+          ? new Date(
+              customer.subscriptionStartDate.getTime() +
+                30 * 24 * 60 * 60 * 1000,
+            )
+          : null),
       cardLast4: customer.cardLast4,
       cardBrand: customer.cardBrand,
       cardExpMonth: customer.cardExpMonth,
@@ -155,7 +193,15 @@ export class SubscriptionService {
     };
   }
 
-  async upgradeToPro(customerId: string, paymentInfo: { last4: string, brand: string, expMonth: number, expYear: number }) {
+  async upgradeToPro(
+    customerId: string,
+    paymentInfo: {
+      last4: string;
+      brand: string;
+      expMonth: number;
+      expYear: number;
+    },
+  ) {
     const trialEndsAt = new Date();
     trialEndsAt.setDate(trialEndsAt.getDate() + TRIAL_DURATION_DAYS);
 

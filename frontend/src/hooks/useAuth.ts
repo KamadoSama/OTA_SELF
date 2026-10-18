@@ -1,19 +1,26 @@
 "use client";
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useRouter } from "next/navigation";
 import { useAuth } from "@/providers/auth-provider";
 import { useSession } from "next-auth/react";
 
+interface SessionUserExtended {
+  id?: string;
+  email?: string | null;
+  tier?: string;
+  preferences?: Record<string, unknown>;
+}
+
 export function useCurrentUser() {
   const { data: session, status } = useSession();
+  const user = session?.user as SessionUserExtended | undefined;
 
   return {
-    data: session?.user ? {
-      id: (session.user as any).id,
-      email: session.user.email,
-      subscriptionTier: (session.user as any).tier,
-      preferences: (session.user as any).preferences,
+    data: user ? {
+      id: user.id || '',
+      email: user.email,
+      subscriptionTier: user.tier,
+      preferences: user.preferences,
     } : null,
     isLoading: status === "loading",
     status,

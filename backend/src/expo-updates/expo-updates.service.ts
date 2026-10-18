@@ -69,10 +69,7 @@ export class ExpoUpdatesService {
         channel: {
           name: channelName,
           app: {
-            OR: [
-              { name: appId },
-              { id: appId },
-            ],
+            OR: [{ name: appId }, { id: appId }],
           },
         },
       },
@@ -95,16 +92,23 @@ export class ExpoUpdatesService {
         where: { id: currentUpdateId },
       });
       if (currentRunning && currentRunning.isRollback) {
-        this.logger.log(`Client is running update ${currentUpdateId} which has been marked as rolled back!`);
+        this.logger.log(
+          `Client is running update ${currentUpdateId} which has been marked as rolled back!`,
+        );
         // If the top eligible update was created BEFORE or AT the same time as currentRunning:
         // Expo updates client will refuse to downgrade unless the manifest timestamp is newer!
-        if (eligibleUpdates.length > 0 && eligibleUpdates[0].createdAt <= currentRunning.createdAt) {
+        if (
+          eligibleUpdates.length > 0 &&
+          eligibleUpdates[0].createdAt <= currentRunning.createdAt
+        ) {
           const sourceUpdate = eligibleUpdates[0];
           this.logger.log(
             `Active update ${sourceUpdate.id} has createdAt <= rolled-back update ${currentRunning.id}. Auto re-publishing to ensure device applies rollback.`,
           );
           const prevMeta = (sourceUpdate.metadata as Record<string, any>) || {};
-          const commitInfo = prevMeta.gitCommit ? ` [commit ${prevMeta.gitCommit.slice(0, 7)}]` : '';
+          const commitInfo = prevMeta.gitCommit
+            ? ` [commit ${prevMeta.gitCommit.slice(0, 7)}]`
+            : '';
           const rollbackMsg = `Rollback: reverted to previous release${commitInfo}`;
 
           const rePublished = await this.prisma.update.create({
@@ -160,7 +164,9 @@ export class ExpoUpdatesService {
 
       // If device is outside the rollout cohort, fallback to previous stable update (100% rollout)
       if (deviceBucket >= rollout) {
-        const stableFallback = eligibleUpdates.slice(1).find((u: any) => (u.rolloutPercentage ?? 100) >= 100);
+        const stableFallback = eligibleUpdates
+          .slice(1)
+          .find((u: any) => (u.rolloutPercentage ?? 100) >= 100);
         if (stableFallback) {
           latestUpdate = stableFallback;
         }
@@ -245,14 +251,17 @@ export class ExpoUpdatesService {
         expoClient: {
           name: appId,
           slug: appId,
-          scheme: (latestUpdate.channel as any).app.scheme || appId.toLowerCase(),
-          version: (latestUpdate.metadata as any)?.version ?? (latestUpdate.metadata as any)?.expoClient?.version ?? undefined,
+          scheme:
+            (latestUpdate.channel as any).app.scheme || appId.toLowerCase(),
+          version:
+            (latestUpdate.metadata as any)?.version ??
+            (latestUpdate.metadata as any)?.expoClient?.version ??
+            undefined,
           runtimeVersion: latestUpdate.runtimeVersion,
           platform: platform,
         },
       },
     };
-
 
     const response = {
       manifest,
@@ -268,7 +277,24 @@ export class ExpoUpdatesService {
     return response;
   }
 
-  async incrementDownloadCount(updateId: string) {
+  /**
+   * Retourne true si ce client peut recevoir le manifest de cette mise à jour,
+   * false s'il l'a déjà reçu dans la fenêtre OTA_MANIFEST_DEDUP_SECONDS (60 s par défaut, 0 = désactivé).
+   */
+  async claimManifestDelivery(
+    clientId: string,
+    updateId: string,
+  ): Promise<boolean> {
+    const windowSeconds = Number(process.env.OTA_MANIFEST_DEDUP_SECONDS ?? 60);
+    if (!Number.isFinite(windowSeconds) || windowSeconds <= 0) return true;
+
+    const key = `manifest-served:${clientId}:${updateId}`;
+    if (await this.cacheManager.get(key)) return false;
+    await this.cacheManager.set(key, true, windowSeconds * 1000);
+    return true;
+  }
+
+  incrementDownloadCount(updateId: string): void {
     this.prisma.update
       .update({
         where: { id: updateId },

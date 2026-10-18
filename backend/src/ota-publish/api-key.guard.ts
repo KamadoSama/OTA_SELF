@@ -1,4 +1,9 @@
-import { Injectable, CanActivate, ExecutionContext, UnauthorizedException } from '@nestjs/common';
+import {
+  Injectable,
+  CanActivate,
+  ExecutionContext,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { Request } from 'express';
 import { ApiKeysService } from '../api-keys/api-keys.service';
 
@@ -14,15 +19,19 @@ export class ApiKeyGuard implements CanActivate {
   constructor(private apiKeysService: ApiKeysService) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    const request = context.switchToHttp().getRequest<ApiKeyAuthenticatedRequest>();
+    const request = context
+      .switchToHttp()
+      .getRequest<ApiKeyAuthenticatedRequest>();
     const authHeader = request.headers['authorization'];
-    
+
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      throw new UnauthorizedException('API Key missing or invalid format (Bearer expected).');
+      throw new UnauthorizedException(
+        'API Key missing or invalid format (Bearer expected).',
+      );
     }
 
     const rawKey = authHeader.split(' ')[1];
-    
+
     if (!rawKey) {
       throw new UnauthorizedException('API Key missing.');
     }

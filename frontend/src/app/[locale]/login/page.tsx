@@ -79,6 +79,8 @@ export default function LoginPage() {
     signIn("google", { callbackUrl: "/dashboard" });
   };
 
+  const isSelfHosted = process.env.NEXT_PUBLIC_SELF_HOSTED === "true";
+
   return (
     <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-black text-white font-sans selection:bg-white selection:text-black">
       <div 
@@ -96,7 +98,7 @@ export default function LoginPage() {
       >
         <div className="rounded-lg border border-white/[0.08] bg-[#050505] p-10 shadow-2xl">
           <div className="mb-10 flex flex-col items-center gap-4">
-            <Link href="/" className="flex h-12 w-12 items-center justify-center rounded bg-white">
+            <Link href={isSelfHosted ? "/dashboard" : "/"} className="flex h-12 w-12 items-center justify-center rounded bg-white">
               <CloudLightning className="h-6 w-6 text-black fill-black" />
             </Link>
             <div className="text-center">

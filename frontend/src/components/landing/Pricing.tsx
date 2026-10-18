@@ -18,7 +18,7 @@ export function Pricing() {
           transition={{ duration: 0.8 }}
           className="text-center mb-24"
         >
-          <h2 className="text-4xl md:text-5xl font-bold tracking-tight mb-6 text-white">{t.rich('Pricing.title', { lb: (chunks) => <br /> })}</h2>
+          <h2 className="text-4xl md:text-5xl font-bold tracking-tight mb-6 text-white">{t.rich('Pricing.title', { lb: () => <br /> })}</h2>
           <p className="text-white/40 max-w-xl mx-auto font-medium">{t('Pricing.subtitle')}</p>
         </motion.div>
 
@@ -63,7 +63,7 @@ export function Pricing() {
 
             <Link href="/docs" className="h-12 w-full rounded-xl border border-blue-500/30 bg-blue-500/10 flex items-center justify-center font-bold text-xs text-blue-300 hover:bg-blue-500 hover:text-white transition-all">
               <Server className="w-3.5 h-3.5 mr-2" />
-              Guide d'installation Self-Host
+              Guide d&apos;installation Self-Host
             </Link>
           </motion.div>
 

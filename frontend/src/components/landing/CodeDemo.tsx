@@ -129,14 +129,14 @@ export function CodeDemo() {
               <span className="text-amber-400 font-bold">$</span>
               <span className="text-white font-semibold">npx zenota rollback --channel production</span>
             </div>
-            <div className="text-white/40">ℹ Identifying latest active update on channel "production"...</div>
+            <div className="text-white/40">ℹ Identifying latest active update on channel &quot;production&quot;...</div>
             <div className="text-white/40">✓ Revoked update ID: <span className="text-white/70">f94d81ec-5002</span></div>
             <div className="text-amber-300 font-bold pt-2 flex items-center gap-2">
               <span>↩</span>
               <span>Instant Rollback complete in 180ms!</span>
             </div>
             <div className="text-white/40 text-xs">
-              Channel "production" restored to stable version <code className="bg-white/10 text-white px-1.5 py-0.5 rounded">v2.4.0</code> without rebuilding bundles.
+              Channel &quot;production&quot; restored to stable version <code className="bg-white/10 text-white px-1.5 py-0.5 rounded">v2.4.0</code> without rebuilding bundles.
             </div>
           </div>
         )}
