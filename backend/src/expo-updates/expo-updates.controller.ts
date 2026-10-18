@@ -144,6 +144,19 @@ export class ExpoUpdatesController {
         return res.status(204).send();
       }
 
+      // Anti-doublon : l'app peut demander la même mise à jour plusieurs fois au lancement
+      // (checkAutomatically + fetchUpdateAsync()). Seule la première requête reçoit le manifest,
+      // les suivantes reçoivent 204 pour éviter des téléchargements parallèles des mêmes fichiers.
+      if (
+        easClientId &&
+        !(await this.expoService.claimManifestDelivery(easClientId, manifest.id))
+      ) {
+        this.logger.log(
+          `Duplicate manifest request suppressed: ${manifest.id} — app: ${targetAppId}, client: ${easClientId}`,
+        );
+        return res.status(204).send();
+      }
+
       // Diagnostic bande passante : quel ID le téléphone dit-il exécuter quand on lui renvoie le manifest ?
       this.logger.log(
         `Serving manifest ${manifest.id} — app: ${targetAppId}, platform: ${expoPlatform}, current: ${currentUpdateId || 'none'}, embedded: ${embeddedUpdateId || 'none'}, client: ${easClientId || 'none'}`,

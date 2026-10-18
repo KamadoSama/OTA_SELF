@@ -277,6 +277,23 @@ export class ExpoUpdatesService {
     return response;
   }
 
+  /**
+   * Retourne true si ce client peut recevoir le manifest de cette mise à jour,
+   * false s'il l'a déjà reçu dans la fenêtre OTA_MANIFEST_DEDUP_SECONDS (60 s par défaut, 0 = désactivé).
+   */
+  async claimManifestDelivery(
+    clientId: string,
+    updateId: string,
+  ): Promise<boolean> {
+    const windowSeconds = Number(process.env.OTA_MANIFEST_DEDUP_SECONDS ?? 60);
+    if (!Number.isFinite(windowSeconds) || windowSeconds <= 0) return true;
+
+    const key = `manifest-served:${clientId}:${updateId}`;
+    if (await this.cacheManager.get(key)) return false;
+    await this.cacheManager.set(key, true, windowSeconds * 1000);
+    return true;
+  }
+
   incrementDownloadCount(updateId: string): void {
     this.prisma.update
       .update({

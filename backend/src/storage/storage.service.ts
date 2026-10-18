@@ -9,7 +9,6 @@ export class StorageService implements OnModuleInit {
   private bucketName = 'expo-updates';
 
   constructor() {
-    console.log('User:', process.env.MINIO_ROOT_USER);
     console.log(
       'MINIO_PUBLIC_URL:',
       JSON.stringify(process.env.MINIO_PUBLIC_URL),
