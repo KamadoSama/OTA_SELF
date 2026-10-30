@@ -77,8 +77,8 @@ services:
       MINIO_BUCKET: ${MINIO_BUCKET:-expo-updates}
       OTA_ASSET_HMAC_SECRET: ${OTA_ASSET_HMAC_SECRET}
       EDGE_PORT: 4002
-    ports:
-      - "${EDGE_PORT:-4005}:4002"
+      RUST_BACKTRACE: "1"
+      RUST_LOG: "info,ota_edge=debug"
     depends_on:
       - backend
     networks:
