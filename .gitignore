@@ -5,6 +5,8 @@
 node_modules
 dist
 .next
+target/
+**/*.rs.bk
 
 .DS_Store
 temp_pdf_gen
