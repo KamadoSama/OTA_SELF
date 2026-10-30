@@ -73,9 +73,9 @@ services:
       MINIO_PUBLIC_URL: ${MINIO_PUBLIC_URL}
       MINIO_BUCKET: ${MINIO_BUCKET:-expo-updates}
       OTA_ASSET_HMAC_SECRET: ${OTA_ASSET_HMAC_SECRET}
-      EDGE_PORT: ${EDGE_PORT:-4002}
+      EDGE_PORT: 4002
     ports:
-      - "${EDGE_PORT:-4002}:4002"
+      - "${EDGE_PORT:-4005}:4002"
     depends_on:
       - backend
     networks:
