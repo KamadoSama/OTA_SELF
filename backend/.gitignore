@@ -41,6 +41,10 @@ lerna-debug.log*
 .env.test.local
 .env.production.local
 .env.local
+curl_output.txt
+*.tsbuildinfo
+test_length.js
+test_parse.js
 
 # temp directory
 .temp

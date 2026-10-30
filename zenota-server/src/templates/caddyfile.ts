@@ -1,7 +1,7 @@
 export const caddyfile = (domain: string) => `
 ${domain} {
     # API requests
-    handle_path /api* {
+    handle /api* {
         reverse_proxy ota_backend:3001
     }
 
