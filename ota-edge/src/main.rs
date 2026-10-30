@@ -59,8 +59,8 @@ async fn start_server() -> Result<(), Box<dyn std::error::Error>> {
     let app = Router::new()
         .route("/health", get(routes::health_check))
         .route("/internal/invalidate-cache", post(routes::invalidate_cache))
-        .route("/api/update/manifest/:app_id", get(routes::manifest::get_manifest))
-        .route("/api/assets/:encoded_key", get(routes::assets::get_asset))
+        .route("/api/update/manifest/{app_id}", get(routes::manifest::get_manifest))
+        .route("/api/assets/{encoded_key}", get(routes::assets::get_asset))
         .layer(TraceLayer::new_for_http())
         .layer(CorsLayer::permissive())
         .with_state(state);
