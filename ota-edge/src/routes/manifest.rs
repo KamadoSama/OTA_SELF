@@ -236,7 +236,7 @@ pub async fn get_manifest(
 
     let manifest_json = json!({
         "id": latest_update.id,
-        "createdAt": latest_update.created_at.to_rfc3339(),
+        "createdAt": latest_update.created_at.and_utc().to_rfc3339(),
         "runtimeVersion": latest_update.runtime_version,
         "launchAsset": {
             "hash": launch_asset.hash,

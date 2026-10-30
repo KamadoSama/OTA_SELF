@@ -1,4 +1,4 @@
-use chrono::{DateTime, Utc};
+use chrono::NaiveDateTime;
 use serde::{Deserialize, Serialize};
 use sqlx::FromRow;
 
@@ -20,7 +20,7 @@ pub struct EligibleUpdateRow {
     #[sqlx(rename = "downloadCount")]
     pub download_count: i32,
     #[sqlx(rename = "createdAt")]
-    pub created_at: DateTime<Utc>,
+    pub created_at: NaiveDateTime,
     pub metadata: Option<serde_json::Value>,
     #[sqlx(rename = "rolloutPercentage")]
     pub rollout_percentage: i32,
