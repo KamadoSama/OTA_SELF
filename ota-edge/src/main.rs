@@ -65,11 +65,23 @@ async fn start_server() -> Result<(), Box<dyn std::error::Error>> {
         .layer(CorsLayer::permissive())
         .with_state(state);
 
-    let addr = SocketAddr::from(([0, 0, 0, 0], config.port));
-    info!("ota-edge server ready and listening on http://{}", addr);
+    let addr_primary = SocketAddr::from(([0, 0, 0, 0], config.port));
+    info!("ota-edge primary listening on http://{}", addr_primary);
 
-    let listener = tokio::net::TcpListener::bind(addr).await?;
-    axum::serve(listener, app).await?;
+    // Also bind 4005 if primary is 4002 (or 4002 if primary is 4005) so Dokploy works with either port
+    let secondary_port = if config.port == 4002 { 4005 } else { 4002 };
+    let addr_secondary = SocketAddr::from(([0, 0, 0, 0], secondary_port));
+
+    if let Ok(listener_secondary) = tokio::net::TcpListener::bind(addr_secondary).await {
+        info!("ota-edge secondary listening on http://{}", addr_secondary);
+        let app_clone = app.clone();
+        tokio::spawn(async move {
+            let _ = axum::serve(listener_secondary, app_clone).await;
+        });
+    }
+
+    let listener_primary = tokio::net::TcpListener::bind(addr_primary).await?;
+    axum::serve(listener_primary, app).await?;
 
     Ok(())
 }

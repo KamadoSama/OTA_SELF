@@ -56,7 +56,10 @@ services:
     ports:
       - "${BACKEND_PORT}:4001"
     networks:
-      - dokploy-network
+      dokploy-network:
+        aliases:
+          - backend
+          - ota_backend
 
   edge:
     build:
@@ -79,7 +82,10 @@ services:
     depends_on:
       - backend
     networks:
-      - dokploy-network
+      dokploy-network:
+        aliases:
+          - edge
+          - ota_edge
 
   frontend:
     build:
