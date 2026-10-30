@@ -14,12 +14,16 @@ use ota_edge::AppState;
 
 #[tokio::main]
 async fn main() {
+    eprintln!(">>> OTA-EDGE BOOTING UP <<<");
+    
     tracing_subscriber::fmt()
         .with_env_filter(
             tracing_subscriber::EnvFilter::try_from_default_env()
                 .unwrap_or_else(|_| "info,ota_edge=debug,tower_http=debug".into()),
         )
         .init();
+
+    info!(">>> TRACING INITIALIZED <<<");
 
     if let Err(err) = start_server().await {
         eprintln!("=======================================================");
