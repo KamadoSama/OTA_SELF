@@ -70,6 +70,16 @@ services:
       NODE_ENV: production
     networks:
       - dokploy-network
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=dokploy-network"
+      - "traefik.http.routers.zenota-web.rule=Host(\`${domain}\`)"
+      - "traefik.http.routers.zenota-web.entrypoints=web"
+      - "traefik.http.routers.zenota-secure.rule=Host(\`${domain}\`)"
+      - "traefik.http.routers.zenota-secure.entrypoints=websecure"
+      - "traefik.http.routers.zenota-secure.tls=true"
+      - "traefik.http.routers.zenota-secure.tls.certresolver=letsencrypt"
+      - "traefik.http.services.zenota-service.loadbalancer.server.port=3002"
     depends_on:
       - backend
 
