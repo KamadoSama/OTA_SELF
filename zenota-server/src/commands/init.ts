@@ -96,6 +96,7 @@ export async function initCommand() {
   await waitForHealthy('ota_postgres');
   
   runMigrations(installDir);
+  runCompose('restart backend', installDir);
 
   console.log(chalk.green.bold('\n✨ ZenOTA successfully installed!'));
   console.log(`URL: https://${response.domain}`);

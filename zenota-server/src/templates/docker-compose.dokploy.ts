@@ -42,7 +42,7 @@ services:
     restart: always
     environment:
       DATABASE_URL: \${DATABASE_URL}
-      MINIO_ENDPOINT: ota_minio
+      MINIO_ENDPOINT: minio
       MINIO_PORT: 9000
       MINIO_ROOT_USER: \${MINIO_ROOT_USER}
       MINIO_ROOT_PASSWORD: \${MINIO_ROOT_PASSWORD}
