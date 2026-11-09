@@ -569,7 +569,7 @@ services:
       - postgres_data:/var/lib/postgresql/data
 
   minio:
-    image: minio/minio:latest
+    image: elestio/minio:latest
     command: server /data --console-address ":9001"
     environment:
       MINIO_ROOT_USER: \${MINIO_ROOT_USER}

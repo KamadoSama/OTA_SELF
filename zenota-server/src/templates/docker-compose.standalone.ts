@@ -17,7 +17,7 @@ services:
       retries: 5
 
   minio:
-    image: minio/minio:latest
+    image: elestio/minio:latest
     container_name: ota_minio
     restart: always
     environment:
