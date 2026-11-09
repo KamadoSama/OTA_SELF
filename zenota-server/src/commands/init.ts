@@ -57,6 +57,33 @@ export async function initCommand() {
   if (env.dokployDetected) {
     console.log(chalk.yellow('ℹ Dokploy detected. Using Dokploy-compatible configuration.'));
     fs.writeFileSync(path.join(installDir, 'docker-compose.yml'), dokployCompose(response.domain));
+
+    const dokployDynamicDir = '/etc/dokploy/traefik/dynamic';
+    if (fs.existsSync(dokployDynamicDir)) {
+      const traefikDynamicConfig = `http:
+  routers:
+    zenota:
+      rule: "Host(\`${response.domain}\`)"
+      entryPoints:
+        - websecure
+      service: zenota-service
+      tls:
+        certResolver: letsencrypt
+    zenota-http:
+      rule: "Host(\`${response.domain}\`)"
+      entryPoints:
+        - web
+      service: zenota-service
+
+  services:
+    zenota-service:
+      loadBalancer:
+        servers:
+          - url: "http://ota_frontend:3002"
+`;
+      fs.writeFileSync(path.join(dokployDynamicDir, 'zenota.yml'), traefikDynamicConfig);
+      console.log(chalk.green('✔ Registered Traefik configuration in Dokploy.'));
+    }
   } else {
     fs.writeFileSync(path.join(installDir, 'docker-compose.yml'), standaloneCompose(response.domain, 3001, 3000));
     fs.writeFileSync(path.join(installDir, 'Caddyfile'), caddyfile(response.domain));

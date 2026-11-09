@@ -30,6 +30,18 @@ export default function middleware(req: NextRequest) {
     return NextResponse.next();
   }
 
+  const isSelfHosted = process.env.SELF_HOSTED === 'true' || process.env.NEXT_PUBLIC_SELF_HOSTED === 'true';
+
+  // En mode self-hosted, la landing page commerciale n'a pas de sens : rediriger directement vers le login / setup
+  if (isSelfHosted) {
+    if (pathname === '/' || pathname === '/en' || pathname === '/fr' || pathname === '/en/' || pathname === '/fr/') {
+      const locale = pathname.startsWith('/fr') ? 'fr' : 'en';
+      const loginUrl = req.nextUrl.clone();
+      loginUrl.pathname = `/${locale}/login`;
+      return NextResponse.redirect(loginUrl);
+    }
+  }
+
   return i18nMiddleware(req);
 }
 

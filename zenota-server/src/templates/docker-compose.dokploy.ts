@@ -49,6 +49,7 @@ services:
       JWT_SECRET: \${JWT_SECRET}
       JWT_EXPIRES_IN: 7d
       PORT: 3001
+      SELF_HOSTED: "true"
     networks:
       - dokploy-network
     depends_on:
@@ -68,6 +69,8 @@ services:
       AUTH_URL: https://${domain}
       AUTH_TRUST_HOST: "true"
       NODE_ENV: production
+      SELF_HOSTED: "true"
+      NEXT_PUBLIC_SELF_HOSTED: "true"
     networks:
       - dokploy-network
     labels:
