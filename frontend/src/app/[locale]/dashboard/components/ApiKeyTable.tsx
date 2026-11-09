@@ -2,6 +2,7 @@
 
 import { Key, Trash2, Loader2 } from "lucide-react";
 import { Link } from "@/i18n/routing";
+import { useIsSelfHosted } from "@/hooks/useSelfHosted";
 
 interface ApiKeyTableProps {
   isLoading: boolean;
@@ -24,8 +25,8 @@ export function ApiKeyTable({
   activeKeysCount,
   keysLimit
 }: ApiKeyTableProps) {
-  const isSelfHosted = process.env.NEXT_PUBLIC_SELF_HOSTED === 'true';
-  const isLimitReached = !isSelfHosted && typeof keysLimit === 'number' && activeKeysCount !== undefined && activeKeysCount >= keysLimit;
+  const isSelfHosted = useIsSelfHosted();
+  const isLimitReached = !isSelfHosted && typeof keysLimit === 'number' && keysLimit !== -1 && activeKeysCount !== undefined && activeKeysCount >= keysLimit;
 
   return (
     <div className="space-y-3">

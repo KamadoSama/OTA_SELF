@@ -35,6 +35,7 @@ RUN apk add --no-cache \
 ENV PUPPETEER_SKIP_DOWNLOAD=true
 ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
 ENV HOSTNAME="0.0.0.0"
+ENV SELF_HOSTED="true"
 
 WORKDIR /app
 

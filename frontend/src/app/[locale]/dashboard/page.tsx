@@ -13,11 +13,12 @@ import { UploadDialog } from "./components/UploadDialog";
 // Hooks
 import { useApps } from "@/hooks/useApps";
 import { useSubscription } from "@/hooks/useUpdates";
+import { useIsSelfHosted } from "@/hooks/useSelfHosted";
 
 export default function Dashboard() {
   const router = useRouter();
   const { data: stats } = useSubscription();
-  const isSelfHosted = process.env.NEXT_PUBLIC_SELF_HOSTED === "true";
+  const isSelfHosted = useIsSelfHosted();
   const isExpired =
     !isSelfHosted && stats?.trialEndsAt && new Date(stats.trialEndsAt) < new Date() && !stats.cardLast4;
 

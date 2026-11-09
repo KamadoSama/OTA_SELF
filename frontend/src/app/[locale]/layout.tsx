@@ -70,9 +70,17 @@ export default async function RootLayout({
   // Providing all messages to the client
   // side is the easiest way to get started
   const messages = await getMessages();
+  const isSelfHosted = process.env.SELF_HOSTED !== 'false';
 
   return (
     <html lang={locale} className="dark">
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `window.__ZENOTA_SELF_HOSTED__ = ${JSON.stringify(isSelfHosted)};`,
+          }}
+        />
+      </head>
       <body className={`${geistSans.variable} ${geistMono.variable} font-sans bg-[#000000] text-slate-50 antialiased min-h-screen`}>
         <NextIntlClientProvider messages={messages}>
           <QueryProvider>

@@ -1,10 +1,12 @@
 import { FileText, BarChart3, ArrowUpRight, Loader2, Download } from "lucide-react";
 import { useBilling, useDownloadInvoice } from "@/hooks/useUpdates";
+import { useIsSelfHosted } from "@/hooks/useSelfHosted";
 import { useState } from "react";
 
 export function BillingView() {
   const { data: invoices, isLoading } = useBilling();
   const { mutate: downloadPdf, isPending: isDownloading } = useDownloadInvoice();
+  const isSelfHosted = useIsSelfHosted();
   const [downloadingId, setDownloadingId] = useState<string | null>(null);
 
   const handleDownload = (id: string) => {
@@ -19,6 +21,17 @@ export function BillingView() {
     return (
       <div className="flex h-64 items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-white/20" />
+      </div>
+    );
+  }
+
+  if (isSelfHosted) {
+    return (
+      <div className="rounded-xl border border-white/10 bg-[#050505] p-8 text-center space-y-3">
+        <h3 className="font-bold text-base text-white">No Billing Required</h3>
+        <p className="text-xs text-white/40 max-w-md mx-auto">
+          ZenOTA is running in Self-Hosted Community Edition. There are no subscriptions, no recurring fees, and no billing requirements.
+        </p>
       </div>
     );
   }

@@ -8,6 +8,7 @@ import { CreateAppModal } from "./CreateAppModal";
 import { AppSummary } from "@/services/apps.service";
 import { useApps } from "@/hooks/useApps";
 import { useLogout } from "@/hooks/useAuth";
+import { useIsSelfHosted } from "@/hooks/useSelfHosted";
 
 interface NavbarProps {
   isLoading?: boolean;
@@ -48,7 +49,7 @@ export function Navbar({
   const activeSelectedApp =
     externalSelectedApp !== undefined ? externalSelectedApp : urlApp;
 
-  const isSelfHosted = process.env.NEXT_PUBLIC_SELF_HOSTED === "true";
+  const isSelfHosted = useIsSelfHosted();
 
   const tabs = ([
     { id: "overview", label: "Projects", href: "/dashboard" },

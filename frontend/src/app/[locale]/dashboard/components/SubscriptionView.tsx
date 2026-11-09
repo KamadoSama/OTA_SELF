@@ -2,6 +2,7 @@
 
 import { CreditCard, Zap, Clock, Loader2, ArrowRight, ShieldCheck, ChevronRight, Terminal } from "lucide-react";
 import { useSubscription, useUpgradePlan, useDowngradePlan } from "@/hooks/useUpdates";
+import { useIsSelfHosted } from "@/hooks/useSelfHosted";
 import { useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 
@@ -19,7 +20,7 @@ export function SubscriptionView() {
   const [formError, setFormError] = useState<string | null>(null);
 
   const isPro = stats?.tier === 'PRO';
-  const isSelfHosted = process.env.NEXT_PUBLIC_SELF_HOSTED === 'true';
+  const isSelfHosted = useIsSelfHosted();
   const isExpired = !isSelfHosted && stats?.trialEndsAt && new Date(stats.trialEndsAt) < new Date() && !stats.cardLast4;
 
   useEffect(() => {
@@ -37,6 +38,36 @@ export function SubscriptionView() {
   }
 
   if (!stats) return null;
+
+  if (isSelfHosted) {
+    return (
+      <div className="rounded-xl border border-white/10 bg-[#050505] p-8 space-y-6">
+        <div className="flex items-center gap-4">
+          <div className="w-12 h-12 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center">
+            <ShieldCheck className="h-6 w-6 text-emerald-400" />
+          </div>
+          <div>
+            <h2 className="text-xl font-bold text-white">Self-Hosted Community Edition</h2>
+            <p className="text-sm text-white/50">Your instance is completely unlocked with unlimited access.</p>
+          </div>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-4 border-t border-white/[0.06]">
+          <div className="p-4 rounded-lg bg-white/[0.02] border border-white/[0.06]">
+            <p className="text-xs text-white/40">Projects Limit</p>
+            <p className="text-lg font-bold text-white mt-1">Unlimited</p>
+          </div>
+          <div className="p-4 rounded-lg bg-white/[0.02] border border-white/[0.06]">
+            <p className="text-xs text-white/40">API Keys</p>
+            <p className="text-lg font-bold text-white mt-1">Unlimited</p>
+          </div>
+          <div className="p-4 rounded-lg bg-white/[0.02] border border-white/[0.06]">
+            <p className="text-xs text-white/40">OTA Deployments</p>
+            <p className="text-lg font-bold text-white mt-1">Unlimited</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
   
   const usageItems = [
     { 

@@ -54,6 +54,7 @@ export interface Invoice {
 }
 
 export interface SubscriptionStats {
+  isSelfHosted?: boolean;
   tier: string;
   monthlyDownloads: number;
   downloadLimit: number;

@@ -12,6 +12,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { AuthButton } from "@/components/ui/auth-button";
+import { useIsSelfHosted } from "@/hooks/useSelfHosted";
 
 const registerSchema = z.object({
   email: z.string().email("Invalid email address"),
@@ -68,7 +69,7 @@ function RegisterForm() {
     signIn("google", { callbackUrl });
   };
 
-  const isSelfHosted = process.env.NEXT_PUBLIC_SELF_HOSTED === "true";
+  const isSelfHosted = useIsSelfHosted();
 
   return (
     <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-black text-white font-sans selection:bg-white selection:text-black">
@@ -100,27 +101,29 @@ function RegisterForm() {
             </div>
           </div>
 
-          <div className="space-y-4 mb-8">
-            <button
-              onClick={handleGoogleSignUp}
-              disabled={isGoogleLoading || isPending}
-              className="w-full flex items-center justify-center gap-3 rounded border border-white/10 bg-white/[0.03] py-3 text-sm font-bold text-white transition-all hover:bg-white/5 disabled:opacity-40"
-            >
-              {isGoogleLoading ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : (
-                <>
-                  <Icon icon="logos:google-icon" className="h-5 w-5" />
-                  <span>Sign up with Google</span>
-                </>
-              )}
-            </button>
-            <div className="flex items-center gap-4 py-2">
-              <div className="h-[1px] flex-1 bg-white/[0.08]" />
-              <span className="text-[10px] font-bold uppercase tracking-widest text-white/20">or</span>
-              <div className="h-[1px] flex-1 bg-white/[0.08]" />
+          {!isSelfHosted && (
+            <div className="space-y-4 mb-8">
+              <button
+                onClick={handleGoogleSignUp}
+                disabled={isGoogleLoading || isPending}
+                className="w-full flex items-center justify-center gap-3 rounded border border-white/10 bg-white/[0.03] py-3 text-sm font-bold text-white transition-all hover:bg-white/5 disabled:opacity-40"
+              >
+                {isGoogleLoading ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <>
+                    <Icon icon="logos:google-icon" className="h-5 w-5" />
+                    <span>Sign up with Google</span>
+                  </>
+                )}
+              </button>
+              <div className="flex items-center gap-4 py-2">
+                <div className="h-[1px] flex-1 bg-white/[0.08]" />
+                <span className="text-[10px] font-bold uppercase tracking-widest text-white/20">or</span>
+                <div className="h-[1px] flex-1 bg-white/[0.08]" />
+              </div>
             </div>
-          </div>
+          )}
 
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
             <div className="space-y-2">

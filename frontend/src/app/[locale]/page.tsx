@@ -5,6 +5,7 @@ import { AnimatePresence } from 'framer-motion';
 import { useRouter } from '@/i18n/routing';
 import { useSession } from "next-auth/react";
 import { Loader2 } from "lucide-react";
+import { useIsSelfHosted } from "@/hooks/useSelfHosted";
 
 // Landing Components
 import { Header } from '@/components/landing/Header';
@@ -21,7 +22,7 @@ import { LoadingScreen } from '@/components/landing/LoadingScreen';
 export default function LandingPage() {
   const router = useRouter();
   const { data: session, status } = useSession();
-  const isSelfHosted = process.env.NEXT_PUBLIC_SELF_HOSTED === "true";
+  const isSelfHosted = useIsSelfHosted();
 
   const [mounted, setMounted] = useState(false);
   const [loading, setLoading] = useState(true);

@@ -19,7 +19,7 @@ export class SubscriptionService {
   constructor(private prisma: PrismaService) {}
 
   private isSelfHosted(): boolean {
-    return process.env.SELF_HOSTED === 'true';
+    return process.env.SELF_HOSTED !== 'false';
   }
 
   async getCustomerData(customerId: string) {
@@ -163,6 +163,7 @@ export class SubscriptionService {
       : PLAN_LIMITS[tier];
 
     return {
+      isSelfHosted: this.isSelfHosted(),
       tier,
       monthlyDownloads: totalDownloads,
       downloadLimit: limits.maxDownloadsPerMonth,
