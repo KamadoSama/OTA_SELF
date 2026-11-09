@@ -23,4 +23,4 @@ scenarios:
   - name: "Check for update (Cached Manifest)"
     flow:
       - get:
-          url: "/api/update/manifest/artisanHub"
+          url: "/api/update/manifest/demo-app"

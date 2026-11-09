@@ -27,7 +27,7 @@ interface ProjectsGridProps {
 }
 
 const PALETTES = [
-  { gradient: "from-[#ea580c] to-[#c2410c]", letter: "text-white" }, // Orange (like Paytou)
+  { gradient: "from-[#ea580c] to-[#c2410c]", letter: "text-white" }, // Orange
   { gradient: "from-[#0891b2] to-[#0e7490]", letter: "text-white" }, // Cyan (like bingoo-pro)
   { gradient: "from-[#65a30d] to-[#4d7c0f]", letter: "text-white" }, // Lime/Green (like bingoo_client)
   { gradient: "from-[#9333ea] to-[#7e22ce]", letter: "text-white" }, // Purple (like bingoo-gerant)

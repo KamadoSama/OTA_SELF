@@ -1,7 +1,7 @@
 #!/bin/bash
 # Test de comparaison entre NestJS (port 4001) et Rust Edge (port 4002)
 
-APP_ID="${1:-artisanHub}"
+APP_ID="${1:-demo-app}"
 RUNTIME="${2:-1.0.0}"
 PLATFORM="${3:-android}"
 
