@@ -7,7 +7,8 @@
     "zenota": "dist/index.js"
   },
   "scripts": {
-    "build": "tsc",
+    "build": "esbuild src/index.ts --bundle --platform=node --target=node22 --outfile=dist/bundle.js",
+    "typecheck": "tsc --noEmit",
     "dev": "ts-node src/index.ts"
   },
   "dependencies": {
@@ -19,6 +20,7 @@
   "devDependencies": {
     "@types/node": "^22.0.0",
     "@types/prompts": "^2.4.9",
+    "esbuild": "^0.28.2",
     "postject": "^1.0.0-alpha.6",
     "ts-node": "^10.9.2",
     "typescript": "^5.7.0"
