@@ -31,6 +31,7 @@
     "noAccount": "Don't have an account?",
     "signup": "Sign up for free",
     "error401": "Invalid email or password.",
+    "sessionExpired": "Your session has expired. Please log in again.",
     "errorGeneric": "Connection error. Please try again."
   },
   "Problem": {

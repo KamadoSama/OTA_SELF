@@ -5,6 +5,23 @@ import GoogleProvider from "next-auth/providers/google";
 const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
 const INTERNAL_BACKEND_URL = process.env.INTERNAL_API_URL || BACKEND_URL;
 
+function parseJwtExp(tokenString: string): number | null {
+  try {
+    const parts = tokenString.split(".");
+    if (parts.length !== 3) return null;
+    let base64 = parts[1].replace(/-/g, "+").replace(/_/g, "/");
+    while (base64.length % 4) base64 += "=";
+    const json =
+      typeof Buffer !== "undefined"
+        ? Buffer.from(base64, "base64").toString("utf-8")
+        : atob(base64);
+    const parsed = JSON.parse(json);
+    return typeof parsed.exp === "number" ? parsed.exp * 1000 : null;
+  } catch {
+    return null;
+  }
+}
+
 export const { handlers, auth, signIn, signOut } = NextAuth({
   providers: [
     GoogleProvider({
@@ -89,7 +106,19 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         token.tier = (user as any).tier;
         token.preferences = (user as any).preferences;
         token.accessToken = (user as any).accessToken;
+        if ((user as any).accessToken) {
+          token.accessTokenExpires = parseJwtExp((user as any).accessToken);
+        }
       }
+
+      // Check if backend JWT token has expired
+      if (token.accessTokenExpires && Date.now() >= (token.accessTokenExpires as number)) {
+        return {
+          ...token,
+          error: "AccessTokenExpired",
+        };
+      }
+
       return token;
     },
     async session({ session, token }) {
@@ -98,6 +127,9 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         (session.user as any).tier = token.tier;
         (session.user as any).preferences = token.preferences;
         (session.user as any).accessToken = token.accessToken;
+        if (token.error) {
+          (session as any).error = token.error;
+        }
       }
       return session;
     },
