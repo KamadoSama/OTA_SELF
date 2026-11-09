@@ -1,3 +1,4 @@
+import * as fs from 'fs';
 import { execSync } from 'child_process';
 import chalk from 'chalk';
 import ora from 'ora';
@@ -40,7 +41,20 @@ export async function waitForHealthy(service: string, timeoutSec: number = 60): 
 export function runMigrations(installDir: string): void {
   const spinner = ora('Running database migrations...').start();
   try {
-    execSync(`docker exec ota_backend npx prisma db push`, { stdio: 'inherit' });
+    let dbUrl = '';
+    const envPath = `${installDir}/.env`;
+    if (fs.existsSync(envPath)) {
+      const envContent = fs.readFileSync(envPath, 'utf-8');
+      const match = envContent.match(/^DATABASE_URL=(.+)$/m);
+      if (match) {
+        dbUrl = match[1].trim();
+      }
+    }
+    const cmd = dbUrl
+      ? `docker exec ota_backend npx prisma db push --accept-data-loss --url "${dbUrl}"`
+      : `docker exec ota_backend sh -c 'npx prisma db push --accept-data-loss --url "\$DATABASE_URL"'`;
+
+    execSync(cmd, { stdio: 'inherit' });
     spinner.succeed('Migrations applied successfully.');
   } catch (error) {
     spinner.fail('Failed to run migrations.');
