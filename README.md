@@ -34,38 +34,7 @@ Bypass slow App Store and Google Play review queues. Ship JS/TS bundle updates d
 - 💻 **Intuitive CLI & Modern Dashboard**
   Ship updates straight from your terminal (`zenota publish`) or manage versions and API keys via a sleek Next.js dashboard.
 
----
 
-## 🏛️ Architecture
-
-```
-                                  ┌────────────────────────┐
-                                  │   Expo Mobile Client   │
-                                  └───────────┬────────────┘
-                                              │ GET /api/update/manifest
-                                              │ GET /api/assets/:key
-                                              ▼
- ┌────────────────────────────────────────────────────────────────────────────────────────┐
- │                                   ZenOTA Platform                                      │
- │                                                                                        │
- │   ┌─────────────────────────┐                        ┌─────────────────────────────┐   │
- │   │  ota-edge (Rust / Axum) │ ── In-Memory Cache ──▶ │     MinIO (S3 Storage)      │   │
- │   │  Port: 4002 (High Load) │ ── Connection Pool ──▶ │         PostgreSQL          │   │
- │   └─────────────────────────┘                        └──────────────┬──────────────┘   │
- │                                                                     ▲                  │
- │   ┌─────────────────────────┐                                       │                  │
- │   │  backend (NestJS API)   │ ──────────────────────────────────────┘                  │
- │   │  Port: 4001 (Admin/Auth)│                                                          │
- │   └────────────▲────────────┘                                                          │
- │                │                                                                       │
- │   ┌────────────┴────────────┐                        ┌─────────────────────────────┐   │
- │   │  frontend (Next.js 16)  │                        │         zenota-cli          │   │
- │   │  Port: 3000 (Dashboard) │                        │ (Publish bundles & manages) │   │
- │   └─────────────────────────┘                        └─────────────────────────────┘   │
- └────────────────────────────────────────────────────────────────────────────────────────┘
-```
-
----
 
 ## 🚀 Quickstart — VPS One-Liner
 
