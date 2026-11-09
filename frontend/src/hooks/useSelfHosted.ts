@@ -10,5 +10,12 @@ export function useIsSelfHosted(): boolean {
   if (stats?.isSelfHosted !== undefined) {
     return stats.isSelfHosted;
   }
-  return process.env.NEXT_PUBLIC_SELF_HOSTED !== 'false';
+  if (process.env.NEXT_PUBLIC_SELF_HOSTED === 'false' || process.env.SELF_HOSTED === 'false') {
+    return false;
+  }
+  return (
+    process.env.NEXT_PUBLIC_SELF_HOSTED === 'true' ||
+    process.env.SELF_HOSTED === 'true' ||
+    process.env.SELF_HOSTED !== 'false'
+  );
 }

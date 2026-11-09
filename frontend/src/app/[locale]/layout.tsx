@@ -70,7 +70,10 @@ export default async function RootLayout({
   // Providing all messages to the client
   // side is the easiest way to get started
   const messages = await getMessages();
-  const isSelfHosted = process.env.SELF_HOSTED !== 'false';
+  const isSelfHosted =
+    process.env.NEXT_PUBLIC_SELF_HOSTED === 'false' || process.env.SELF_HOSTED === 'false'
+      ? false
+      : (process.env.SELF_HOSTED === 'true' || process.env.NEXT_PUBLIC_SELF_HOSTED === 'true' || process.env.SELF_HOSTED !== 'false');
 
   return (
     <html lang={locale} className="dark">

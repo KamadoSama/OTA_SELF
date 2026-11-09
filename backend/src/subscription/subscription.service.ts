@@ -19,7 +19,14 @@ export class SubscriptionService {
   constructor(private prisma: PrismaService) {}
 
   private isSelfHosted(): boolean {
-    return process.env.SELF_HOSTED !== 'false';
+    if (process.env.SELF_HOSTED === 'false' || process.env.NEXT_PUBLIC_SELF_HOSTED === 'false') {
+      return false;
+    }
+    return (
+      process.env.SELF_HOSTED === 'true' ||
+      process.env.NEXT_PUBLIC_SELF_HOSTED === 'true' ||
+      process.env.SELF_HOSTED !== 'false'
+    );
   }
 
   async getCustomerData(customerId: string) {

@@ -4,6 +4,7 @@ import React, { createContext, useContext, useEffect, useMemo, useCallback } fro
 import { useRouter, usePathname } from 'next/navigation';
 import { useSession, signIn, signOut } from 'next-auth/react';
 import { AdminUser } from '@/services/auth.service';
+import { useIsSelfHosted } from '@/hooks/useSelfHosted';
 
 interface AuthContextType {
   user: AdminUser | null;
@@ -25,7 +26,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
 
   const loading = status === 'loading';
-  const isSelfHosted = process.env.NEXT_PUBLIC_SELF_HOSTED === 'true';
+  const isSelfHosted = useIsSelfHosted();
 
   const user: AdminUser | null = useMemo(() => {
     if (!session?.user) return null;

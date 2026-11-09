@@ -30,7 +30,10 @@ export default function middleware(req: NextRequest) {
     return NextResponse.next();
   }
 
-  const isSelfHosted = process.env.SELF_HOSTED === 'true' || process.env.NEXT_PUBLIC_SELF_HOSTED === 'true';
+  const isSelfHosted =
+    process.env.NEXT_PUBLIC_SELF_HOSTED === 'false' || process.env.SELF_HOSTED === 'false'
+      ? false
+      : (process.env.SELF_HOSTED === 'true' || process.env.NEXT_PUBLIC_SELF_HOSTED === 'true' || process.env.SELF_HOSTED !== 'false');
 
   // En mode self-hosted, la landing page commerciale n'a pas de sens : rediriger directement vers le login / setup
   if (isSelfHosted) {

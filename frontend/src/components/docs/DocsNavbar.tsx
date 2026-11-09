@@ -6,6 +6,7 @@ import { Link } from "@/i18n/routing";
 import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import { useSession } from "next-auth/react";
+import { useIsSelfHosted } from "@/hooks/useSelfHosted";
 
 export interface NavSection {
   title: string;
@@ -28,7 +29,7 @@ export function DocsNavbar({
   const [isOpen, setIsOpen] = useState(false);
   const t = useTranslations("Docs.navbar");
   const { data: session } = useSession();
-  const isSelfHosted = process.env.NEXT_PUBLIC_SELF_HOSTED === 'true';
+  const isSelfHosted = useIsSelfHosted();
   const isLoggedIn = Boolean(session?.user) || isSelfHosted;
   const backHref = isLoggedIn ? '/dashboard' : '/';
   const backLabel = isLoggedIn ? 'Dashboard' : t('home');
