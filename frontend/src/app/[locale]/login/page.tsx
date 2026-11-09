@@ -1,11 +1,12 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { CloudLightning, Eye, EyeOff, Loader2 } from "lucide-react";
 import { Icon } from "@iconify/react";
 import { useLogin } from "@/hooks/useAuth";
 import axios from "axios";
 import { Link, useRouter } from "@/i18n/routing";
+import { useSearchParams } from "next/navigation";
 import { signIn } from "next-auth/react";
 import { useTranslations } from "next-intl";
 import { useForm } from "react-hook-form";
@@ -20,13 +21,15 @@ const loginSchema = z.object({
 
 type LoginValues = z.infer<typeof loginSchema>;
 
-export default function LoginPage() {
+function LoginForm() {
   const t = useTranslations("Login");
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [mounted, setMounted] = useState(false);
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const isExpired = searchParams.get("expired") === "true";
 
   const { register: registerField, handleSubmit, formState: { errors } } = useForm<LoginValues>({
     resolver: zodResolver(loginSchema),
@@ -174,6 +177,12 @@ export default function LoginPage() {
               )}
             </div>
 
+            {isExpired && !error && (
+              <div className="rounded border border-amber-500/20 bg-amber-500/10 px-4 py-3 text-[13px] font-medium text-amber-400">
+                {t("sessionExpired")}
+              </div>
+            )}
+
             {error && (
               <div className="rounded border border-red-500/20 bg-red-500/5 px-4 py-3 text-[13px] font-medium text-red-400">
                 {error}
@@ -194,5 +203,19 @@ export default function LoginPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen bg-black flex items-center justify-center">
+          <Loader2 className="h-8 w-8 animate-spin text-white/20" />
+        </div>
+      }
+    >
+      <LoginForm />
+    </Suspense>
   );
 }

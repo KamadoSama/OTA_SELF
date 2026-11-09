@@ -9,6 +9,9 @@ target/
 **/*.rs.bk
 
 .DS_Store
+*.tsbuildinfo
+curl_output.txt
+.claude
 temp_pdf_gen
 zenota-server/dist
 zenota-server/zenota

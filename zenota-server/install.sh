@@ -18,10 +18,12 @@ esac
 if [ "$OS" = "darwin" ]; then OS="macos"; fi
 
 # Fetch latest version tag from GitHub
-LATEST_TAG=$(curl -fsSL "https://api.github.com/repos/$REPO/releases/latest" | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/')
+RELEASE_JSON=$(curl -fsSL "https://api.github.com/repos/$REPO/releases/latest" 2>/dev/null || true)
+LATEST_TAG=$(echo "$RELEASE_JSON" | grep '"tag_name":' | head -n1 | sed -E 's/.*"([^"]+)".*/\1/')
 
 if [ -z "$LATEST_TAG" ]; then
-  echo "❌ Could not detect latest version. Please check the repository: $REPO"
+  echo "❌ Could not detect latest release version from GitHub (https://github.com/$REPO)."
+  echo "💡 Ensure the repository is public and at least one release (e.g. v1.0.0) is published."
   exit 1
 fi
 

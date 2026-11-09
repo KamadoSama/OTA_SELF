@@ -52,7 +52,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     );
   }, [isSelfHosted]);
 
+  const logout = useCallback(async () => {
+    await signOut({ redirect: false });
+    const localeMatch = pathname.match(/^\/(en|fr)(?=\/|$)/);
+    const localePrefix = localeMatch ? `/${localeMatch[1]}` : '';
+    if (isSelfHosted) {
+      router.push(`${localePrefix}/login`);
+    } else {
+      router.push(localePrefix ? `${localePrefix}` : '/');
+    }
+  }, [isSelfHosted, pathname, router]);
+
   useEffect(() => {
+    if ((session as any)?.error === 'AccessTokenExpired') {
+      logout();
+      return;
+    }
+
     if (session?.user) {
       if (
         GUEST_ONLY_ROUTES.includes(pathname) ||
@@ -65,7 +81,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         router.push('/login');
       }
     }
-  }, [session, loading, pathname, router, isSelfHosted, isPublicRoute]);
+  }, [session, loading, pathname, router, isSelfHosted, isPublicRoute, logout]);
 
   const login = async (email: string, pass: string) => {
     const result = await signIn('credentials', {
@@ -102,14 +118,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     await login(email, pass);
   };
 
-  const logout = async () => {
-    await signOut({ redirect: false });
-    if (isSelfHosted) {
-      router.push('/login');
-    } else {
-      router.push('/');
-    }
-  };
 
   if (loading && !isPublicRoute(pathname)) {
     return (
