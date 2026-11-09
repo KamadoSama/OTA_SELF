@@ -33,7 +33,7 @@ services:
       retries: 3
 
   backend:
-    image: diesestudio/zenota-backend:latest
+    image: kamadosama2808/zenota-backend:latest
     container_name: ota_backend
     restart: always
     environment:
@@ -52,7 +52,7 @@ services:
         condition: service_healthy
 
   frontend:
-    image: diesestudio/zenota-frontend:latest
+    image: kamadosama2808/zenota-frontend:latest
     container_name: ota_frontend
     restart: always
     environment:
