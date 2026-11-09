@@ -73,13 +73,15 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.docker.network=dokploy-network"
+      - "traefik.http.routers.zenota.rule=Host(\`${domain}\`)"
+      - "traefik.http.routers.zenota.entrypoints=websecure"
+      - "traefik.http.routers.zenota.tls=true"
+      - "traefik.http.routers.zenota.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.zenota.service=zenota"
       - "traefik.http.routers.zenota-web.rule=Host(\`${domain}\`)"
       - "traefik.http.routers.zenota-web.entrypoints=web"
-      - "traefik.http.routers.zenota-secure.rule=Host(\`${domain}\`)"
-      - "traefik.http.routers.zenota-secure.entrypoints=websecure"
-      - "traefik.http.routers.zenota-secure.tls=true"
-      - "traefik.http.routers.zenota-secure.tls.certresolver=letsencrypt"
-      - "traefik.http.services.zenota-service.loadbalancer.server.port=3002"
+      - "traefik.http.routers.zenota-web.service=zenota"
+      - "traefik.http.services.zenota.loadbalancer.server.port=3002"
     depends_on:
       - backend
 
