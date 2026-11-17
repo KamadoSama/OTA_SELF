@@ -5,6 +5,10 @@ import * as nodemailer from 'nodemailer';
 export class MailService {
   private readonly logger = new Logger(MailService.name);
 
+  isSmtpConfigured(): boolean {
+    return Boolean(process.env.SMTP_HOST);
+  }
+
   private getTransporter(): nodemailer.Transporter | null {
     const host = process.env.SMTP_HOST;
     if (!host) {
