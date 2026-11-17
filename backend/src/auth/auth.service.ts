@@ -165,10 +165,13 @@ export class AuthService {
       where: { email },
     });
 
+    const smtpConfigured = this.mailService.isSmtpConfigured();
+
     if (!customer) {
       // Return generic success to avoid email enumeration
       return {
         success: true,
+        smtpConfigured,
         message: 'If an account exists with this email, a reset link has been sent.',
       };
     }
@@ -192,6 +195,7 @@ export class AuthService {
 
     return {
       success: true,
+      smtpConfigured,
       message: 'If an account exists with this email, a reset link has been sent.',
     };
   }

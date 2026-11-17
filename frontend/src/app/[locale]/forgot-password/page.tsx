@@ -24,6 +24,7 @@ function ForgotPasswordForm() {
   const [mounted, setMounted] = useState(false);
   const [isPending, setIsPending] = useState(false);
   const [isSent, setIsSent] = useState(false);
+  const [smtpConfigured, setSmtpConfigured] = useState(true);
   const [error, setError] = useState("");
 
   const {
@@ -47,10 +48,11 @@ function ForgotPasswordForm() {
         typeof window !== "undefined"
           ? `${window.location.origin}/${locale}`
           : undefined;
-      await axios.post("/api/auth/forgot-password", {
+      const res = await axios.post("/api/auth/forgot-password", {
         email: data.email,
         baseUrl,
       });
+      setSmtpConfigured(res.data?.smtpConfigured !== false);
       setIsSent(true);
     } catch {
       setError(t("errorGeneric"));
@@ -84,10 +86,10 @@ function ForgotPasswordForm() {
             </Link>
             <div className="text-center">
               <h1 className="text-2xl font-bold tracking-tighter text-white">
-                {isSent ? t("sentTitle") : t("title")}
+                {isSent ? (smtpConfigured ? t("sentTitle") : t("noSmtpTitle")) : t("title")}
               </h1>
               <p className="mt-1 text-sm text-white/40 font-medium">
-                {isSent ? t("sentMessage") : t("subtitle")}
+                {isSent ? (smtpConfigured ? t("sentMessage") : t("noSmtpMessage")) : t("subtitle")}
               </p>
             </div>
           </div>

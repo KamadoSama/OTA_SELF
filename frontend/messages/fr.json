@@ -40,7 +40,9 @@
     "email": "Email",
     "submit": "Envoyer le lien",
     "sentTitle": "Vérifiez votre boîte mail",
-    "sentMessage": "Si un compte existe avec cet e-mail, un lien de réinitialisation a été envoyé (ou affiché dans les logs serveur sans SMTP).",
+    "sentMessage": "Si un compte existe avec cet e-mail, un lien de réinitialisation a été envoyé.",
+    "noSmtpTitle": "SMTP non configuré",
+    "noSmtpMessage": "Aucun e-mail n'a été envoyé car aucun serveur SMTP n'est configuré. Récupérez le lien dans les logs du backend (docker logs ota_backend) ou utilisez `sudo zenota reset-password` en SSH.",
     "backToLogin": "Retour à la connexion",
     "errorGeneric": "Impossible d'envoyer la demande. Veuillez réessayer."
   },

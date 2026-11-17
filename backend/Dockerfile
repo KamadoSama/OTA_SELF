@@ -51,4 +51,4 @@ COPY --from=builder /app/src/invoice/templates ./src/invoice/templates
 
 EXPOSE 4001
 
-CMD ["npm", "run", "start:prod"]
+CMD ["sh", "-c", "npx prisma db push --url \"$DATABASE_URL\" && npm run start:prod"]

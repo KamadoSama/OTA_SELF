@@ -13,7 +13,9 @@ RUN mkdir -p src tests && \
 
 # Copy actual source code and build final binary
 COPY . .
-RUN cargo build --release --bin ota-edge
+RUN rm -rf target/release/ota-edge* target/release/deps/ota_edge* target/release/deps/libota_edge* target/release/.fingerprint/ota-edge-* && \
+    touch src/main.rs src/lib.rs && \
+    cargo build --release --bin ota-edge
 
 # --- Stage 2: Minimal runtime image (~30MB) ---
 FROM debian:bookworm-slim

@@ -40,7 +40,9 @@
     "email": "Email",
     "submit": "Send reset link",
     "sentTitle": "Check your inbox",
-    "sentMessage": "If an account exists with this email, a reset link has been sent (check server logs in self-hosted mode without SMTP).",
+    "sentMessage": "If an account exists with this email, a reset link has been sent.",
+    "noSmtpTitle": "SMTP not configured",
+    "noSmtpMessage": "No email was sent because SMTP is not configured on this server. Check your backend logs (docker logs ota_backend) for the reset link, or run `sudo zenota reset-password` via SSH.",
     "backToLogin": "Back to log in",
     "errorGeneric": "Unable to send reset request. Please try again."
   },
