@@ -34,6 +34,28 @@
     "sessionExpired": "Votre session a expiré. Veuillez vous reconnecter.",
     "errorGeneric": "Erreur de connexion. Veuillez réessayer."
   },
+  "ForgotPassword": {
+    "title": "Mot de passe oublié",
+    "subtitle": "Entrez votre adresse e-mail pour recevoir un lien de réinitialisation.",
+    "email": "Email",
+    "submit": "Envoyer le lien",
+    "sentTitle": "Vérifiez votre boîte mail",
+    "sentMessage": "Si un compte existe avec cet e-mail, un lien de réinitialisation a été envoyé (ou affiché dans les logs serveur sans SMTP).",
+    "backToLogin": "Retour à la connexion",
+    "errorGeneric": "Impossible d'envoyer la demande. Veuillez réessayer."
+  },
+  "ResetPassword": {
+    "title": "Nouveau mot de passe",
+    "subtitle": "Choisissez un nouveau mot de passe sécurisé pour votre compte ZenOTA.",
+    "password": "Nouveau mot de passe",
+    "confirmPassword": "Confirmer le mot de passe",
+    "submit": "Réinitialiser le mot de passe",
+    "successTitle": "Mot de passe mis à jour",
+    "successMessage": "Votre mot de passe a été réinitialisé. Vous pouvez maintenant vous connecter.",
+    "missingToken": "Lien de réinitialisation manquant ou invalide.",
+    "backToLogin": "Aller à la connexion",
+    "errorGeneric": "Lien invalide ou expiré. Veuillez en demander un nouveau."
+  },
   "Problem": {
     "title": "Le jeu d'attente de l'App Store est terminé.",
     "subtitle": "La correction d'une faute de frappe ne devrait pas prendre 3 jours de révision. Contournez la bureaucratie et livrez les mises à jour directement sur les appareils de vos utilisateurs.",

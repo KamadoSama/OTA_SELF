@@ -34,6 +34,28 @@
     "sessionExpired": "Your session has expired. Please log in again.",
     "errorGeneric": "Connection error. Please try again."
   },
+  "ForgotPassword": {
+    "title": "Reset your password",
+    "subtitle": "Enter your email address and we'll send you a reset link.",
+    "email": "Email",
+    "submit": "Send reset link",
+    "sentTitle": "Check your inbox",
+    "sentMessage": "If an account exists with this email, a reset link has been sent (check server logs in self-hosted mode without SMTP).",
+    "backToLogin": "Back to log in",
+    "errorGeneric": "Unable to send reset request. Please try again."
+  },
+  "ResetPassword": {
+    "title": "Set a new password",
+    "subtitle": "Choose a strong password for your ZenOTA account.",
+    "password": "New password",
+    "confirmPassword": "Confirm new password",
+    "submit": "Reset password",
+    "successTitle": "Password updated",
+    "successMessage": "Your password has been reset. You can now log in.",
+    "missingToken": "Missing or invalid reset token.",
+    "backToLogin": "Go to log in",
+    "errorGeneric": "Invalid or expired reset link. Please request a new one."
+  },
   "Problem": {
     "title": "The App Store waiting game is over.",
     "subtitle": "Shipping a typo fix shouldn't take 3 days of review. Bypass the bureaucracy and deliver updates directly to your users' devices.",

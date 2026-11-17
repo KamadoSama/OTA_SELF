@@ -84,4 +84,22 @@ export class AuthController {
     const email = req.user.email;
     return this.authService.updatePreferences(email, body);
   }
+
+  @Post('forgot-password')
+  async forgotPassword(
+    @Req() req: any,
+    @Body() body: { email: string; baseUrl?: string },
+  ) {
+    const origin =
+      body.baseUrl ||
+      (req.headers['origin'] as string | undefined) ||
+      process.env.FRONTEND_URL ||
+      'http://localhost:3002';
+    return this.authService.forgotPassword(body.email, origin);
+  }
+
+  @Post('reset-password')
+  async resetPassword(@Body() body: { token: string; password: string }) {
+    return this.authService.resetPassword(body.token, body.password);
+  }
 }

@@ -5,6 +5,7 @@ import { initCommand } from './commands/init';
 import { statusCommand } from './commands/status';
 import { logsCommand } from './commands/logs';
 import { stopCommand, startCommand, restartCommand } from './commands/control';
+import { resetPasswordCommand } from './commands/reset-password';
 
 const program = new Command();
 program
@@ -41,5 +42,10 @@ program
   .command('restart')
   .description('Restart ZenOTA services')
   .action(restartCommand);
+
+program
+  .command('reset-password [email]')
+  .description('Reset a user password directly in the database')
+  .action(resetPasswordCommand);
 
 program.parse();

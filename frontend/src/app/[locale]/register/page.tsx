@@ -12,7 +12,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { AuthButton } from "@/components/ui/auth-button";
-import { useIsSelfHosted } from "@/hooks/useSelfHosted";
+import { useIsSelfHosted, useGoogleAuthEnabled } from "@/hooks/useSelfHosted";
 
 const registerSchema = z.object({
   email: z.string().email("Invalid email address"),
@@ -70,6 +70,7 @@ function RegisterForm() {
   };
 
   const isSelfHosted = useIsSelfHosted();
+  const isGoogleAuthEnabled = useGoogleAuthEnabled();
 
   return (
     <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-black text-white font-sans selection:bg-white selection:text-black">
@@ -101,7 +102,7 @@ function RegisterForm() {
             </div>
           </div>
 
-          {!isSelfHosted && (
+          {isGoogleAuthEnabled && (
             <div className="space-y-4 mb-8">
               <button
                 onClick={handleGoogleSignUp}

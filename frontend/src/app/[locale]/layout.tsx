@@ -74,13 +74,16 @@ export default async function RootLayout({
     process.env.NEXT_PUBLIC_SELF_HOSTED === 'false' || process.env.SELF_HOSTED === 'false'
       ? false
       : (process.env.SELF_HOSTED === 'true' || process.env.NEXT_PUBLIC_SELF_HOSTED === 'true' || process.env.SELF_HOSTED !== 'false');
+  const isGoogleAuthEnabled = Boolean(
+    process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET,
+  );
 
   return (
     <html lang={locale} className="dark">
       <head>
         <script
           dangerouslySetInnerHTML={{
-            __html: `window.__ZENOTA_SELF_HOSTED__ = ${JSON.stringify(isSelfHosted)};`,
+            __html: `window.__ZENOTA_SELF_HOSTED__ = ${JSON.stringify(isSelfHosted)}; window.__ZENOTA_GOOGLE_AUTH_ENABLED__ = ${JSON.stringify(isGoogleAuthEnabled)};`,
           }}
         />
       </head>

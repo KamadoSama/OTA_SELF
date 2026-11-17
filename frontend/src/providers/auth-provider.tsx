@@ -17,7 +17,24 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 const PUBLIC_PREFIXES = ['/docs','/en/docs','/fr/docs'];
-const PUBLIC_EXACT = ['/', '/en', '/fr', '/en/login', '/fr/login', '/en/register', '/fr/register', '/setup', '/en/setup', '/fr/setup'];
+const PUBLIC_EXACT = [
+  '/',
+  '/en',
+  '/fr',
+  '/en/login',
+  '/fr/login',
+  '/en/register',
+  '/fr/register',
+  '/forgot-password',
+  '/en/forgot-password',
+  '/fr/forgot-password',
+  '/reset-password',
+  '/en/reset-password',
+  '/fr/reset-password',
+  '/setup',
+  '/en/setup',
+  '/fr/setup',
+];
 const GUEST_ONLY_ROUTES = ['/login', '/register', '/en/login', '/fr/login', '/en/register', '/fr/register'];
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {

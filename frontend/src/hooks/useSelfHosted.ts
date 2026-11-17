@@ -19,3 +19,13 @@ export function useIsSelfHosted(): boolean {
     process.env.SELF_HOSTED !== 'false'
   );
 }
+
+export function useGoogleAuthEnabled(): boolean {
+  if (
+    typeof window !== 'undefined' &&
+    (window as any).__ZENOTA_GOOGLE_AUTH_ENABLED__ !== undefined
+  ) {
+    return Boolean((window as any).__ZENOTA_GOOGLE_AUTH_ENABLED__);
+  }
+  return false;
+}

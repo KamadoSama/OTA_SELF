@@ -50,6 +50,13 @@ services:
       JWT_EXPIRES_IN: 7d
       PORT: 3001
       SELF_HOSTED: "true"
+      FRONTEND_URL: https://${domain}
+      SMTP_HOST: \${SMTP_HOST:-}
+      SMTP_PORT: \${SMTP_PORT:-587}
+      SMTP_USER: \${SMTP_USER:-}
+      SMTP_PASS: \${SMTP_PASS:-}
+      SMTP_FROM: \${SMTP_FROM:-}
+      SMTP_SECURE: \${SMTP_SECURE:-}
     networks:
       - dokploy-network
     depends_on:
@@ -71,6 +78,8 @@ services:
       NODE_ENV: production
       SELF_HOSTED: "true"
       NEXT_PUBLIC_SELF_HOSTED: "true"
+      GOOGLE_CLIENT_ID: \${GOOGLE_CLIENT_ID:-}
+      GOOGLE_CLIENT_SECRET: \${GOOGLE_CLIENT_SECRET:-}
     networks:
       - dokploy-network
     labels:

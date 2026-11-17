@@ -13,7 +13,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { AuthButton } from "@/components/ui/auth-button";
-import { useIsSelfHosted } from "@/hooks/useSelfHosted";
+import { useIsSelfHosted, useGoogleAuthEnabled } from "@/hooks/useSelfHosted";
 
 const loginSchema = z.object({
   email: z.string().email("Invalid email address"),
@@ -84,6 +84,7 @@ function LoginForm() {
   };
 
   const isSelfHosted = useIsSelfHosted();
+  const isGoogleAuthEnabled = useGoogleAuthEnabled();
 
   return (
     <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-black text-white font-sans selection:bg-white selection:text-black">
@@ -115,7 +116,7 @@ function LoginForm() {
             </div>
           </div>
 
-          {!isSelfHosted && (
+          {isGoogleAuthEnabled && (
             <div className="space-y-4 mb-8">
               <button
                 onClick={handleGoogleSignIn}
@@ -157,7 +158,7 @@ function LoginForm() {
             <div className="space-y-2">
               <div className="flex justify-between items-center">
                 <label htmlFor="password" className="text-[11px] font-bold uppercase tracking-widest text-white/40">{t("password")}</label>
-                <a href="#" className="text-[11px] font-bold uppercase tracking-widest text-white/30 hover:text-white transition-colors">{t("forgot")}</a>
+                <Link href="/forgot-password" className="text-[11px] font-bold uppercase tracking-widest text-white/30 hover:text-white transition-colors">{t("forgot")}</Link>
               </div>
               <div className="relative">
                 <input
