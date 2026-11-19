@@ -30,6 +30,8 @@ fn test_build_rollback_multipart() {
     assert!(body_str.starts_with(&format!("--{}", boundary)));
     assert!(body_str.contains("Content-Disposition: form-data; name=\"directive\""));
     assert!(body_str.contains("\"rollBackToEmbedded\""));
+    assert!(body_str.contains("Z\""));
+    assert!(!body_str.contains("+00:00"));
     assert!(body_str.ends_with(&format!("--{}--\r\n", boundary)));
 }
 

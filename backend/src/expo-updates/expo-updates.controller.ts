@@ -196,7 +196,7 @@ export class ExpoUpdatesController {
       // 3. Configuration stricte des headers Expo
       res.setHeader('expo-protocol-version', '1');
       res.setHeader('expo-sfv-version', '0');
-      res.setHeader('expo-manifest-filters', '[]');
+      res.setHeader('expo-manifest-filters', '');
       res.setHeader('cache-control', 'private, no-cache, no-store');
 
       // Nettoyage et forçage du Content-Type et Content-Length

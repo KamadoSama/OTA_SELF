@@ -1,4 +1,4 @@
-use chrono::Utc;
+use chrono::{SecondsFormat, Utc};
 use rand::{distributions::Alphanumeric, Rng};
 use serde_json::json;
 
@@ -45,7 +45,7 @@ pub fn build_rollback_multipart() -> (String, Vec<u8>) {
     let directive = json!({
         "type": "rollBackToEmbedded",
         "parameters": {
-            "commitTime": Utc::now().to_rfc3339()
+            "commitTime": Utc::now().to_rfc3339_opts(SecondsFormat::Millis, true)
         }
     });
 
