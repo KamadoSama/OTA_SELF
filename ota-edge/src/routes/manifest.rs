@@ -3,7 +3,7 @@ use axum::{
     http::{HeaderMap, HeaderValue, StatusCode},
     response::{IntoResponse, Response},
 };
-use chrono::Utc;
+use chrono::{SecondsFormat, Utc};
 use serde_json::json;
 use std::sync::Arc;
 use tracing::{info, warn};
@@ -25,6 +25,22 @@ fn compute_rollout_bucket(client_id: &str, update_id: &str) -> u32 {
 
 fn get_header_str<'a>(headers: &'a HeaderMap, name: &str) -> Option<&'a str> {
     headers.get(name).and_then(|h| h.to_str().ok())
+}
+
+fn effective_asset_key(key: &str) -> String {
+    let base = key.rsplit(['/', '\\']).next().unwrap_or(key);
+    if base.is_empty() || base == "." || base == ".." {
+        key.replace(['/', '\\', '\0'], "_")
+    } else {
+        base.replace('\0', "")
+    }
+}
+
+fn sanitize_file_extension(ext: Option<&str>, default: &str) -> String {
+    match ext {
+        Some(e) if !e.contains(['/', '\\', '\0']) => e.to_string(),
+        _ => default.to_string(),
+    }
 }
 
 pub async fn get_manifest(
@@ -200,13 +216,7 @@ pub async fn get_manifest(
     let expires_at_seconds = Utc::now().timestamp() as u64 + 15 * 60; // 15 mins
     let mut asset_request_headers = serde_json::Map::new();
 
-    let get_effective_key = |key: &str| -> String {
-        if platform == "ios" {
-            key.split('/').last().unwrap_or(key).to_string()
-        } else {
-            key.to_string()
-        }
-    };
+    let get_effective_key = |key: &str| -> String { effective_asset_key(key) };
 
     let get_asset_url = |key: &str| -> String {
         if should_sign_assets {
@@ -236,26 +246,23 @@ pub async fn get_manifest(
 
     let manifest_json = json!({
         "id": latest_update.id,
-        "createdAt": latest_update.created_at.and_utc().to_rfc3339(),
+        "createdAt": latest_update.created_at.and_utc().to_rfc3339_opts(SecondsFormat::Millis, true),
         "runtimeVersion": latest_update.runtime_version,
         "launchAsset": {
             "hash": launch_asset.hash,
             "key": get_effective_key(&launch_asset.key),
             "contentType": launch_asset.content_type,
             "url": get_asset_url(&launch_asset.key),
-            "fileExtension": launch_asset.file_extension.as_deref().unwrap_or(".js"),
+            "fileExtension": sanitize_file_extension(launch_asset.file_extension.as_deref(), ".js"),
         },
         "assets": other_assets.iter().map(|a| {
-            let mut obj = json!({
+            json!({
                 "hash": a.hash,
                 "key": get_effective_key(&a.key),
                 "contentType": a.content_type,
                 "url": get_asset_url(&a.key),
-            });
-            if let Some(ref ext) = a.file_extension {
-                obj["fileExtension"] = json!(ext);
-            }
-            obj
+                "fileExtension": sanitize_file_extension(a.file_extension.as_deref(), ""),
+            })
         }).collect::<Vec<_>>(),
         "metadata": {},
         "extra": {
@@ -308,7 +315,7 @@ fn build_multipart_response(boundary: String, body_bytes: Vec<u8>) -> Response {
     let headers = res.headers_mut();
     headers.insert("expo-protocol-version", HeaderValue::from_static("1"));
     headers.insert("expo-sfv-version", HeaderValue::from_static("0"));
-    headers.insert("expo-manifest-filters", HeaderValue::from_static("[]"));
+    headers.insert("expo-manifest-filters", HeaderValue::from_static(""));
     headers.insert(
         "cache-control",
         HeaderValue::from_static("private, no-cache, no-store"),
@@ -320,4 +327,27 @@ fn build_multipart_response(boundary: String, body_bytes: Vec<u8>) -> Response {
     }
 
     res
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_effective_asset_key_strips_path_separators() {
+        let bundle = "_expo/static/js/android/entry-98a0b66c2d2e8a75cef9a483191c4e3c.hbc";
+        let resolved_bundle = effective_asset_key(bundle);
+        assert_eq!(resolved_bundle, "entry-98a0b66c2d2e8a75cef9a483191c4e3c.hbc");
+        assert!(!resolved_bundle.contains(['/', '\\', '\0']));
+
+        let asset = "assets/778ffc9fe8773a878e9c30a6304784de";
+        let resolved_asset = effective_asset_key(asset);
+        assert_eq!(resolved_asset, "778ffc9fe8773a878e9c30a6304784de");
+        assert!(!resolved_asset.contains(['/', '\\', '\0']));
+
+        let win_path = r"assets\nested\image.png";
+        let resolved_win = effective_asset_key(win_path);
+        assert_eq!(resolved_win, "image.png");
+        assert!(!resolved_win.contains(['/', '\\', '\0']));
+    }
 }

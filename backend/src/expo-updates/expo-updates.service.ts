@@ -196,10 +196,15 @@ export class ExpoUpdatesService {
     const assetRequestHeaders: Record<string, Record<string, string>> = {};
 
     const getEffectiveKey = (assetKey: string): string => {
-      if (platform === 'ios') {
-        return assetKey.split('/').pop() || assetKey;
+      const base = assetKey.split(/[\\/]/).pop() || assetKey;
+      if (!base || base === '.' || base === '..') {
+        return assetKey.replace(/[\\/\0]/g, '_');
       }
-      return assetKey;
+      return base.replace(/\0/g, '');
+    };
+    const sanitizeExt = (ext?: string | null, fallback = ''): string => {
+      if (!ext || /[\\/\0]/.test(ext)) return fallback;
+      return ext;
     };
 
     const getAssetUrl = (assetKey: string): string => {
@@ -232,20 +237,15 @@ export class ExpoUpdatesService {
         key: getEffectiveKey(launchAsset.key),
         contentType: launchAsset.contentType,
         url: getAssetUrl(launchAsset.key),
-        fileExtension: launchAsset.fileExtension || '.js',
+        fileExtension: sanitizeExt(launchAsset.fileExtension, '.js'),
       },
-      assets: otherAssets.map((asset) => {
-        const obj: any = {
-          hash: asset.hash,
-          key: getEffectiveKey(asset.key),
-          contentType: asset.contentType,
-          url: getAssetUrl(asset.key),
-        };
-        if (asset.fileExtension) {
-          obj.fileExtension = asset.fileExtension;
-        }
-        return obj;
-      }),
+      assets: otherAssets.map((asset) => ({
+        hash: asset.hash,
+        key: getEffectiveKey(asset.key),
+        contentType: asset.contentType,
+        url: getAssetUrl(asset.key),
+        fileExtension: sanitizeExt(asset.fileExtension, ''),
+      })),
       metadata: {},
       extra: {
         expoClient: {
